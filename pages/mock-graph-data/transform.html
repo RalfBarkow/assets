@@ -2,7 +2,7 @@
 <div id=result></div>
 <script type=module>
 
-  import {download} from 'http://code.fed.wiki/assets/v1/frame.js'
+  import {download} from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
 
   let nodes = []
   let rels = []
@@ -27,7 +27,7 @@
   async function raw(file, build) {
     const report = msg => {window.result.innerHTML += `<details><summary>${file}</summary><p>${msg}</p></details>`}
     const tally = list => list.reduce((s,e)=>{s[e.type] = s[e.type] ? s[e.type]+1 : 1; return s}, {})
-    let assets = `http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/raw`
+    let assets = `https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/raw`
     let json = await fetch(`${assets}/${file}.json`).then(res => res.json())
     let had = {nodes:tally(nodes), rels:tally(rels)}
     try {
