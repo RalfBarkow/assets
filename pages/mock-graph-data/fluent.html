@@ -24,7 +24,7 @@
     .map(text => `<span onclick=doquery(event)>${title(text)}</span>`)
     .join("<br>")
 
-  let g = await Graph.fetch('http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/graphs/graph.json')
+  let g = await Graph.fetch('https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graphs/graph.json')
   window.result.innerHTML = `${list(g.tally().nodes,'nodes')}<br><br>${list(g.tally().rels,'rels')}`
 
 
