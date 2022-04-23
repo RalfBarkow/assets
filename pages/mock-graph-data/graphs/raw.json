@@ -1,0 +1,4070 @@
+{
+  "dataflow": [
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Delta Graham scan"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Cone algorithm",
+      "to": "Delta PageRank"
+    },
+    {
+      "type": "rest",
+      "from": "Lambda Trapezoidal rule (differential equations)",
+      "to": "Delta General Problem Solver"
+    },
+    {
+      "type": "rest",
+      "from": "Alpha Differential evolution",
+      "to": "Delta Sparse matrix"
+    },
+    {
+      "type": "rest",
+      "from": "Mu OPTICS",
+      "to": "Delta Spline interpolation"
+    },
+    {
+      "type": "rest",
+      "from": "Epsilon Levenberg–Marquardt algorithm",
+      "to": "Delta Evolutionary computation"
+    },
+    {
+      "type": "rest",
+      "from": "Iota Nicholl–Lee–Nicholl",
+      "to": "Epsilon Simple precedence parser"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Epsilon WHIRLPOOL"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Epsilon Sieve of Eratosthenes"
+    },
+    {
+      "type": "rest",
+      "from": "Delta Evolutionary computation",
+      "to": "Epsilon Gaussian elimination"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma lattice basis in polynomial time",
+      "to": "Epsilon Levenberg–Marquardt algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Gamma Coppersmith–Winograd algorithm",
+      "to": "Nu Longest common substring problem"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Nu Steinhaus–Johnson–Trotter algorithm"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Nu Laplacian smoothing"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma Lempel–Ziv–Oberhumer",
+      "to": "Upsilon Earley parser"
+    },
+    {
+      "type": "rest",
+      "from": "Alpha BFGS method",
+      "to": "Upsilon SUBCLU"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Upsilon Binary search algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Delta Sparse matrix",
+      "to": "Sigma SURF (Speeded Up Robust Features)"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Sigma Kruskal's algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Alpha Gaussian elimination",
+      "to": "Sigma Flashsort"
+    },
+    {
+      "type": "queue",
+      "queue": "method_squared_deviation",
+      "write": "Gamma root mean squared deviation between two protein structures."
+    },
+    {
+      "type": "queue",
+      "queue": "method_squared_deviation",
+      "read": "Sigma Crank-Nicolson method"
+    },
+    {
+      "type": "queue",
+      "queue": "ridder_s_sigma",
+      "write": "Mu Antipodal"
+    },
+    {
+      "type": "queue",
+      "queue": "ridder_s_sigma",
+      "read": "Sigma Ridder's method"
+    },
+    {
+      "type": "store",
+      "store": "redis",
+      "from": "Sigma lattice basis in polynomial time"
+    },
+    {
+      "type": "queue",
+      "queue": "computation_calculus_index",
+      "write": "Delta Evolutionary computation"
+    },
+    {
+      "type": "queue",
+      "queue": "computation_calculus_index",
+      "read": "Gamma Index calculus algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Mu OPTICS",
+      "to": "Gamma Grover's algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "exponentiation_layout_layout",
+      "write": "Iota Addition-chain exponentiation"
+    },
+    {
+      "type": "queue",
+      "queue": "exponentiation_layout_layout",
+      "read": "Gamma Spectral layout"
+    },
+    {
+      "type": "rest",
+      "from": "Mu OPTICS",
+      "to": "Gamma root mean squared deviation between two protein structures."
+    },
+    {
+      "type": "store",
+      "store": "redis",
+      "from": "Gamma Multi level feedback queue"
+    },
+    {
+      "type": "rest",
+      "from": "Rho Video compression",
+      "to": "Gamma Watershed transformation"
+    },
+    {
+      "type": "queue",
+      "queue": "smoothsort_delta_id3",
+      "write": "Upsilon Smoothsort"
+    },
+    {
+      "type": "queue",
+      "queue": "smoothsort_delta_id3",
+      "read": "Delta ID3 algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma SURF (Speeded Up Robust Features)",
+      "to": "Delta Sethi-Ullman algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Gamma Index calculus algorithm",
+      "to": "Delta Shoelace algorithm"
+    },
+    {
+      "type": "store",
+      "store": "neo4j",
+      "from": "Delta Mu-law algorithm"
+    },
+    {
+      "type": "site",
+      "site": "apple",
+      "from": "Delta Perceptron"
+    },
+    {
+      "type": "rest",
+      "from": "Gamma Spectral layout",
+      "to": "Psi Kosaraju's algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "index_match_index",
+      "write": "Gamma Index calculus algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "index_match_index",
+      "read": "Psi Match Rating Approach"
+    },
+    {
+      "type": "rest",
+      "from": "Rho Double Metaphone",
+      "to": "Psi Ramer–Douglas–Peucker algorithm"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Psi Sparse matrix"
+    },
+    {
+      "type": "rest",
+      "from": "Lambda Spigot algorithm",
+      "to": "Psi Unicode Collation Algorithm"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Iota Dinic's algorithm"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Iota Best Bin First"
+    },
+    {
+      "type": "queue",
+      "queue": "coppersmith_lee_algorithm",
+      "write": "Alpha Coppersmith–Winograd algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "coppersmith_lee_algorithm",
+      "read": "Iota Nicholl–Lee–Nicholl"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Iota Addition-chain exponentiation"
+    },
+    {
+      "type": "rest",
+      "from": "Delta Sethi-Ullman algorithm",
+      "to": "Iota Adaptive replacement cache"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Iota factorization"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Lempel–Ziv–Storer–Szymanski",
+      "to": "Rho Pohlig&ndash;Hellman algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Delta General Problem Solver",
+      "to": "Rho Lempel–Ziv Jeff Bonwick (LZJB)"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma lattice basis in polynomial time",
+      "to": "Rho Coloring algorithm"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Rho Video compression"
+    },
+    {
+      "type": "site",
+      "site": "apple",
+      "from": "Rho Knuth–Bendix completion algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Psi Kosaraju's algorithm",
+      "to": "Rho Cross-entropy method"
+    },
+    {
+      "type": "queue",
+      "queue": "lambda_lambda_hildreth",
+      "write": "Alpha Coppersmith–Winograd algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "lambda_lambda_hildreth",
+      "read": "Lambda Marr–Hildreth algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Nu Symmetric (secret key) encryption",
+      "to": "Lambda Unicode Collation Algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Blum Blum Shub",
+      "to": "Lambda Spigot algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma GLR parser",
+      "to": "Lambda Redundancy check"
+    },
+    {
+      "type": "rest",
+      "from": "Beta Chien search",
+      "to": "Lambda Dekker's algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "pratt_parser_delta",
+      "write": "Delta Evolutionary computation"
+    },
+    {
+      "type": "queue",
+      "queue": "pratt_parser_delta",
+      "read": "Gamma Pratt parser"
+    },
+    {
+      "type": "queue",
+      "queue": "gamma_algorithm_parser",
+      "write": "Gamma Pratt parser"
+    },
+    {
+      "type": "queue",
+      "queue": "gamma_algorithm_parser",
+      "read": "Gamma Coppersmith–Winograd algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "evolution_gamma_chi",
+      "write": "Chi Maximum parsimony (phylogenetics)"
+    },
+    {
+      "type": "queue",
+      "queue": "evolution_gamma_chi",
+      "read": "Gamma Evolution strategy"
+    },
+    {
+      "type": "rest",
+      "from": "Rho Lempel–Ziv Jeff Bonwick (LZJB)",
+      "to": "Gamma Karger's algorithm"
+    },
+    {
+      "type": "store",
+      "store": "elastic",
+      "from": "Mu Hopfield net"
+    },
+    {
+      "type": "rest",
+      "from": "Iota Addition-chain exponentiation",
+      "to": "Mu OPTICS"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Mu Antipodal"
+    },
+    {
+      "type": "site",
+      "site": "microsoft",
+      "from": "Mu Library sort"
+    },
+    {
+      "type": "queue",
+      "queue": "expectation_sukhotin_maximization",
+      "write": "Alpha Sukhotin's algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "expectation_sukhotin_maximization",
+      "read": "Chi Ordered subset expectation maximization"
+    },
+    {
+      "type": "queue",
+      "queue": "lzwl_multi_gamma",
+      "write": "Gamma Multi level feedback queue"
+    },
+    {
+      "type": "queue",
+      "queue": "lzwl_multi_gamma",
+      "read": "Chi LZWL"
+    },
+    {
+      "type": "queue",
+      "queue": "nu_algorithm_nu",
+      "write": "Nu Longest common substring problem"
+    },
+    {
+      "type": "queue",
+      "queue": "nu_algorithm_nu",
+      "read": "Chi Verhoeff algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Mu Antipodal",
+      "to": "Chi Maximum parsimony (phylogenetics)"
+    },
+    {
+      "type": "site",
+      "site": "amazon",
+      "from": "Chi Prüfer coding"
+    },
+    {
+      "type": "store",
+      "store": "elastic",
+      "from": "Alpha Paxos algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "gamma_gaussian_strategy",
+      "write": "Gamma Evolution strategy"
+    },
+    {
+      "type": "queue",
+      "queue": "gamma_gaussian_strategy",
+      "read": "Alpha Gaussian elimination"
+    },
+    {
+      "type": "rest",
+      "from": "Alpha BFGS method",
+      "to": "Alpha Differential evolution"
+    },
+    {
+      "type": "queue",
+      "queue": "alpha_alpha_bfgs",
+      "write": "Delta Shoelace algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "alpha_alpha_bfgs",
+      "read": "Alpha BFGS method"
+    },
+    {
+      "type": "rest",
+      "from": "Psi Ramer–Douglas–Peucker algorithm",
+      "to": "Alpha Sukhotin's algorithm"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Alpha Addition-chain exponentiation"
+    },
+    {
+      "type": "store",
+      "store": "memcache",
+      "from": "Alpha Pearson hashing"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Blum Blum Shub",
+      "to": "Alpha Connected-component labeling"
+    },
+    {
+      "type": "rest",
+      "from": "Gamma Evolution strategy",
+      "to": "Alpha Metropolis light transport"
+    },
+    {
+      "type": "rest",
+      "from": "Beta Fast folding algorithm",
+      "to": "Alpha Rabin–Karp string search algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "alpha_slerp_slerp",
+      "write": "Alpha Slerp"
+    },
+    {
+      "type": "queue",
+      "queue": "alpha_slerp_slerp",
+      "read": "Alpha MISER algorithm"
+    },
+    {
+      "type": "site",
+      "site": "microsoft",
+      "from": "Alpha Pratt parser"
+    },
+    {
+      "type": "queue",
+      "queue": "means_fuzzy_pratt",
+      "write": "Alpha Pratt parser"
+    },
+    {
+      "type": "queue",
+      "queue": "means_fuzzy_pratt",
+      "read": "Upsilon Fuzzy c-means"
+    },
+    {
+      "type": "site",
+      "site": "wikipedia",
+      "from": "Upsilon Smoothsort"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Upsilon Prüfer coding"
+    },
+    {
+      "type": "rest",
+      "from": "Upsilon SUBCLU",
+      "to": "Lambda SPWGNN"
+    },
+    {
+      "type": "rest",
+      "from": "Delta Graham scan",
+      "to": "Lambda Trapezoidal rule (differential equations)"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Lambda Depth-first search"
+    },
+    {
+      "type": "queue",
+      "queue": "time_shortest_nagle",
+      "write": "Sigma Shortest remaining time"
+    },
+    {
+      "type": "queue",
+      "queue": "time_shortest_nagle",
+      "read": "Beta Nagle's algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Discrete logarithm",
+      "to": "Beta Error diffusion"
+    },
+    {
+      "type": "store",
+      "store": "neo4j",
+      "from": "Beta Fast folding algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Gamma Spectral layout",
+      "to": "Beta Chien search"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Blum Blum Shub",
+      "to": "Beta Bowyer–Watson algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "beta_project_beta",
+      "write": "Alpha Texas Medication Algorithm Project"
+    },
+    {
+      "type": "queue",
+      "queue": "beta_project_beta",
+      "read": "Beta Velvet"
+    },
+    {
+      "type": "queue",
+      "queue": "discrete_mu_net",
+      "write": "Mu Hopfield net"
+    },
+    {
+      "type": "queue",
+      "queue": "discrete_mu_net",
+      "read": "Eta Discrete logarithm"
+    },
+    {
+      "type": "queue",
+      "queue": "eta_eta_shub",
+      "write": "Sigma Flashsort"
+    },
+    {
+      "type": "queue",
+      "queue": "eta_eta_shub",
+      "read": "Eta Blum Blum Shub"
+    },
+    {
+      "type": "store",
+      "store": "neo4j",
+      "from": "Eta Lempel–Ziv–Storer–Szymanski"
+    },
+    {
+      "type": "rest",
+      "from": "Upsilon Binary search algorithm",
+      "to": "Eta Fractal compression"
+    },
+    {
+      "type": "queue",
+      "queue": "speeded_robust_algorithm",
+      "write": "Sigma SURF (Speeded Up Robust Features)"
+    },
+    {
+      "type": "queue",
+      "queue": "speeded_robust_algorithm",
+      "read": "Eta Cone algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Discrete logarithm",
+      "to": "Rho Double Metaphone"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Discrete logarithm",
+      "to": "Rho Gradient descent"
+    },
+    {
+      "type": "rest",
+      "from": "Delta PageRank",
+      "to": "Rho LALR (Look-ahead LR) parser"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Alpha Delayed column generation"
+    },
+    {
+      "type": "site",
+      "site": "apple",
+      "from": "Alpha Slerp"
+    },
+    {
+      "type": "rest",
+      "from": "Nu Genetic algorithms",
+      "to": "Alpha Texas Medication Algorithm Project"
+    },
+    {
+      "type": "rest",
+      "from": "Iota Dinic's algorithm",
+      "to": "Alpha Audio"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Alpha Marching triangles"
+    },
+    {
+      "type": "rest",
+      "from": "Eta Blum Blum Shub",
+      "to": "Alpha Coppersmith–Winograd algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "exponentiation_structured_addition",
+      "write": "Iota Addition-chain exponentiation"
+    },
+    {
+      "type": "queue",
+      "queue": "exponentiation_structured_addition",
+      "read": "Sigma Structured SVM"
+    },
+    {
+      "type": "store",
+      "store": "redis",
+      "from": "Sigma Shortest remaining time"
+    },
+    {
+      "type": "rest",
+      "from": "Psi Match Rating Approach",
+      "to": "Sigma Lempel–Ziv–Oberhumer"
+    },
+    {
+      "type": "store",
+      "store": "redis",
+      "from": "Sigma GLR parser"
+    },
+    {
+      "type": "rest",
+      "from": "Epsilon Simple precedence parser",
+      "to": "Sigma Bluestein's FFT algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Rho Video compression",
+      "to": "Sigma Random walker algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "logarithm_algorithm_delta",
+      "write": "Delta Shoelace algorithm"
+    },
+    {
+      "type": "queue",
+      "queue": "logarithm_algorithm_delta",
+      "read": "Nu Discrete logarithm"
+    },
+    {
+      "type": "rest",
+      "from": "Sigma Ridder's method",
+      "to": "Nu Counting sort"
+    },
+    {
+      "type": "site",
+      "site": "google",
+      "from": "Nu Symmetric (secret key) encryption"
+    },
+    {
+      "type": "store",
+      "store": "mysql",
+      "from": "Nu Schreier–Sims algorithm"
+    },
+    {
+      "type": "rest",
+      "from": "Nu Genetic algorithms",
+      "to": "Nu Genetic algorithms"
+    },
+    {
+      "type": "rest",
+      "from": "Delta Sparse matrix",
+      "to": "Nu Gift wrapping algorithm"
+    }
+  ],
+  "organization": [
+    {
+      "name": "E. R. Lee",
+      "email": "erlee@email.com",
+      "manager": null,
+      "start": "2004-6-7"
+    },
+    {
+      "name": "H. R. Collins",
+      "email": "hrcollins@email.com",
+      "manager": "erlee@email.com",
+      "start": "2002-10-11"
+    },
+    {
+      "name": "W. F. Lewis",
+      "email": "wflewis@email.com",
+      "manager": "hrcollins@email.com",
+      "start": "2016-7-26"
+    },
+    {
+      "name": "T. M. Barnes",
+      "email": "tmbarnes@email.com",
+      "manager": "wflewis@email.com",
+      "start": "2012-11-12"
+    },
+    {
+      "name": "C. G. Moore",
+      "email": "cgmoore@email.com",
+      "manager": "tmbarnes@email.com",
+      "start": "2010-12-28"
+    },
+    {
+      "name": "C. J. Collins",
+      "email": "cjcollins@email.com",
+      "manager": "tmbarnes@email.com",
+      "start": "2002-9-17"
+    },
+    {
+      "name": "O. M. Cruz",
+      "email": "omcruz@email.com",
+      "manager": "tmbarnes@email.com",
+      "start": "2015-6-15"
+    },
+    {
+      "name": "A. I. Myers",
+      "email": "aimyers@email.com",
+      "manager": "tmbarnes@email.com",
+      "start": "2004-8-27"
+    },
+    {
+      "name": "C. P. Murphy",
+      "email": "cpmurphy@email.com",
+      "manager": "wflewis@email.com",
+      "start": "2002-5-15"
+    },
+    {
+      "name": "A. F. Hall",
+      "email": "afhall@email.com",
+      "manager": "cpmurphy@email.com",
+      "start": "2005-5-12"
+    },
+    {
+      "name": "E. S. Watson",
+      "email": "eswatson@email.com",
+      "manager": "cpmurphy@email.com",
+      "start": "2002-3-7"
+    },
+    {
+      "name": "E. G. Hall",
+      "email": "eghall@email.com",
+      "manager": "cpmurphy@email.com",
+      "start": "2009-8-2"
+    },
+    {
+      "name": "S. J. Baker",
+      "email": "sjbaker@email.com",
+      "manager": "cpmurphy@email.com",
+      "start": "2010-5-20"
+    },
+    {
+      "name": "A. J. Flores",
+      "email": "ajflores@email.com",
+      "manager": "hrcollins@email.com",
+      "start": "2007-2-21"
+    },
+    {
+      "name": "M. A. Baker",
+      "email": "mabaker@email.com",
+      "manager": "ajflores@email.com",
+      "start": "2012-8-22"
+    },
+    {
+      "name": "R. H. Young",
+      "email": "rhyoung@email.com",
+      "manager": "mabaker@email.com",
+      "start": "2003-12-9"
+    },
+    {
+      "name": "S. K. Nelson",
+      "email": "sknelson@email.com",
+      "manager": "mabaker@email.com",
+      "start": "2007-8-22"
+    },
+    {
+      "name": "A. L. Bennett",
+      "email": "albennett@email.com",
+      "manager": "mabaker@email.com",
+      "start": "2013-4-26"
+    },
+    {
+      "name": "I. D. Jenkins",
+      "email": "idjenkins@email.com",
+      "manager": "mabaker@email.com",
+      "start": "2000-9-26"
+    },
+    {
+      "name": "L. I. Sanders",
+      "email": "lisanders@email.com",
+      "manager": "ajflores@email.com",
+      "start": "2003-12-24"
+    },
+    {
+      "name": "R. H. Sullivan",
+      "email": "rhsullivan@email.com",
+      "manager": "lisanders@email.com",
+      "start": "2012-3-11"
+    },
+    {
+      "name": "G. K. Bennett",
+      "email": "gkbennett@email.com",
+      "manager": "lisanders@email.com",
+      "start": "2010-10-18"
+    },
+    {
+      "name": "P. M. Phillips",
+      "email": "pmphillips@email.com",
+      "manager": "lisanders@email.com",
+      "start": "2007-6-4"
+    },
+    {
+      "name": "J. E. Jones",
+      "email": "jejones@email.com",
+      "manager": "lisanders@email.com",
+      "start": "2004-10-1"
+    },
+    {
+      "name": "O. C. Cooper",
+      "email": "occooper@email.com",
+      "manager": "hrcollins@email.com",
+      "start": "2007-4-21"
+    },
+    {
+      "name": "G. S. Walker",
+      "email": "gswalker@email.com",
+      "manager": "occooper@email.com",
+      "start": "2012-3-21"
+    },
+    {
+      "name": "O. A. Davis",
+      "email": "oadavis@email.com",
+      "manager": "gswalker@email.com",
+      "start": "2002-8-4"
+    },
+    {
+      "name": "O. I. Cooper",
+      "email": "oicooper@email.com",
+      "manager": "gswalker@email.com",
+      "start": "2001-6-19"
+    },
+    {
+      "name": "N. O. Watson",
+      "email": "nowatson@email.com",
+      "manager": "gswalker@email.com",
+      "start": "2011-4-3"
+    },
+    {
+      "name": "L. K. Murphy",
+      "email": "lkmurphy@email.com",
+      "manager": "gswalker@email.com",
+      "start": "2008-6-14"
+    },
+    {
+      "name": "B. B. Clark",
+      "email": "bbclark@email.com",
+      "manager": "occooper@email.com",
+      "start": "2010-1-26"
+    },
+    {
+      "name": "D. O. Jones",
+      "email": "dojones@email.com",
+      "manager": "bbclark@email.com",
+      "start": "2006-8-8"
+    },
+    {
+      "name": "H. M. Flores",
+      "email": "hmflores@email.com",
+      "manager": "bbclark@email.com",
+      "start": "2004-11-18"
+    },
+    {
+      "name": "T. T. Harris",
+      "email": "ttharris@email.com",
+      "manager": "bbclark@email.com",
+      "start": "2013-1-19"
+    },
+    {
+      "name": "K. S. Lee",
+      "email": "kslee@email.com",
+      "manager": "bbclark@email.com",
+      "start": "2010-3-9"
+    },
+    {
+      "name": "I. R. Evans",
+      "email": "irevans@email.com",
+      "manager": "hrcollins@email.com",
+      "start": "2014-9-27"
+    },
+    {
+      "name": "S. B. Garcia",
+      "email": "sbgarcia@email.com",
+      "manager": "irevans@email.com",
+      "start": "2015-5-6"
+    },
+    {
+      "name": "G. K. Jackson",
+      "email": "gkjackson@email.com",
+      "manager": "sbgarcia@email.com",
+      "start": "2013-11-26"
+    },
+    {
+      "name": "C. E. Green",
+      "email": "cegreen@email.com",
+      "manager": "sbgarcia@email.com",
+      "start": "2007-10-21"
+    },
+    {
+      "name": "P. W. Ross",
+      "email": "pwross@email.com",
+      "manager": "sbgarcia@email.com",
+      "start": "2016-2-17"
+    },
+    {
+      "name": "P. J. Mitchell",
+      "email": "pjmitchell@email.com",
+      "manager": "sbgarcia@email.com",
+      "start": "2006-1-24"
+    },
+    {
+      "name": "B. J. Lewis",
+      "email": "bjlewis@email.com",
+      "manager": "irevans@email.com",
+      "start": "2013-10-17"
+    },
+    {
+      "name": "M. N. Ward",
+      "email": "mnward@email.com",
+      "manager": "bjlewis@email.com",
+      "start": "2011-4-25"
+    },
+    {
+      "name": "G. F. Gray",
+      "email": "gfgray@email.com",
+      "manager": "bjlewis@email.com",
+      "start": "2006-2-2"
+    },
+    {
+      "name": "P. B. Fisher",
+      "email": "pbfisher@email.com",
+      "manager": "bjlewis@email.com",
+      "start": "2009-12-23"
+    },
+    {
+      "name": "E. P. Foster",
+      "email": "epfoster@email.com",
+      "manager": "bjlewis@email.com",
+      "start": "2009-9-11"
+    },
+    {
+      "name": "N. L. Anderson",
+      "email": "nlanderson@email.com",
+      "manager": "erlee@email.com",
+      "start": "2000-9-25"
+    },
+    {
+      "name": "R. N. Rodriguez",
+      "email": "rnrodriguez@email.com",
+      "manager": "nlanderson@email.com",
+      "start": "2015-11-19"
+    },
+    {
+      "name": "F. A. Foster",
+      "email": "fafoster@email.com",
+      "manager": "rnrodriguez@email.com",
+      "start": "2007-8-26"
+    },
+    {
+      "name": "O. J. White",
+      "email": "ojwhite@email.com",
+      "manager": "fafoster@email.com",
+      "start": "2013-5-17"
+    },
+    {
+      "name": "I. R. Sanchez",
+      "email": "irsanchez@email.com",
+      "manager": "fafoster@email.com",
+      "start": "2015-9-4"
+    },
+    {
+      "name": "H. M. Williams",
+      "email": "hmwilliams@email.com",
+      "manager": "fafoster@email.com",
+      "start": "2003-3-29"
+    },
+    {
+      "name": "N. G. Bennett",
+      "email": "ngbennett@email.com",
+      "manager": "fafoster@email.com",
+      "start": "2007-5-9"
+    },
+    {
+      "name": "P. P. Barnes",
+      "email": "ppbarnes@email.com",
+      "manager": "rnrodriguez@email.com",
+      "start": "2016-1-23"
+    },
+    {
+      "name": "C. D. Brooks",
+      "email": "cdbrooks@email.com",
+      "manager": "ppbarnes@email.com",
+      "start": "2001-11-11"
+    },
+    {
+      "name": "C. W. White",
+      "email": "cwwhite@email.com",
+      "manager": "ppbarnes@email.com",
+      "start": "2006-12-5"
+    },
+    {
+      "name": "K. J. James",
+      "email": "kjjames@email.com",
+      "manager": "ppbarnes@email.com",
+      "start": "2010-3-20"
+    },
+    {
+      "name": "J. H. Robinson",
+      "email": "jhrobinson@email.com",
+      "manager": "ppbarnes@email.com",
+      "start": "2015-3-12"
+    },
+    {
+      "name": "P. B. Bennett",
+      "email": "pbbennett@email.com",
+      "manager": "nlanderson@email.com",
+      "start": "2015-9-4"
+    },
+    {
+      "name": "J. L. Davis",
+      "email": "jldavis@email.com",
+      "manager": "pbbennett@email.com",
+      "start": "2003-2-22"
+    },
+    {
+      "name": "G. D. Morris",
+      "email": "gdmorris@email.com",
+      "manager": "jldavis@email.com",
+      "start": "2009-7-24"
+    },
+    {
+      "name": "F. N. Powell",
+      "email": "fnpowell@email.com",
+      "manager": "jldavis@email.com",
+      "start": "2008-1-12"
+    },
+    {
+      "name": "I. G. Davis",
+      "email": "igdavis@email.com",
+      "manager": "jldavis@email.com",
+      "start": "2003-8-3"
+    },
+    {
+      "name": "W. J. Garcia",
+      "email": "wjgarcia@email.com",
+      "manager": "jldavis@email.com",
+      "start": "2009-11-7"
+    },
+    {
+      "name": "G. M. Scott",
+      "email": "gmscott@email.com",
+      "manager": "pbbennett@email.com",
+      "start": "2016-5-24"
+    },
+    {
+      "name": "J. T. Foster",
+      "email": "jtfoster@email.com",
+      "manager": "gmscott@email.com",
+      "start": "2011-8-8"
+    },
+    {
+      "name": "F. O. Ross",
+      "email": "foross@email.com",
+      "manager": "gmscott@email.com",
+      "start": "2016-10-27"
+    },
+    {
+      "name": "I. M. Gomez",
+      "email": "imgomez@email.com",
+      "manager": "gmscott@email.com",
+      "start": "2002-4-28"
+    },
+    {
+      "name": "J. L. Barnes",
+      "email": "jlbarnes@email.com",
+      "manager": "gmscott@email.com",
+      "start": "2015-5-9"
+    },
+    {
+      "name": "N. A. Morgan",
+      "email": "namorgan@email.com",
+      "manager": "nlanderson@email.com",
+      "start": "2008-10-6"
+    },
+    {
+      "name": "D. R. Wilson",
+      "email": "drwilson@email.com",
+      "manager": "namorgan@email.com",
+      "start": "2006-1-26"
+    },
+    {
+      "name": "N. W. Flores",
+      "email": "nwflores@email.com",
+      "manager": "drwilson@email.com",
+      "start": "2014-8-20"
+    },
+    {
+      "name": "C. H. White",
+      "email": "chwhite@email.com",
+      "manager": "drwilson@email.com",
+      "start": "2009-4-10"
+    },
+    {
+      "name": "B. H. Long",
+      "email": "bhlong@email.com",
+      "manager": "drwilson@email.com",
+      "start": "2016-9-26"
+    },
+    {
+      "name": "C. W. Powell",
+      "email": "cwpowell@email.com",
+      "manager": "drwilson@email.com",
+      "start": "2002-10-8"
+    },
+    {
+      "name": "W. M. Turner",
+      "email": "wmturner@email.com",
+      "manager": "namorgan@email.com",
+      "start": "2010-7-26"
+    },
+    {
+      "name": "T. S. Barnes",
+      "email": "tsbarnes@email.com",
+      "manager": "wmturner@email.com",
+      "start": "2014-7-5"
+    },
+    {
+      "name": "I. N. Lopez",
+      "email": "inlopez@email.com",
+      "manager": "wmturner@email.com",
+      "start": "2014-4-27"
+    },
+    {
+      "name": "T. D. Morgan",
+      "email": "tdmorgan@email.com",
+      "manager": "wmturner@email.com",
+      "start": "2013-6-29"
+    },
+    {
+      "name": "A. I. Ross",
+      "email": "aiross@email.com",
+      "manager": "wmturner@email.com",
+      "start": "2001-5-13"
+    },
+    {
+      "name": "W. C. Mitchell",
+      "email": "wcmitchell@email.com",
+      "manager": "nlanderson@email.com",
+      "start": "2004-6-6"
+    },
+    {
+      "name": "L. W. Stewart",
+      "email": "lwstewart@email.com",
+      "manager": "wcmitchell@email.com",
+      "start": "2013-11-15"
+    },
+    {
+      "name": "H. W. Morgan",
+      "email": "hwmorgan@email.com",
+      "manager": "lwstewart@email.com",
+      "start": "2006-6-24"
+    },
+    {
+      "name": "H. G. Jenkins",
+      "email": "hgjenkins@email.com",
+      "manager": "lwstewart@email.com",
+      "start": "2006-4-12"
+    },
+    {
+      "name": "D. N. Flores",
+      "email": "dnflores@email.com",
+      "manager": "lwstewart@email.com",
+      "start": "2005-3-15"
+    },
+    {
+      "name": "J. W. Roberts",
+      "email": "jwroberts@email.com",
+      "manager": "lwstewart@email.com",
+      "start": "2009-11-11"
+    },
+    {
+      "name": "L. G. Scott",
+      "email": "lgscott@email.com",
+      "manager": "wcmitchell@email.com",
+      "start": "2010-8-20"
+    },
+    {
+      "name": "W. L. Ross",
+      "email": "wlross@email.com",
+      "manager": "lgscott@email.com",
+      "start": "2010-1-14"
+    },
+    {
+      "name": "S. H. Perry",
+      "email": "shperry@email.com",
+      "manager": "lgscott@email.com",
+      "start": "2012-11-7"
+    },
+    {
+      "name": "O. R. Campbell",
+      "email": "orcampbell@email.com",
+      "manager": "lgscott@email.com",
+      "start": "2003-5-6"
+    },
+    {
+      "name": "G. J. Scott",
+      "email": "gjscott@email.com",
+      "manager": "lgscott@email.com",
+      "start": "2014-6-10"
+    },
+    {
+      "name": "P. P. Taylor",
+      "email": "pptaylor@email.com",
+      "manager": "erlee@email.com",
+      "start": "2007-3-8"
+    },
+    {
+      "name": "A. T. Jones",
+      "email": "atjones@email.com",
+      "manager": "pptaylor@email.com",
+      "start": "2012-8-19"
+    },
+    {
+      "name": "E. P. Jackson",
+      "email": "epjackson@email.com",
+      "manager": "atjones@email.com",
+      "start": "2004-12-27"
+    },
+    {
+      "name": "T. M. Torres",
+      "email": "tmtorres@email.com",
+      "manager": "epjackson@email.com",
+      "start": "2005-4-2"
+    },
+    {
+      "name": "I. O. Smith",
+      "email": "iosmith@email.com",
+      "manager": "epjackson@email.com",
+      "start": "2007-4-10"
+    },
+    {
+      "name": "D. O. Foster",
+      "email": "dofoster@email.com",
+      "manager": "epjackson@email.com",
+      "start": "2016-5-3"
+    },
+    {
+      "name": "P. P. Nguyen",
+      "email": "ppnguyen@email.com",
+      "manager": "epjackson@email.com",
+      "start": "2000-7-7"
+    },
+    {
+      "name": "L. S. Flores",
+      "email": "lsflores@email.com",
+      "manager": "atjones@email.com",
+      "start": "2012-9-17"
+    },
+    {
+      "name": "W. O. Cooper",
+      "email": "wocooper@email.com",
+      "manager": "lsflores@email.com",
+      "start": "2006-9-15"
+    },
+    {
+      "name": "C. N. Edwards",
+      "email": "cnedwards@email.com",
+      "manager": "lsflores@email.com",
+      "start": "2010-6-5"
+    },
+    {
+      "name": "M. I. Bell",
+      "email": "mibell@email.com",
+      "manager": "lsflores@email.com",
+      "start": "2007-6-19"
+    },
+    {
+      "name": "A. K. Rivera",
+      "email": "akrivera@email.com",
+      "manager": "lsflores@email.com",
+      "start": "2005-3-9"
+    },
+    {
+      "name": "I. J. Reed",
+      "email": "ijreed@email.com",
+      "manager": "pptaylor@email.com",
+      "start": "2009-8-28"
+    },
+    {
+      "name": "L. W. King",
+      "email": "lwking@email.com",
+      "manager": "ijreed@email.com",
+      "start": "2009-1-13"
+    },
+    {
+      "name": "O. W. Hernandez",
+      "email": "owhernandez@email.com",
+      "manager": "lwking@email.com",
+      "start": "2011-5-13"
+    },
+    {
+      "name": "D. A. Fisher",
+      "email": "dafisher@email.com",
+      "manager": "lwking@email.com",
+      "start": "2006-5-28"
+    },
+    {
+      "name": "J. O. Sullivan",
+      "email": "josullivan@email.com",
+      "manager": "lwking@email.com",
+      "start": "2008-5-14"
+    },
+    {
+      "name": "C. F. Torres",
+      "email": "cftorres@email.com",
+      "manager": "lwking@email.com",
+      "start": "2002-10-1"
+    },
+    {
+      "name": "D. P. Murphy",
+      "email": "dpmurphy@email.com",
+      "manager": "ijreed@email.com",
+      "start": "2016-12-8"
+    },
+    {
+      "name": "F. W. Ortiz",
+      "email": "fwortiz@email.com",
+      "manager": "dpmurphy@email.com",
+      "start": "2013-9-26"
+    },
+    {
+      "name": "F. P. King",
+      "email": "fpking@email.com",
+      "manager": "dpmurphy@email.com",
+      "start": "2014-11-24"
+    },
+    {
+      "name": "F. N. Jackson",
+      "email": "fnjackson@email.com",
+      "manager": "dpmurphy@email.com",
+      "start": "2003-3-13"
+    },
+    {
+      "name": "B. J. Perry",
+      "email": "bjperry@email.com",
+      "manager": "dpmurphy@email.com",
+      "start": "2002-6-24"
+    },
+    {
+      "name": "E. T. Anderson",
+      "email": "etanderson@email.com",
+      "manager": "pptaylor@email.com",
+      "start": "2015-12-7"
+    },
+    {
+      "name": "P. F. Nguyen",
+      "email": "pfnguyen@email.com",
+      "manager": "etanderson@email.com",
+      "start": "2006-12-5"
+    },
+    {
+      "name": "G. C. Turner",
+      "email": "gcturner@email.com",
+      "manager": "pfnguyen@email.com",
+      "start": "2014-5-26"
+    },
+    {
+      "name": "G. H. Morales",
+      "email": "ghmorales@email.com",
+      "manager": "pfnguyen@email.com",
+      "start": "2006-2-21"
+    },
+    {
+      "name": "M. P. Cruz",
+      "email": "mpcruz@email.com",
+      "manager": "pfnguyen@email.com",
+      "start": "2000-3-9"
+    },
+    {
+      "name": "D. H. Perez",
+      "email": "dhperez@email.com",
+      "manager": "pfnguyen@email.com",
+      "start": "2001-5-7"
+    },
+    {
+      "name": "H. H. Wilson",
+      "email": "hhwilson@email.com",
+      "manager": "etanderson@email.com",
+      "start": "2013-3-29"
+    },
+    {
+      "name": "O. R. Gonzalez",
+      "email": "orgonzalez@email.com",
+      "manager": "hhwilson@email.com",
+      "start": "2009-1-27"
+    },
+    {
+      "name": "P. E. Martinez",
+      "email": "pemartinez@email.com",
+      "manager": "hhwilson@email.com",
+      "start": "2011-1-3"
+    },
+    {
+      "name": "T. E. Baker",
+      "email": "tebaker@email.com",
+      "manager": "hhwilson@email.com",
+      "start": "2001-11-9"
+    },
+    {
+      "name": "H. C. Bennett",
+      "email": "hcbennett@email.com",
+      "manager": "hhwilson@email.com",
+      "start": "2003-2-6"
+    },
+    {
+      "name": "B. P. Gomez",
+      "email": "bpgomez@email.com",
+      "manager": "pptaylor@email.com",
+      "start": "2005-5-25"
+    },
+    {
+      "name": "M. F. Garcia",
+      "email": "mfgarcia@email.com",
+      "manager": "bpgomez@email.com",
+      "start": "2005-7-15"
+    },
+    {
+      "name": "P. F. Rodriguez",
+      "email": "pfrodriguez@email.com",
+      "manager": "mfgarcia@email.com",
+      "start": "2009-8-24"
+    },
+    {
+      "name": "O. B. Carter",
+      "email": "obcarter@email.com",
+      "manager": "mfgarcia@email.com",
+      "start": "2001-3-9"
+    },
+    {
+      "name": "E. D. Sullivan",
+      "email": "edsullivan@email.com",
+      "manager": "mfgarcia@email.com",
+      "start": "2010-5-14"
+    },
+    {
+      "name": "C. N. Campbell",
+      "email": "cncampbell@email.com",
+      "manager": "mfgarcia@email.com",
+      "start": "2000-4-24"
+    },
+    {
+      "name": "P. O. Reyes",
+      "email": "poreyes@email.com",
+      "manager": "bpgomez@email.com",
+      "start": "2013-3-9"
+    },
+    {
+      "name": "A. C. Williams",
+      "email": "acwilliams@email.com",
+      "manager": "poreyes@email.com",
+      "start": "2013-2-14"
+    },
+    {
+      "name": "N. F. Cox",
+      "email": "nfcox@email.com",
+      "manager": "poreyes@email.com",
+      "start": "2009-8-9"
+    },
+    {
+      "name": "W. K. Ross",
+      "email": "wkross@email.com",
+      "manager": "poreyes@email.com",
+      "start": "2000-12-29"
+    },
+    {
+      "name": "T. G. Anderson",
+      "email": "tganderson@email.com",
+      "manager": "poreyes@email.com",
+      "start": "2005-10-16"
+    }
+  ],
+  "traffic": [
+    {
+      "name": "Delta Graham scan (staging)",
+      "load": 65.86,
+      "ping": 0.87
+    },
+    {
+      "name": "Delta Graham scan (production)",
+      "load": 1734.9,
+      "ping": 1.8
+    },
+    {
+      "name": "Delta PageRank (staging)",
+      "load": 106.68,
+      "ping": 1.56
+    },
+    {
+      "name": "Delta PageRank (production)",
+      "load": 2800.32,
+      "ping": 1.83
+    },
+    {
+      "name": "Delta General Problem Solver (staging)",
+      "load": 102.58,
+      "ping": 3
+    },
+    {
+      "name": "Delta General Problem Solver (production)",
+      "load": 2863.32,
+      "ping": 1.78
+    },
+    {
+      "name": "Delta Sparse matrix (staging)",
+      "load": 36.06,
+      "ping": 1.75
+    },
+    {
+      "name": "Delta Sparse matrix (production)",
+      "load": 1419.24,
+      "ping": 1.87
+    },
+    {
+      "name": "Delta Spline interpolation (staging)",
+      "load": 15.09,
+      "ping": 1.96
+    },
+    {
+      "name": "Delta Spline interpolation (production)",
+      "load": 1694.48,
+      "ping": 3.37
+    },
+    {
+      "name": "Delta Evolutionary computation (staging)",
+      "load": 85.69,
+      "ping": 1.17
+    },
+    {
+      "name": "Delta Evolutionary computation (production)",
+      "load": 2898.41,
+      "ping": 1.92
+    },
+    {
+      "name": "Epsilon Simple precedence parser (staging)",
+      "load": 110.77,
+      "ping": 1.29
+    },
+    {
+      "name": "Epsilon Simple precedence parser (production)",
+      "load": 1254.71,
+      "ping": 2.97
+    },
+    {
+      "name": "Epsilon WHIRLPOOL (staging)",
+      "load": 51.08,
+      "ping": 1.7
+    },
+    {
+      "name": "Epsilon WHIRLPOOL (production)",
+      "load": 1785.26,
+      "ping": 1.79
+    },
+    {
+      "name": "Epsilon Sieve of Eratosthenes (staging)",
+      "load": 61.79,
+      "ping": 2.21
+    },
+    {
+      "name": "Epsilon Sieve of Eratosthenes (production)",
+      "load": 2046.75,
+      "ping": 1.87
+    },
+    {
+      "name": "Epsilon Gaussian elimination (staging)",
+      "load": 105.89,
+      "ping": 0.94
+    },
+    {
+      "name": "Epsilon Gaussian elimination (production)",
+      "load": 2280.55,
+      "ping": 1.53
+    },
+    {
+      "name": "Epsilon Levenberg–Marquardt algorithm (staging)",
+      "load": 37.18,
+      "ping": 0.94
+    },
+    {
+      "name": "Epsilon Levenberg–Marquardt algorithm (production)",
+      "load": 1027.86,
+      "ping": 1.96
+    },
+    {
+      "name": "Nu Longest common substring problem (staging)",
+      "load": 20.66,
+      "ping": 2.6
+    },
+    {
+      "name": "Nu Longest common substring problem (production)",
+      "load": 429.85,
+      "ping": 1.19
+    },
+    {
+      "name": "Nu Steinhaus–Johnson–Trotter algorithm (staging)",
+      "load": 131.04,
+      "ping": 2.45
+    },
+    {
+      "name": "Nu Steinhaus–Johnson–Trotter algorithm (production)",
+      "load": 1584.73,
+      "ping": 1.66
+    },
+    {
+      "name": "Nu Laplacian smoothing (staging)",
+      "load": 44.98,
+      "ping": 1.11
+    },
+    {
+      "name": "Nu Laplacian smoothing (production)",
+      "load": 1823.31,
+      "ping": 1.09
+    },
+    {
+      "name": "Upsilon Earley parser (staging)",
+      "load": 113.21,
+      "ping": 2.03
+    },
+    {
+      "name": "Upsilon Earley parser (production)",
+      "load": 56.81,
+      "ping": 2.54
+    },
+    {
+      "name": "Upsilon SUBCLU (staging)",
+      "load": 10.88,
+      "ping": 2.56
+    },
+    {
+      "name": "Upsilon SUBCLU (production)",
+      "load": 2320.11,
+      "ping": 2.46
+    },
+    {
+      "name": "Upsilon Binary search algorithm (staging)",
+      "load": 31.62,
+      "ping": 1.21
+    },
+    {
+      "name": "Upsilon Binary search algorithm (production)",
+      "load": 2712.03,
+      "ping": 1.27
+    },
+    {
+      "name": "Sigma SURF (Speeded Up Robust Features) (staging)",
+      "load": 12.51,
+      "ping": 1.65
+    },
+    {
+      "name": "Sigma SURF (Speeded Up Robust Features) (production)",
+      "load": 861.8,
+      "ping": 0.98
+    },
+    {
+      "name": "Sigma Kruskal's algorithm (staging)",
+      "load": 96.06,
+      "ping": 3.05
+    },
+    {
+      "name": "Sigma Kruskal's algorithm (production)",
+      "load": 1658.59,
+      "ping": 3.09
+    },
+    {
+      "name": "Sigma Flashsort (staging)",
+      "load": 133.03,
+      "ping": 1.53
+    },
+    {
+      "name": "Sigma Flashsort (production)",
+      "load": 2189.38,
+      "ping": 1.8
+    },
+    {
+      "name": "Sigma Crank-Nicolson method (staging)",
+      "load": 93.68,
+      "ping": 1.7
+    },
+    {
+      "name": "Sigma Crank-Nicolson method (production)",
+      "load": 830.7,
+      "ping": 1.63
+    },
+    {
+      "name": "Sigma Ridder's method (staging)",
+      "load": 147.25,
+      "ping": 1.76
+    },
+    {
+      "name": "Sigma Ridder's method (production)",
+      "load": 1576.87,
+      "ping": 1.04
+    },
+    {
+      "name": "Sigma lattice basis in polynomial time (staging)",
+      "load": 141.8,
+      "ping": 2.43
+    },
+    {
+      "name": "Sigma lattice basis in polynomial time (production)",
+      "load": 2247.78,
+      "ping": 2.25
+    },
+    {
+      "name": "Gamma Index calculus algorithm (staging)",
+      "load": 136.33,
+      "ping": 0.93
+    },
+    {
+      "name": "Gamma Index calculus algorithm (production)",
+      "load": 674.88,
+      "ping": 1.41
+    },
+    {
+      "name": "Gamma Grover's algorithm (staging)",
+      "load": 118.9,
+      "ping": 1.21
+    },
+    {
+      "name": "Gamma Grover's algorithm (production)",
+      "load": 71.51,
+      "ping": 2.34
+    },
+    {
+      "name": "Gamma Spectral layout (staging)",
+      "load": 84.21,
+      "ping": 2.09
+    },
+    {
+      "name": "Gamma Spectral layout (production)",
+      "load": 2794.13,
+      "ping": 2.19
+    },
+    {
+      "name": "Gamma root mean squared deviation between two protein structures. (staging)",
+      "load": 141.94,
+      "ping": 0.61
+    },
+    {
+      "name": "Gamma root mean squared deviation between two protein structures. (production)",
+      "load": 2450.56,
+      "ping": 2.72
+    },
+    {
+      "name": "Gamma Multi level feedback queue (staging)",
+      "load": 144.36,
+      "ping": 1.39
+    },
+    {
+      "name": "Gamma Multi level feedback queue (production)",
+      "load": 2911.43,
+      "ping": 1.86
+    },
+    {
+      "name": "Gamma Watershed transformation (staging)",
+      "load": 112.02,
+      "ping": 0.98
+    },
+    {
+      "name": "Gamma Watershed transformation (production)",
+      "load": 30.18,
+      "ping": 2.49
+    },
+    {
+      "name": "Delta ID3 algorithm (staging)",
+      "load": 12.58,
+      "ping": 1.93
+    },
+    {
+      "name": "Delta ID3 algorithm (production)",
+      "load": 1529.76,
+      "ping": 1.75
+    },
+    {
+      "name": "Delta Sethi-Ullman algorithm (staging)",
+      "load": 1.31,
+      "ping": 2.01
+    },
+    {
+      "name": "Delta Sethi-Ullman algorithm (production)",
+      "load": 2629.36,
+      "ping": 3.27
+    },
+    {
+      "name": "Delta Shoelace algorithm (staging)",
+      "load": 55.97,
+      "ping": 1.76
+    },
+    {
+      "name": "Delta Shoelace algorithm (production)",
+      "load": 1358.18,
+      "ping": 2.39
+    },
+    {
+      "name": "Delta Mu-law algorithm (staging)",
+      "load": 45.23,
+      "ping": 1.05
+    },
+    {
+      "name": "Delta Mu-law algorithm (production)",
+      "load": 350.34,
+      "ping": 2.17
+    },
+    {
+      "name": "Delta Perceptron (staging)",
+      "load": 145.44,
+      "ping": 2.12
+    },
+    {
+      "name": "Delta Perceptron (production)",
+      "load": 886.75,
+      "ping": 1.85
+    },
+    {
+      "name": "Psi Kosaraju's algorithm (staging)",
+      "load": 48.47,
+      "ping": 2.59
+    },
+    {
+      "name": "Psi Kosaraju's algorithm (production)",
+      "load": 1599.92,
+      "ping": 1.69
+    },
+    {
+      "name": "Psi Match Rating Approach (staging)",
+      "load": 91.21,
+      "ping": 1.06
+    },
+    {
+      "name": "Psi Match Rating Approach (production)",
+      "load": 685.4,
+      "ping": 2.76
+    },
+    {
+      "name": "Psi Ramer–Douglas–Peucker algorithm (staging)",
+      "load": 87.81,
+      "ping": 1.69
+    },
+    {
+      "name": "Psi Ramer–Douglas–Peucker algorithm (production)",
+      "load": 2267.81,
+      "ping": 2.23
+    },
+    {
+      "name": "Psi Sparse matrix (staging)",
+      "load": 75.7,
+      "ping": 2.46
+    },
+    {
+      "name": "Psi Sparse matrix (production)",
+      "load": 2948.74,
+      "ping": 2.38
+    },
+    {
+      "name": "Psi Unicode Collation Algorithm (staging)",
+      "load": 65.87,
+      "ping": 1.53
+    },
+    {
+      "name": "Psi Unicode Collation Algorithm (production)",
+      "load": 679.9,
+      "ping": 1.24
+    },
+    {
+      "name": "Iota Dinic's algorithm (staging)",
+      "load": 49.84,
+      "ping": 2.94
+    },
+    {
+      "name": "Iota Dinic's algorithm (production)",
+      "load": 2008.01,
+      "ping": 2.22
+    },
+    {
+      "name": "Iota Best Bin First (staging)",
+      "load": 83.27,
+      "ping": 1.13
+    },
+    {
+      "name": "Iota Best Bin First (production)",
+      "load": 2507.95,
+      "ping": 2.81
+    },
+    {
+      "name": "Iota Nicholl–Lee–Nicholl (staging)",
+      "load": 27.66,
+      "ping": 1.78
+    },
+    {
+      "name": "Iota Nicholl–Lee–Nicholl (production)",
+      "load": 546.26,
+      "ping": 1.79
+    },
+    {
+      "name": "Iota Addition-chain exponentiation (staging)",
+      "load": 127.25,
+      "ping": 2.07
+    },
+    {
+      "name": "Iota Addition-chain exponentiation (production)",
+      "load": 2021.22,
+      "ping": 2.15
+    },
+    {
+      "name": "Iota Adaptive replacement cache (staging)",
+      "load": 99.65,
+      "ping": 2.35
+    },
+    {
+      "name": "Iota Adaptive replacement cache (production)",
+      "load": 735.04,
+      "ping": 1.73
+    },
+    {
+      "name": "Iota factorization (staging)",
+      "load": 132.08,
+      "ping": 2.41
+    },
+    {
+      "name": "Iota factorization (production)",
+      "load": 2633,
+      "ping": 3.07
+    },
+    {
+      "name": "Rho Pohlig&ndash;Hellman algorithm (staging)",
+      "load": 122.77,
+      "ping": 1.67
+    },
+    {
+      "name": "Rho Pohlig&ndash;Hellman algorithm (production)",
+      "load": 608.63,
+      "ping": 0.92
+    },
+    {
+      "name": "Rho Lempel–Ziv Jeff Bonwick (LZJB) (staging)",
+      "load": 2.39,
+      "ping": 2.1
+    },
+    {
+      "name": "Rho Lempel–Ziv Jeff Bonwick (LZJB) (production)",
+      "load": 31.47,
+      "ping": 1.64
+    },
+    {
+      "name": "Rho Coloring algorithm (staging)",
+      "load": 103.33,
+      "ping": 2.61
+    },
+    {
+      "name": "Rho Coloring algorithm (production)",
+      "load": 2699.6,
+      "ping": 2.51
+    },
+    {
+      "name": "Rho Video compression (staging)",
+      "load": 108.72,
+      "ping": 2.6
+    },
+    {
+      "name": "Rho Video compression (production)",
+      "load": 793.84,
+      "ping": 0.97
+    },
+    {
+      "name": "Rho Knuth–Bendix completion algorithm (staging)",
+      "load": 121.24,
+      "ping": 1.32
+    },
+    {
+      "name": "Rho Knuth–Bendix completion algorithm (production)",
+      "load": 2363.54,
+      "ping": 1.75
+    },
+    {
+      "name": "Rho Cross-entropy method (staging)",
+      "load": 107.35,
+      "ping": 1.38
+    },
+    {
+      "name": "Rho Cross-entropy method (production)",
+      "load": 238.77,
+      "ping": 2.8
+    },
+    {
+      "name": "Lambda Marr–Hildreth algorithm (staging)",
+      "load": 17.9,
+      "ping": 2.15
+    },
+    {
+      "name": "Lambda Marr–Hildreth algorithm (production)",
+      "load": 1042.85,
+      "ping": 1.36
+    },
+    {
+      "name": "Lambda Unicode Collation Algorithm (staging)",
+      "load": 91.78,
+      "ping": 1.96
+    },
+    {
+      "name": "Lambda Unicode Collation Algorithm (production)",
+      "load": 712.24,
+      "ping": 1.12
+    },
+    {
+      "name": "Lambda Spigot algorithm (staging)",
+      "load": 24.02,
+      "ping": 2.14
+    },
+    {
+      "name": "Lambda Spigot algorithm (production)",
+      "load": 1717.91,
+      "ping": 2.19
+    },
+    {
+      "name": "Lambda Redundancy check (staging)",
+      "load": 24.81,
+      "ping": 1.74
+    },
+    {
+      "name": "Lambda Redundancy check (production)",
+      "load": 761.43,
+      "ping": 1.34
+    },
+    {
+      "name": "Lambda Dekker's algorithm (staging)",
+      "load": 70.99,
+      "ping": 1.84
+    },
+    {
+      "name": "Lambda Dekker's algorithm (production)",
+      "load": 1652.25,
+      "ping": 2.89
+    },
+    {
+      "name": "Gamma Pratt parser (staging)",
+      "load": 110.91,
+      "ping": 0.72
+    },
+    {
+      "name": "Gamma Pratt parser (production)",
+      "load": 578.18,
+      "ping": 1.28
+    },
+    {
+      "name": "Gamma Coppersmith–Winograd algorithm (staging)",
+      "load": 112.58,
+      "ping": 2.03
+    },
+    {
+      "name": "Gamma Coppersmith–Winograd algorithm (production)",
+      "load": 565.31,
+      "ping": 3.38
+    },
+    {
+      "name": "Gamma Evolution strategy (staging)",
+      "load": 73.67,
+      "ping": 1.68
+    },
+    {
+      "name": "Gamma Evolution strategy (production)",
+      "load": 53.5,
+      "ping": 1.03
+    },
+    {
+      "name": "Gamma Karger's algorithm (staging)",
+      "load": 133.25,
+      "ping": 2.13
+    },
+    {
+      "name": "Gamma Karger's algorithm (production)",
+      "load": 755.74,
+      "ping": 0.74
+    },
+    {
+      "name": "Mu Hopfield net (staging)",
+      "load": 92.28,
+      "ping": 1.98
+    },
+    {
+      "name": "Mu Hopfield net (production)",
+      "load": 425.63,
+      "ping": 2.47
+    },
+    {
+      "name": "Mu OPTICS (staging)",
+      "load": 16.29,
+      "ping": 2.07
+    },
+    {
+      "name": "Mu OPTICS (production)",
+      "load": 1553.98,
+      "ping": 2.28
+    },
+    {
+      "name": "Mu Antipodal (staging)",
+      "load": 123.58,
+      "ping": 2.13
+    },
+    {
+      "name": "Mu Antipodal (production)",
+      "load": 1943.38,
+      "ping": 1.15
+    },
+    {
+      "name": "Mu Library sort (staging)",
+      "load": 32.19,
+      "ping": 1.7
+    },
+    {
+      "name": "Mu Library sort (production)",
+      "load": 614.3,
+      "ping": 2.74
+    },
+    {
+      "name": "Chi Ordered subset expectation maximization (staging)",
+      "load": 21.65,
+      "ping": 1.21
+    },
+    {
+      "name": "Chi Ordered subset expectation maximization (production)",
+      "load": 236.97,
+      "ping": 1.88
+    },
+    {
+      "name": "Chi LZWL (staging)",
+      "load": 128.91,
+      "ping": 2.3
+    },
+    {
+      "name": "Chi LZWL (production)",
+      "load": 16.7,
+      "ping": 1.38
+    },
+    {
+      "name": "Chi Verhoeff algorithm (staging)",
+      "load": 13.06,
+      "ping": 2.17
+    },
+    {
+      "name": "Chi Verhoeff algorithm (production)",
+      "load": 2248.51,
+      "ping": 3
+    },
+    {
+      "name": "Chi Maximum parsimony (phylogenetics) (staging)",
+      "load": 133.62,
+      "ping": 1.91
+    },
+    {
+      "name": "Chi Maximum parsimony (phylogenetics) (production)",
+      "load": 2773.18,
+      "ping": 2.77
+    },
+    {
+      "name": "Chi Prüfer coding (staging)",
+      "load": 67.22,
+      "ping": 2.72
+    },
+    {
+      "name": "Chi Prüfer coding (production)",
+      "load": 2036.25,
+      "ping": 2.55
+    },
+    {
+      "name": "Alpha Paxos algorithm (staging)",
+      "load": 13.31,
+      "ping": 1.4
+    },
+    {
+      "name": "Alpha Paxos algorithm (production)",
+      "load": 879.74,
+      "ping": 1.18
+    },
+    {
+      "name": "Alpha Gaussian elimination (staging)",
+      "load": 49.85,
+      "ping": 1.37
+    },
+    {
+      "name": "Alpha Gaussian elimination (production)",
+      "load": 1226.84,
+      "ping": 1.69
+    },
+    {
+      "name": "Alpha Differential evolution (staging)",
+      "load": 87.13,
+      "ping": 2.21
+    },
+    {
+      "name": "Alpha Differential evolution (production)",
+      "load": 2830.43,
+      "ping": 1.88
+    },
+    {
+      "name": "Alpha BFGS method (staging)",
+      "load": 10.47,
+      "ping": 2.26
+    },
+    {
+      "name": "Alpha BFGS method (production)",
+      "load": 1809.49,
+      "ping": 2.56
+    },
+    {
+      "name": "Alpha Sukhotin's algorithm (staging)",
+      "load": 77.66,
+      "ping": 0.83
+    },
+    {
+      "name": "Alpha Sukhotin's algorithm (production)",
+      "load": 249.55,
+      "ping": 1.54
+    },
+    {
+      "name": "Alpha Addition-chain exponentiation (staging)",
+      "load": 115.35,
+      "ping": 2.46
+    },
+    {
+      "name": "Alpha Addition-chain exponentiation (production)",
+      "load": 43.54,
+      "ping": 2.88
+    },
+    {
+      "name": "Alpha Pearson hashing (staging)",
+      "load": 63.43,
+      "ping": 0.91
+    },
+    {
+      "name": "Alpha Pearson hashing (production)",
+      "load": 2972.51,
+      "ping": 2.25
+    },
+    {
+      "name": "Alpha Connected-component labeling (staging)",
+      "load": 132.98,
+      "ping": 2.27
+    },
+    {
+      "name": "Alpha Connected-component labeling (production)",
+      "load": 864.83,
+      "ping": 2.56
+    },
+    {
+      "name": "Alpha Metropolis light transport (staging)",
+      "load": 82.07,
+      "ping": 1.74
+    },
+    {
+      "name": "Alpha Metropolis light transport (production)",
+      "load": 1485.25,
+      "ping": 2.18
+    },
+    {
+      "name": "Alpha Rabin–Karp string search algorithm (staging)",
+      "load": 137.31,
+      "ping": 2.41
+    },
+    {
+      "name": "Alpha Rabin–Karp string search algorithm (production)",
+      "load": 748.72,
+      "ping": 2.13
+    },
+    {
+      "name": "Alpha MISER algorithm (staging)",
+      "load": 4.48,
+      "ping": 2.17
+    },
+    {
+      "name": "Alpha MISER algorithm (production)",
+      "load": 2983.37,
+      "ping": 0.63
+    },
+    {
+      "name": "Alpha Pratt parser (staging)",
+      "load": 137.81,
+      "ping": 0.77
+    },
+    {
+      "name": "Alpha Pratt parser (production)",
+      "load": 602.83,
+      "ping": 2.32
+    },
+    {
+      "name": "Upsilon Fuzzy c-means (staging)",
+      "load": 139.45,
+      "ping": 2.36
+    },
+    {
+      "name": "Upsilon Fuzzy c-means (production)",
+      "load": 143.84,
+      "ping": 1.92
+    },
+    {
+      "name": "Upsilon Smoothsort (staging)",
+      "load": 121.31,
+      "ping": 1.46
+    },
+    {
+      "name": "Upsilon Smoothsort (production)",
+      "load": 83.02,
+      "ping": 2.02
+    },
+    {
+      "name": "Upsilon Prüfer coding (staging)",
+      "load": 69.11,
+      "ping": 1.95
+    },
+    {
+      "name": "Upsilon Prüfer coding (production)",
+      "load": 1674.76,
+      "ping": 0.74
+    },
+    {
+      "name": "Lambda SPWGNN (staging)",
+      "load": 55.75,
+      "ping": 2.96
+    },
+    {
+      "name": "Lambda SPWGNN (production)",
+      "load": 2040.47,
+      "ping": 1.96
+    },
+    {
+      "name": "Lambda Trapezoidal rule (differential equations) (staging)",
+      "load": 55.75,
+      "ping": 1.88
+    },
+    {
+      "name": "Lambda Trapezoidal rule (differential equations) (production)",
+      "load": 2556.12,
+      "ping": 3
+    },
+    {
+      "name": "Lambda Depth-first search (staging)",
+      "load": 70.15,
+      "ping": 0.81
+    },
+    {
+      "name": "Lambda Depth-first search (production)",
+      "load": 2010.47,
+      "ping": 1.63
+    },
+    {
+      "name": "Beta Nagle's algorithm (staging)",
+      "load": 144.95,
+      "ping": 2.28
+    },
+    {
+      "name": "Beta Nagle's algorithm (production)",
+      "load": 1532.21,
+      "ping": 1.59
+    },
+    {
+      "name": "Beta Error diffusion (staging)",
+      "load": 104.11,
+      "ping": 2.67
+    },
+    {
+      "name": "Beta Error diffusion (production)",
+      "load": 622.53,
+      "ping": 1.77
+    },
+    {
+      "name": "Beta Fast folding algorithm (staging)",
+      "load": 119.51,
+      "ping": 1.08
+    },
+    {
+      "name": "Beta Fast folding algorithm (production)",
+      "load": 941.73,
+      "ping": 3.17
+    },
+    {
+      "name": "Beta Chien search (staging)",
+      "load": 112.15,
+      "ping": 1.9
+    },
+    {
+      "name": "Beta Chien search (production)",
+      "load": 2168.95,
+      "ping": 1.81
+    },
+    {
+      "name": "Beta Bowyer–Watson algorithm (staging)",
+      "load": 77.12,
+      "ping": 2.71
+    },
+    {
+      "name": "Beta Bowyer–Watson algorithm (production)",
+      "load": 1678.65,
+      "ping": 1.3
+    },
+    {
+      "name": "Beta Velvet (staging)",
+      "load": 124.17,
+      "ping": 1.47
+    },
+    {
+      "name": "Beta Velvet (production)",
+      "load": 1082.65,
+      "ping": 2.29
+    },
+    {
+      "name": "Eta Discrete logarithm (staging)",
+      "load": 114.14,
+      "ping": 1.22
+    },
+    {
+      "name": "Eta Discrete logarithm (production)",
+      "load": 1213.35,
+      "ping": 1.54
+    },
+    {
+      "name": "Eta Blum Blum Shub (staging)",
+      "load": 142.87,
+      "ping": 2.64
+    },
+    {
+      "name": "Eta Blum Blum Shub (production)",
+      "load": 118.62,
+      "ping": 0.85
+    },
+    {
+      "name": "Eta Lempel–Ziv–Storer–Szymanski (staging)",
+      "load": 25.19,
+      "ping": 1.54
+    },
+    {
+      "name": "Eta Lempel–Ziv–Storer–Szymanski (production)",
+      "load": 1875.02,
+      "ping": 2.36
+    },
+    {
+      "name": "Eta Fractal compression (staging)",
+      "load": 133.07,
+      "ping": 1.82
+    },
+    {
+      "name": "Eta Fractal compression (production)",
+      "load": 2672.93,
+      "ping": 1.57
+    },
+    {
+      "name": "Eta Cone algorithm (staging)",
+      "load": 104.18,
+      "ping": 2.86
+    },
+    {
+      "name": "Eta Cone algorithm (production)",
+      "load": 222.84,
+      "ping": 2.52
+    },
+    {
+      "name": "Rho Double Metaphone (staging)",
+      "load": 108.46,
+      "ping": 2.05
+    },
+    {
+      "name": "Rho Double Metaphone (production)",
+      "load": 1869.97,
+      "ping": 1.71
+    },
+    {
+      "name": "Rho Gradient descent (staging)",
+      "load": 131.55,
+      "ping": 2.19
+    },
+    {
+      "name": "Rho Gradient descent (production)",
+      "load": 2040.8,
+      "ping": 2.13
+    },
+    {
+      "name": "Rho LALR (Look-ahead LR) parser (staging)",
+      "load": 106.95,
+      "ping": 2.15
+    },
+    {
+      "name": "Rho LALR (Look-ahead LR) parser (production)",
+      "load": 851.86,
+      "ping": 2.17
+    },
+    {
+      "name": "Alpha Delayed column generation (staging)",
+      "load": 128.55,
+      "ping": 2.3
+    },
+    {
+      "name": "Alpha Delayed column generation (production)",
+      "load": 2206.82,
+      "ping": 2
+    },
+    {
+      "name": "Alpha Slerp (staging)",
+      "load": 28.71,
+      "ping": 2.06
+    },
+    {
+      "name": "Alpha Slerp (production)",
+      "load": 812.61,
+      "ping": 2.11
+    },
+    {
+      "name": "Alpha Texas Medication Algorithm Project (staging)",
+      "load": 20.38,
+      "ping": 2.52
+    },
+    {
+      "name": "Alpha Texas Medication Algorithm Project (production)",
+      "load": 1204.07,
+      "ping": 2.91
+    },
+    {
+      "name": "Alpha Audio (staging)",
+      "load": 101.78,
+      "ping": 2.81
+    },
+    {
+      "name": "Alpha Audio (production)",
+      "load": 1174.13,
+      "ping": 1.86
+    },
+    {
+      "name": "Alpha Marching triangles (staging)",
+      "load": 80.34,
+      "ping": 2.05
+    },
+    {
+      "name": "Alpha Marching triangles (production)",
+      "load": 1646.54,
+      "ping": 2.09
+    },
+    {
+      "name": "Alpha Coppersmith–Winograd algorithm (staging)",
+      "load": 127.12,
+      "ping": 1.47
+    },
+    {
+      "name": "Alpha Coppersmith–Winograd algorithm (production)",
+      "load": 2221.09,
+      "ping": 1.02
+    },
+    {
+      "name": "Sigma Structured SVM (staging)",
+      "load": 94.22,
+      "ping": 2.23
+    },
+    {
+      "name": "Sigma Structured SVM (production)",
+      "load": 1100.44,
+      "ping": 2.09
+    },
+    {
+      "name": "Sigma Shortest remaining time (staging)",
+      "load": 70.21,
+      "ping": 1.8
+    },
+    {
+      "name": "Sigma Shortest remaining time (production)",
+      "load": 496,
+      "ping": 2.03
+    },
+    {
+      "name": "Sigma Lempel–Ziv–Oberhumer (staging)",
+      "load": 38.38,
+      "ping": 2.29
+    },
+    {
+      "name": "Sigma Lempel–Ziv–Oberhumer (production)",
+      "load": 1272.83,
+      "ping": 2.75
+    },
+    {
+      "name": "Sigma GLR parser (staging)",
+      "load": 23.53,
+      "ping": 1.49
+    },
+    {
+      "name": "Sigma GLR parser (production)",
+      "load": 2880.71,
+      "ping": 2.46
+    },
+    {
+      "name": "Sigma Bluestein's FFT algorithm (staging)",
+      "load": 112.94,
+      "ping": 2.22
+    },
+    {
+      "name": "Sigma Bluestein's FFT algorithm (production)",
+      "load": 1665.04,
+      "ping": 1.83
+    },
+    {
+      "name": "Sigma Random walker algorithm (staging)",
+      "load": 86.69,
+      "ping": 1.82
+    },
+    {
+      "name": "Sigma Random walker algorithm (production)",
+      "load": 2347.38,
+      "ping": 2.54
+    },
+    {
+      "name": "Nu Discrete logarithm (staging)",
+      "load": 27.87,
+      "ping": 2.51
+    },
+    {
+      "name": "Nu Discrete logarithm (production)",
+      "load": 1304.58,
+      "ping": 3.21
+    },
+    {
+      "name": "Nu Counting sort (staging)",
+      "load": 133.13,
+      "ping": 1.91
+    },
+    {
+      "name": "Nu Counting sort (production)",
+      "load": 382.31,
+      "ping": 1.94
+    },
+    {
+      "name": "Nu Symmetric (secret key) encryption (staging)",
+      "load": 63.49,
+      "ping": 2.46
+    },
+    {
+      "name": "Nu Symmetric (secret key) encryption (production)",
+      "load": 137.87,
+      "ping": 2.25
+    },
+    {
+      "name": "Nu Schreier–Sims algorithm (staging)",
+      "load": 1.25,
+      "ping": 2.5
+    },
+    {
+      "name": "Nu Schreier–Sims algorithm (production)",
+      "load": 1646.61,
+      "ping": 2.8
+    },
+    {
+      "name": "Nu Genetic algorithms (staging)",
+      "load": 139.95,
+      "ping": 1.66
+    },
+    {
+      "name": "Nu Genetic algorithms (production)",
+      "load": 2761.31,
+      "ping": 2.14
+    },
+    {
+      "name": "Nu Gift wrapping algorithm (staging)",
+      "load": 88.56,
+      "ping": 1.22
+    },
+    {
+      "name": "Nu Gift wrapping algorithm (production)",
+      "load": 183.32,
+      "ping": 2.02
+    }
+  ],
+  "source": [
+    {
+      "project": "Delta Xi",
+      "manager": "tmbarnes@email.com",
+      "programs": [
+        {
+          "name": "Delta Graham scan",
+          "description": "Quickhull",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        },
+        {
+          "name": "Delta PageRank",
+          "description": "TrustRank",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        },
+        {
+          "name": "Delta General Problem Solver",
+          "description": "a seminal theorem-proving algorithm intended to work as a universal problem solver machine.",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        },
+        {
+          "name": "Delta Sparse matrix",
+          "description": "algorithms",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        },
+        {
+          "name": "Delta Spline interpolation",
+          "description": "Reduces error with Runge's phenomenon.",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        },
+        {
+          "name": "Delta Evolutionary computation",
+          "description": "optimization inspired by biological mechanisms of evolution",
+          "team": [
+            "cgmoore@email.com",
+            "cjcollins@email.com",
+            "omcruz@email.com",
+            "aimyers@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Epsilon Phi",
+      "manager": "cpmurphy@email.com",
+      "programs": [
+        {
+          "name": "Epsilon Simple precedence parser",
+          "description": "Packrat parser: A linear time parsing algorithm supporting some context-free grammars and parsing expression grammars",
+          "team": [
+            "afhall@email.com",
+            "eswatson@email.com",
+            "eghall@email.com",
+            "sjbaker@email.com"
+          ]
+        },
+        {
+          "name": "Epsilon WHIRLPOOL",
+          "description": "Cryptographically secure pseudo-random number generators",
+          "team": [
+            "afhall@email.com",
+            "eswatson@email.com",
+            "eghall@email.com",
+            "sjbaker@email.com"
+          ]
+        },
+        {
+          "name": "Epsilon Sieve of Eratosthenes",
+          "description": "Sieve of Sundaram",
+          "team": [
+            "afhall@email.com",
+            "eswatson@email.com",
+            "eghall@email.com",
+            "sjbaker@email.com"
+          ]
+        },
+        {
+          "name": "Epsilon Gaussian elimination",
+          "description": "Gauss–Jordan elimination: solves systems of linear equations",
+          "team": [
+            "afhall@email.com",
+            "eswatson@email.com",
+            "eghall@email.com",
+            "sjbaker@email.com"
+          ]
+        },
+        {
+          "name": "Epsilon Levenberg–Marquardt algorithm",
+          "description": "An algorithm for solving nonlinear least squares problems.",
+          "team": [
+            "afhall@email.com",
+            "eswatson@email.com",
+            "eghall@email.com",
+            "sjbaker@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Nu Lambda",
+      "manager": "mabaker@email.com",
+      "programs": [
+        {
+          "name": "Nu Longest common substring problem",
+          "description": "find the longest string (or strings) that is a substring (or are substrings) of two or more strings",
+          "team": [
+            "rhyoung@email.com",
+            "sknelson@email.com",
+            "albennett@email.com",
+            "idjenkins@email.com"
+          ]
+        },
+        {
+          "name": "Nu Steinhaus–Johnson–Trotter algorithm",
+          "description": "also known as the Johnson–Trotter algorithm): generate permutations by transposing elements",
+          "team": [
+            "rhyoung@email.com",
+            "sknelson@email.com",
+            "albennett@email.com",
+            "idjenkins@email.com"
+          ]
+        },
+        {
+          "name": "Nu Laplacian smoothing",
+          "description": "an algorithm to smooth a polygonal mesh",
+          "team": [
+            "rhyoung@email.com",
+            "sknelson@email.com",
+            "albennett@email.com",
+            "idjenkins@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Upsilon Phi",
+      "manager": "lisanders@email.com",
+      "programs": [
+        {
+          "name": "Upsilon Earley parser",
+          "description": "Another O(n<sup>3</sup>) algorithm for parsing any context-free grammar",
+          "team": [
+            "rhsullivan@email.com",
+            "gkbennett@email.com",
+            "pmphillips@email.com",
+            "jejones@email.com"
+          ]
+        },
+        {
+          "name": "Upsilon SUBCLU",
+          "description": "a subspace clustering algorithm",
+          "team": [
+            "rhsullivan@email.com",
+            "gkbennett@email.com",
+            "pmphillips@email.com",
+            "jejones@email.com"
+          ]
+        },
+        {
+          "name": "Upsilon Binary search algorithm",
+          "description": "locates an item in a sorted sequence",
+          "team": [
+            "rhsullivan@email.com",
+            "gkbennett@email.com",
+            "pmphillips@email.com",
+            "jejones@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Sigma Beta",
+      "manager": "gswalker@email.com",
+      "programs": [
+        {
+          "name": "Sigma SURF (Speeded Up Robust Features)",
+          "description": "is a robust local feature detector, first presented by Herbert Bay et al. in 2006, that can be used in computer vision tasks like object recognition or 3D reconstruction. It is partly inspired by the SIFT descriptor. The standard version of SURF is several times faster than SIFT and claimed by its authors to be more robust against different image transformations than SIFT.<ref>SURF</ref><ref>http://www.vision.ee.ethz.ch/~surf/eccv06.pdf</ref><ref>http://glorfindel.mavrinac.com/~aaron/school/pdf/bay06_surf.pdf</ref>",
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Kruskal's algorithm",
+          "description": "Prim's algorithm",
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Flashsort",
+          "description": "Introsort: begin with quicksort and switch to heapsort when the recursion depth exceeds a certain level",
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Crank-Nicolson method",
+          "description": "for diffusion equations",
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Ridder's method",
+          "description": "3-point, exponential scaling",
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        },
+        {
+          "name": "Sigma lattice basis in polynomial time",
+          "description": null,
+          "team": [
+            "oadavis@email.com",
+            "oicooper@email.com",
+            "nowatson@email.com",
+            "lkmurphy@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Gamma Lambda",
+      "manager": "bbclark@email.com",
+      "programs": [
+        {
+          "name": "Gamma Index calculus algorithm",
+          "description": "Pollard's rho algorithm for logarithms",
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Grover's algorithm",
+          "description": "provides quadratic speedup for many search problems",
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Spectral layout",
+          "description": "Girvan–Newman algorithm: detect communities in complex systems",
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        },
+        {
+          "name": "Gamma root mean squared deviation between two protein structures.",
+          "description": null,
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Multi level feedback queue",
+          "description": "Rate-monotonic scheduling",
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Watershed transformation",
+          "description": "a class of algorithms based on the watershed analogy",
+          "team": [
+            "dojones@email.com",
+            "hmflores@email.com",
+            "ttharris@email.com",
+            "kslee@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Delta Epsilon",
+      "manager": "sbgarcia@email.com",
+      "programs": [
+        {
+          "name": "Delta ID3 algorithm",
+          "description": "Iterative Dichotomiser 3):  Use heuristic to generate small decision trees",
+          "team": [
+            "gkjackson@email.com",
+            "cegreen@email.com",
+            "pwross@email.com",
+            "pjmitchell@email.com"
+          ]
+        },
+        {
+          "name": "Delta Sethi-Ullman algorithm",
+          "description": "generate optimal code for arithmetic expressions",
+          "team": [
+            "gkjackson@email.com",
+            "cegreen@email.com",
+            "pwross@email.com",
+            "pjmitchell@email.com"
+          ]
+        },
+        {
+          "name": "Delta Shoelace algorithm",
+          "description": "determine the area of a polygon whose vertices are described by ordered pairs in the plane",
+          "team": [
+            "gkjackson@email.com",
+            "cegreen@email.com",
+            "pwross@email.com",
+            "pjmitchell@email.com"
+          ]
+        },
+        {
+          "name": "Delta Mu-law algorithm",
+          "description": "standard analog signal compression or companding algorithm",
+          "team": [
+            "gkjackson@email.com",
+            "cegreen@email.com",
+            "pwross@email.com",
+            "pjmitchell@email.com"
+          ]
+        },
+        {
+          "name": "Delta Perceptron",
+          "description": "the simplest kind of feedforward neural network: a linear classifier.",
+          "team": [
+            "gkjackson@email.com",
+            "cegreen@email.com",
+            "pwross@email.com",
+            "pjmitchell@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Psi Psi",
+      "manager": "bjlewis@email.com",
+      "programs": [
+        {
+          "name": "Psi Kosaraju's algorithm",
+          "description": "Tarjan's strongly connected components algorithm",
+          "team": [
+            "mnward@email.com",
+            "gfgray@email.com",
+            "pbfisher@email.com",
+            "epfoster@email.com"
+          ]
+        },
+        {
+          "name": "Psi Match Rating Approach",
+          "description": "a phonetic algorithm developed by Western Airlines",
+          "team": [
+            "mnward@email.com",
+            "gfgray@email.com",
+            "pbfisher@email.com",
+            "epfoster@email.com"
+          ]
+        },
+        {
+          "name": "Psi Ramer–Douglas–Peucker algorithm",
+          "description": "Given a 'curve' composed of line segments to find a curve not too dissimilar but that has fewer points",
+          "team": [
+            "mnward@email.com",
+            "gfgray@email.com",
+            "pbfisher@email.com",
+            "epfoster@email.com"
+          ]
+        },
+        {
+          "name": "Psi Sparse matrix",
+          "description": "algorithms",
+          "team": [
+            "mnward@email.com",
+            "gfgray@email.com",
+            "pbfisher@email.com",
+            "epfoster@email.com"
+          ]
+        },
+        {
+          "name": "Psi Unicode Collation Algorithm",
+          "description": "Xor swap algorithm: swaps the values of two variables without using a buffer",
+          "team": [
+            "mnward@email.com",
+            "gfgray@email.com",
+            "pbfisher@email.com",
+            "epfoster@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Iota Lambda",
+      "manager": "fafoster@email.com",
+      "programs": [
+        {
+          "name": "Iota Dinic's algorithm",
+          "description": "is a strongly polynomial algorithm for computing the maximum flow in a flow network.",
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        },
+        {
+          "name": "Iota Best Bin First",
+          "description": "find an approximate solution to the Nearest neighbor search problem in very-high-dimensional spaces",
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        },
+        {
+          "name": "Iota Nicholl–Lee–Nicholl",
+          "description": "Sutherland–Hodgman",
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        },
+        {
+          "name": "Iota Addition-chain exponentiation",
+          "description": "exponentiation by positive integer powers that requires a minimal number of multiplications",
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        },
+        {
+          "name": "Iota Adaptive replacement cache",
+          "description": "better performance than LRU",
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        },
+        {
+          "name": "Iota factorization",
+          "description": null,
+          "team": [
+            "ojwhite@email.com",
+            "irsanchez@email.com",
+            "hmwilliams@email.com",
+            "ngbennett@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Rho Chi",
+      "manager": "ppbarnes@email.com",
+      "programs": [
+        {
+          "name": "Rho Pohlig&ndash;Hellman algorithm",
+          "description": "Euclidean algorithm: computes the greatest common divisor",
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        },
+        {
+          "name": "Rho Lempel–Ziv Jeff Bonwick (LZJB)",
+          "description": null,
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        },
+        {
+          "name": "Rho Coloring algorithm",
+          "description": "Graph coloring algorithm.",
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        },
+        {
+          "name": "Rho Video compression",
+          "description": "Vector quantization: technique often used in lossy data compression",
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        },
+        {
+          "name": "Rho Knuth–Bendix completion algorithm",
+          "description": "for rewriting rule systems",
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        },
+        {
+          "name": "Rho Cross-entropy method",
+          "description": "a general Monte Carlo approach to combinatorial and continuous multi-extremal optimization and importance sampling",
+          "team": [
+            "cdbrooks@email.com",
+            "cwwhite@email.com",
+            "kjjames@email.com",
+            "jhrobinson@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Lambda Alpha",
+      "manager": "jldavis@email.com",
+      "programs": [
+        {
+          "name": "Lambda Marr–Hildreth algorithm",
+          "description": "an early edge detection algorithm",
+          "team": [
+            "gdmorris@email.com",
+            "fnpowell@email.com",
+            "igdavis@email.com",
+            "wjgarcia@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Unicode Collation Algorithm",
+          "description": "Xor swap algorithm: swaps the values of two variables without using a buffer",
+          "team": [
+            "gdmorris@email.com",
+            "fnpowell@email.com",
+            "igdavis@email.com",
+            "wjgarcia@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Spigot algorithm",
+          "description": "A way to compute the value of a mathematical constant without knowing preceding digits",
+          "team": [
+            "gdmorris@email.com",
+            "fnpowell@email.com",
+            "igdavis@email.com",
+            "wjgarcia@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Redundancy check",
+          "description": "s",
+          "team": [
+            "gdmorris@email.com",
+            "fnpowell@email.com",
+            "igdavis@email.com",
+            "wjgarcia@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Dekker's algorithm",
+          "description": "Lamport's Bakery algorithm",
+          "team": [
+            "gdmorris@email.com",
+            "fnpowell@email.com",
+            "igdavis@email.com",
+            "wjgarcia@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Gamma Sigma",
+      "manager": "gmscott@email.com",
+      "programs": [
+        {
+          "name": "Gamma Pratt parser",
+          "description": "Lexical analysis",
+          "team": [
+            "jtfoster@email.com",
+            "foross@email.com",
+            "imgomez@email.com",
+            "jlbarnes@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Coppersmith–Winograd algorithm",
+          "description": "square matrix multiplication",
+          "team": [
+            "jtfoster@email.com",
+            "foross@email.com",
+            "imgomez@email.com",
+            "jlbarnes@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Evolution strategy",
+          "description": "Gene expression programming",
+          "team": [
+            "jtfoster@email.com",
+            "foross@email.com",
+            "imgomez@email.com",
+            "jlbarnes@email.com"
+          ]
+        },
+        {
+          "name": "Gamma Karger's algorithm",
+          "description": "a Monte Carlo method to compute the minimum cut of a connected graph",
+          "team": [
+            "jtfoster@email.com",
+            "foross@email.com",
+            "imgomez@email.com",
+            "jlbarnes@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Mu Alpha",
+      "manager": "drwilson@email.com",
+      "programs": [
+        {
+          "name": "Mu Hopfield net",
+          "description": "a Recurrent neural network in which all connections are symmetric",
+          "team": [
+            "nwflores@email.com",
+            "chwhite@email.com",
+            "bhlong@email.com",
+            "cwpowell@email.com"
+          ]
+        },
+        {
+          "name": "Mu OPTICS",
+          "description": "a density based clustering algorithm with a visual evaluation method",
+          "team": [
+            "nwflores@email.com",
+            "chwhite@email.com",
+            "bhlong@email.com",
+            "cwpowell@email.com"
+          ]
+        },
+        {
+          "name": "Mu Antipodal",
+          "description": "antipodal pairs of points and vertices on a convex polygon or convex hull.",
+          "team": [
+            "nwflores@email.com",
+            "chwhite@email.com",
+            "bhlong@email.com",
+            "cwpowell@email.com"
+          ]
+        },
+        {
+          "name": "Mu Library sort",
+          "description": "Patience sorting",
+          "team": [
+            "nwflores@email.com",
+            "chwhite@email.com",
+            "bhlong@email.com",
+            "cwpowell@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Chi Xi",
+      "manager": "wmturner@email.com",
+      "programs": [
+        {
+          "name": "Chi Ordered subset expectation maximization",
+          "description": "OSEM): used in medical imaging for positron emission tomography, single photon emission computed tomography and X-ray computed tomography.",
+          "team": [
+            "tsbarnes@email.com",
+            "inlopez@email.com",
+            "tdmorgan@email.com",
+            "aiross@email.com"
+          ]
+        },
+        {
+          "name": "Chi LZWL",
+          "description": "syllable-based variant",
+          "team": [
+            "tsbarnes@email.com",
+            "inlopez@email.com",
+            "tdmorgan@email.com",
+            "aiross@email.com"
+          ]
+        },
+        {
+          "name": "Chi Verhoeff algorithm",
+          "description": "Context tree weighting",
+          "team": [
+            "tsbarnes@email.com",
+            "inlopez@email.com",
+            "tdmorgan@email.com",
+            "aiross@email.com"
+          ]
+        },
+        {
+          "name": "Chi Maximum parsimony (phylogenetics)",
+          "description": "an algorithm for finding the simplest phylogenetic tree to explain a given character matrix.",
+          "team": [
+            "tsbarnes@email.com",
+            "inlopez@email.com",
+            "tdmorgan@email.com",
+            "aiross@email.com"
+          ]
+        },
+        {
+          "name": "Chi Prüfer coding",
+          "description": "conversion between a labeled tree and its Prüfer sequence",
+          "team": [
+            "tsbarnes@email.com",
+            "inlopez@email.com",
+            "tdmorgan@email.com",
+            "aiross@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Alpha Gamma",
+      "manager": "lwstewart@email.com",
+      "programs": [
+        {
+          "name": "Alpha Paxos algorithm",
+          "description": "a family of protocols for solving consensus in a network of unreliable processors",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Gaussian elimination",
+          "description": "Gauss–Jordan elimination: solves systems of linear equations",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Differential evolution",
+          "description": "Dynamic Programming: problems exhibiting the properties of overlapping subproblems and optimal substructure",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        },
+        {
+          "name": "Alpha BFGS method",
+          "description": "A nonlinear optimization algorithm",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Sukhotin's algorithm",
+          "description": "a statistical classification algorithm for classifying characters in a text as vowels or consonants",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Addition-chain exponentiation",
+          "description": "exponentiation by positive integer powers that requires a minimal number of multiplications",
+          "team": [
+            "hwmorgan@email.com",
+            "hgjenkins@email.com",
+            "dnflores@email.com",
+            "jwroberts@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Alpha Omega",
+      "manager": "lgscott@email.com",
+      "programs": [
+        {
+          "name": "Alpha Pearson hashing",
+          "description": "computes 8 bit value only, optimized for 8 bit computers",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Connected-component labeling",
+          "description": "find and label disjoint regions",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Metropolis light transport",
+          "description": "Path tracing",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Rabin–Karp string search algorithm",
+          "description": "searches multiple patterns efficiently",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        },
+        {
+          "name": "Alpha MISER algorithm",
+          "description": "Monte Carlo simulation, numerical integration",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Pratt parser",
+          "description": "Lexical analysis",
+          "team": [
+            "wlross@email.com",
+            "shperry@email.com",
+            "orcampbell@email.com",
+            "gjscott@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Upsilon Delta",
+      "manager": "epjackson@email.com",
+      "programs": [
+        {
+          "name": "Upsilon Fuzzy c-means",
+          "description": "FLAME clustering (Fuzzy clustering by Local Approximation of MEmberships): define clusters in the dense parts of a dataset and perform cluster assignment solely based on the neighborhood relationships among objects",
+          "team": [
+            "tmtorres@email.com",
+            "iosmith@email.com",
+            "dofoster@email.com",
+            "ppnguyen@email.com"
+          ]
+        },
+        {
+          "name": "Upsilon Smoothsort",
+          "description": "Bitonic sorter",
+          "team": [
+            "tmtorres@email.com",
+            "iosmith@email.com",
+            "dofoster@email.com",
+            "ppnguyen@email.com"
+          ]
+        },
+        {
+          "name": "Upsilon Prüfer coding",
+          "description": "conversion between a labeled tree and its Prüfer sequence",
+          "team": [
+            "tmtorres@email.com",
+            "iosmith@email.com",
+            "dofoster@email.com",
+            "ppnguyen@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Lambda Psi",
+      "manager": "lsflores@email.com",
+      "programs": [
+        {
+          "name": "Lambda SPWGNN",
+          "description": "shortest paths in a graph with non-negative edge weights",
+          "team": [
+            "wocooper@email.com",
+            "cnedwards@email.com",
+            "mibell@email.com",
+            "akrivera@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Trapezoidal rule (differential equations)",
+          "description": "Linear multistep methods",
+          "team": [
+            "wocooper@email.com",
+            "cnedwards@email.com",
+            "mibell@email.com",
+            "akrivera@email.com"
+          ]
+        },
+        {
+          "name": "Lambda Depth-first search",
+          "description": "traverses a graph branch by branch",
+          "team": [
+            "wocooper@email.com",
+            "cnedwards@email.com",
+            "mibell@email.com",
+            "akrivera@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Beta Kappa",
+      "manager": "lwking@email.com",
+      "programs": [
+        {
+          "name": "Beta Nagle's algorithm",
+          "description": "improve the efficiency of TCP/IP networks by coalescing packets",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        },
+        {
+          "name": "Beta Error diffusion",
+          "description": "Floyd–Steinberg dithering",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        },
+        {
+          "name": "Beta Fast folding algorithm",
+          "description": "an efficient algorithm for the detection of approximately periodic events within time series data",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        },
+        {
+          "name": "Beta Chien search",
+          "description": "a recursive algorithm for determining roots of polynomials defined over a finite field",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        },
+        {
+          "name": "Beta Bowyer–Watson algorithm",
+          "description": "create voronoi diagram in any number of dimensions",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        },
+        {
+          "name": "Beta Velvet",
+          "description": "a set of algorithms manipulating de Bruijn graphs for genomic sequence assembly",
+          "team": [
+            "owhernandez@email.com",
+            "dafisher@email.com",
+            "josullivan@email.com",
+            "cftorres@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Eta Tau",
+      "manager": "dpmurphy@email.com",
+      "programs": [
+        {
+          "name": "Eta Discrete logarithm",
+          "description": "Baby-step giant-step",
+          "team": [
+            "fwortiz@email.com",
+            "fpking@email.com",
+            "fnjackson@email.com",
+            "bjperry@email.com"
+          ]
+        },
+        {
+          "name": "Eta Blum Blum Shub",
+          "description": "Lagged Fibonacci generator",
+          "team": [
+            "fwortiz@email.com",
+            "fpking@email.com",
+            "fnjackson@email.com",
+            "bjperry@email.com"
+          ]
+        },
+        {
+          "name": "Eta Lempel–Ziv–Storer–Szymanski",
+          "description": "LZSS)",
+          "team": [
+            "fwortiz@email.com",
+            "fpking@email.com",
+            "fnjackson@email.com",
+            "bjperry@email.com"
+          ]
+        },
+        {
+          "name": "Eta Fractal compression",
+          "description": "method used to compress images using fractals",
+          "team": [
+            "fwortiz@email.com",
+            "fpking@email.com",
+            "fnjackson@email.com",
+            "bjperry@email.com"
+          ]
+        },
+        {
+          "name": "Eta Cone algorithm",
+          "description": "identify surface points",
+          "team": [
+            "fwortiz@email.com",
+            "fpking@email.com",
+            "fnjackson@email.com",
+            "bjperry@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Rho Rho",
+      "manager": "pfnguyen@email.com",
+      "programs": [
+        {
+          "name": "Rho Double Metaphone",
+          "description": "an improvement on Metaphone",
+          "team": [
+            "gcturner@email.com",
+            "ghmorales@email.com",
+            "mpcruz@email.com",
+            "dhperez@email.com"
+          ]
+        },
+        {
+          "name": "Rho Gradient descent",
+          "description": "Harmony search (HS): a metaheuristic algorithm mimicking the improvisation process of musicians",
+          "team": [
+            "gcturner@email.com",
+            "ghmorales@email.com",
+            "mpcruz@email.com",
+            "dhperez@email.com"
+          ]
+        },
+        {
+          "name": "Rho LALR (Look-ahead LR) parser",
+          "description": null,
+          "team": [
+            "gcturner@email.com",
+            "ghmorales@email.com",
+            "mpcruz@email.com",
+            "dhperez@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Alpha Theta",
+      "manager": "hhwilson@email.com",
+      "programs": [
+        {
+          "name": "Alpha Delayed column generation",
+          "description": "Integer linear programming: solve linear programming problems where some or all the unknowns are restricted to integer values",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Slerp",
+          "description": "spherical linear interpolation): quaternion interpolation for the purpose of animating 3D rotation",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Texas Medication Algorithm Project",
+          "description": "Demon algorithm:  a Monte Carlo method for efficiently sampling members of a microcanonical ensemble with a given energy",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Audio",
+          "description": "and Speech compression",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Marching triangles",
+          "description": "reconstruct two-dimensional surface geometry from an unstructured point cloud",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        },
+        {
+          "name": "Alpha Coppersmith–Winograd algorithm",
+          "description": "square matrix multiplication",
+          "team": [
+            "orgonzalez@email.com",
+            "pemartinez@email.com",
+            "tebaker@email.com",
+            "hcbennett@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Sigma Pi",
+      "manager": "mfgarcia@email.com",
+      "programs": [
+        {
+          "name": "Sigma Structured SVM",
+          "description": "allows training of a classifier for general structured output labels.",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Shortest remaining time",
+          "description": "Top-nodes algorithm: resource calendar management",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Lempel–Ziv–Oberhumer",
+          "description": "LZO): speed oriented",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        },
+        {
+          "name": "Sigma GLR parser",
+          "description": "An algorithm for parsing any context-free grammar by Masaru Tomita. It is tuned for deterministic grammars, on which it performs almost linear time and O(n<sup>3</sup>) in worst case.",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Bluestein's FFT algorithm",
+          "description": "Bruun's FFT algorithm",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        },
+        {
+          "name": "Sigma Random walker algorithm",
+          "description": "Region growing",
+          "team": [
+            "pfrodriguez@email.com",
+            "obcarter@email.com",
+            "edsullivan@email.com",
+            "cncampbell@email.com"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "Nu Omicron",
+      "manager": "poreyes@email.com",
+      "programs": [
+        {
+          "name": "Nu Discrete logarithm",
+          "description": "Baby-step giant-step",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        },
+        {
+          "name": "Nu Counting sort",
+          "description": "Pigeonhole sort",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        },
+        {
+          "name": "Nu Symmetric (secret key) encryption",
+          "description": "Advanced Encryption Standard (AES), winner of NIST competition, also known as Rijndael",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        },
+        {
+          "name": "Nu Schreier–Sims algorithm",
+          "description": "computing a base and strong generating set (BSGS) of a permutation group",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        },
+        {
+          "name": "Nu Genetic algorithms",
+          "description": "Fitness proportionate selection - also known as roulette-wheel selection",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        },
+        {
+          "name": "Nu Gift wrapping algorithm",
+          "description": "or Jarvis march",
+          "team": [
+            "acwilliams@email.com",
+            "nfcox@email.com",
+            "wkross@email.com",
+            "tganderson@email.com"
+          ]
+        }
+      ]
+    }
+  ]
+}

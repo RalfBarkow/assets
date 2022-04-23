@@ -1,0 +1,37 @@
+<p><button onclick=dodownload(event)>download</button></p>
+<pre id=result></pre>
+<script type=module>
+
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {Graph} from 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graph.js'
+
+  const context = await frame.context()
+  const arrows = context.page.story.find(item => item.text.includes('arrows'))
+  const data = arrows.text.split(/json=| arrows/)[1]
+  const diagram = JSON.parse(atob(data))
+  const trim = obj => Object.fromEntries(Object.entries(obj).map(e => [e[0].trim(),e[1].trim()]))
+
+  const graph = new Graph()
+  const nids = {}
+  for (const node of diagram.graph.nodes) {
+    const type = node.caption.trim()
+    const props = trim(node.properties)
+    nids[node.id] = graph.addNode(type,props)
+    window.result.innerText += `${type}: ${Object.keys(props).join(", ")}\n`
+  }
+  for (const rel of diagram.graph.relationships) {
+    const type = rel.type.trim()
+    const props = trim(rel.properties)
+    const from = nids[rel.fromId]
+    const to = nids[rel.toId]
+    graph.addRel(type,from,to,props)
+    window.result.innerText += `${type}: ${Object.keys(props).join(", ")}\n`
+  }
+
+  window.dodownload = function (event) {
+    const text = JSON.stringify(graph, null, 2)
+    const file = diagram.diagramName.toLowerCase() + '.schema.json'
+    frame.download(text, file, 'application/json')
+  }
+
+</script>

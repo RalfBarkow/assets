@@ -1,0 +1,275 @@
+<div id=result><p>
+  Creating from Schema &nbsp; &nbsp;
+  <button onclick=dopreview(event)>preview</button>
+  <button onclick=dodownload(event)>download</button>
+  <button onclick=dodebug(event)>?</button>
+</p><div>
+<style>
+  body {font-family: "Helvetica Neue", Verdana, helvetica, Arial, Sans;}
+  td, th { border: 1px solid gray; padding: 8px; }
+  table { border-collapse: collapse; }
+</style>
+
+<script type=module>
+  const delay = msec => new Promise(done => setTimeout(done, msec))
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const dup = obj => JSON.parse(JSON.stringify(obj))
+
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {Graph} from 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graph.js'
+
+  let assets = await frame.assets()
+  let schema = assets.find(asset => asset.file.endsWith('.schema.json'))
+
+  let s = await Graph.fetch(schema.url)
+  let g = new Graph()
+
+  let stride = {}
+  let lineup = []
+
+  stride.new = {
+    render: div => {
+      let keys = Object.keys(s.tally().nodes)
+      div.innerHTML = `<hr><p>${keys.map(type =>
+        `<span>${type}</span>`).join("<br>")}</p>`
+    },
+    click: event => {
+      let target = event.target
+      if(target.tagName=='SPAN') {
+        bold(target)
+        let line = event.target.closest("[data-line]").dataset.line
+        let name = target.innerText
+        let model = s.n(name).map(node => node)[0]
+        let nid = g.addNode(model.type,dup(model.props))
+        let props = g.nodes[nid].props
+        drill(line, stride.fill, {nid,props})
+      }
+    }
+  }
+
+  stride.fill = {
+    render: div => {
+      let line = div.dataset.line
+      let entries = Object.entries(lineup[line].data.props)
+      div.innerHTML = `<hr><p>${entries.map(entry =>
+        `<span>${entry[0]}</span><br><input type=text value="${entry[1]}" size=50>`).join("<br>")}</p><button>+</button> <button>⧎</button>`
+    },
+    click: event => {
+      let target = event.target
+      if(target.tagName != 'BUTTON') return
+      let line = target.closest("[data-line]").dataset.line
+      let nid = lineup[line].data.nid
+      if (target.innerText == '+')
+        drill(line, stride.add, {})
+      else
+        drill(line, stride.link, {nid})
+    },
+    input: event => {
+      let target = event.target
+      let line = target.closest("[data-line]").dataset.line
+      let props = lineup[line].data.props
+      let key = target.previousSibling.previousSibling.innerText
+      props[key] = target.value.trim()
+    }
+  }
+
+  stride.add = {
+    render: div => {
+      let line = div.dataset.line
+      div.innerHTML = `<hr><p><input type=text size=50 placeholder="new property name"></p>`
+    },
+    input: event => {
+      if (event.type != 'change') return
+      let target = event.target
+      let line = target.closest("[data-line]").dataset.line
+      let key = target.value.replace(/\W/g,'').toLowerCase()
+      let data = lineup[line-1].data
+      if(key) data.props[key] = ''
+      drill(line-2, stride.fill, data)
+    }
+  }
+
+  stride.link = {
+    render: div => {
+      let line = div.dataset.line
+      let nid = lineup[line].data.nid
+      let node = g.nodes[nid]
+      let name = node.props['name'] || 'This'
+      let here = s.n(node.type).map(node => node)[0]
+      let i = here.in.map(rid => `<span>${s.nodes[s.rels[rid].from].type} ${s.rels[rid].type} ▷</span> ${name}`)
+      let o = here.out.map(rid => `${name} <span>▷ ${s.rels[rid].type} ${s.nodes[s.rels[rid].to].type}</span>`)
+      console.log({nid, i, o})
+      div.innerHTML = `<hr><p>${[...o, ...i].join("<br>")}</p>`
+    },
+    click: event => {
+      const newNode = type => {
+        let model = s.n(type).map(node => node)[0]
+        return g.addNode(model.type,dup(model.props))
+      }
+      let target = event.target
+      if(target.tagName=='SPAN') {
+        bold(event.target)
+        let line = event.target.closest("[data-line]").dataset.line
+        let nid = lineup[line].data.nid
+        let seq = target.innerText.split(/ +/)
+        let tid
+        if(seq[0] == '▷') {
+          tid = newNode(seq.pop())
+          g.addRel(seq.pop(),nid,tid,{})
+        }
+        else {
+          seq.reverse()
+          tid = newNode(seq.pop())
+          g.addRel(seq.pop(),tid,nid,{})
+        }
+        let props = g.nodes[tid].props
+        drill(line, stride.fill, {nid:tid,props})
+      }
+    }
+  }
+
+  // stride.tally = {
+  //   render: div => {
+  //     let line = div.dataset.line
+  //     let graph = lineup[line].data.graph
+  //     let counts = graph.tally().nodes
+  //     let keys = Object.keys(counts)
+  //     div.innerHTML = `<hr><p>${keys.map(type =>
+  //       `<span>${type}</span>: ${counts[type]}`).join("<br>")}</p>`
+  //   },
+  //   click: event => {
+  //     let target = event.target
+  //     if(target.tagName=='SPAN') {
+  //       let line = event.target.closest("[data-line]").dataset.line
+  //       let graph = lineup[line].data.graph
+  //       let name = target.innerText
+  //       let nodes = graph.n(name)
+  //       drill(line, stride.props,{nodes})
+  //     }
+  //   }
+  // }
+  //
+  // stride.props = {
+  //   render: div => {
+  //     let line = div.dataset.line
+  //     let props = lineup[line].data.nodes.props('name')
+  //     div.innerHTML = `<hr><p><input type=text placeholder="search"></input></p>
+  //       <div>${props.map(name => `<span>${name}</span>`).join(`<br>`)}</div>`
+  //   },
+  //   click: event => {
+  //     let target = event.target
+  //     if(target.tagName=='SPAN') {
+  //       let line = event.target.closest("[data-line]").dataset.line
+  //       let have = lineup[line].data.nodes
+  //       let name = target.innerText
+  //       let nodes = have.filter((type,props) => props['name'] == name)
+  //       drill(line,stride.choice,{nodes})
+  //     }
+  //   },
+  //   input: event => {
+  //     let line = event.target.closest("[data-line]").dataset.line
+  //     let have = lineup[line].data.nodes
+  //     let name = event.target.value
+  //     let nodes = have.filter((type,props) => props['name'].includes(name))
+  //     if(event.type=='change') {return drill(line,stride.choice,{nodes})}
+  //     lineup[line].div.querySelector('div').innerHTML = nodes.props().map(name => `<span>${name}</span>`).join("<br>")
+  //   }
+  // }
+  //
+  // stride.table = {
+  //   render: div => {
+  //     let line = div.dataset.line
+  //     let nodes =lineup[line].data.nodes
+  //     let rows = nodes.map(node => `<tr>
+  //       <td>${node.in.join(', ')}
+  //       <td>${node.props['name']}
+  //       <td>${node.out.join(', ')}`).join("\n")
+  //     div.innerHTML = `<hr><p><table>${rows}</table></p>`
+  //   },
+  //   click: event => {}
+  // }
+  //
+  // stride.choice = {
+  //   render: div => {
+  //     div.innerHTML = `<hr><p>${
+  //       ['inputs','outputs','open graph'].map(choice =>
+  //       `<button>${choice}</button>`).join(" ")
+  //     }</p>`
+  //     let line = div.dataset.line
+  //     let have = lineup[line].data.nodes
+  //     div.innerHTML += `<table><tr>
+  //       <td>${have.i().map(rel => rel.type).filter(uniq).join("<br")}</td>
+  //       <td>${have.o().map(rel => rel.type).filter(uniq).join("<br")}</td>
+  //     </table>`
+  //   },
+  //   click: event => {
+  //     let line = event.target.closest("[data-line]").dataset.line
+  //     let have = lineup[line].data.nodes
+  //     switch (event.target.innerText) {
+  //       case 'inputs': drill(line, stride.props, {nodes:have.i().f()}); break
+  //       case 'outputs': drill(line, stride.props, {nodes:have.o().t()}); break
+  //     }
+  //   }
+  // }
+
+
+  async function drill(line,step,data) {
+    while (lineup.length-1 > line) lineup.pop().div.remove()
+    await delay(300)
+    let div = document.createElement('div')
+    lineup.push({step,data,div})
+    div.setAttribute('data-line',lineup.length-1)
+    div.addEventListener('click', step.click)
+    div.addEventListener('input', step.input)
+    div.addEventListener('change', step.input)
+    step.render(div)
+    window.result.append(div)
+    window.parent.postMessage({action: "resize",height: document.body.offsetHeight}, "*")
+  }
+
+  drill(-1,stride.new, {})
+
+  function bold(target) {
+    target.closest('p').querySelectorAll('span').forEach(span =>
+      span.style.cssText = 'font-weight:400')
+    target.style.cssText = 'font-weight:900'
+  }
+
+  window.dodownload = function (event) {
+    let obj = {nodes:g.nodes, rels:g.rels}
+    let text = JSON.stringify(obj,null,2)
+    let file = (g.nodes[0].props['name']||'thing').replace(/\W/g,'').toLowerCase() + '.graph.json'
+    frame.download(text,file,'application/json')
+  }
+
+  window.dopreview = function (event) {
+    let nodes = g.nodes.map((node,id) => `${id} [label="${node.type}\n${node.props['name']}"]`)
+    let edges = g.rels.map(rel => `${rel.from}->${rel.to} [label="${rel.type}"]`)
+    let text = [
+      'digraph {',
+      'node [shape=box style=filled fillcolor=lightgreen]',
+      'rankdir=LR',
+      ...nodes,
+      ...edges,
+      '}'].join("\n")
+    let story = [
+      {type:'paragraph',text:'Graph as created so far.'},
+      {type:'graphviz',text}
+    ]
+    frame.open({title:'Graph Preview',story},event.shiftKey)
+  }
+
+  window.dodebug = function (event) {
+    let story = lineup.map ((each,line) => {
+      let step = Object.keys(stride).find(key => stride[key] === each.step)
+      let data = each.data
+      return {
+        type:'paragraph',
+        text:`${line}: ${step}\n${JSON.stringify(data)}`,
+        id: 123450+line}
+    })
+    story.unshift({type:'paragraph',text:'Navigator lineup snapshot. [http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/navigator.pdf pdf]'})
+    frame.open({title:'Lineup Snapshot',story},event.shiftKey)
+  }
+
+</script>
