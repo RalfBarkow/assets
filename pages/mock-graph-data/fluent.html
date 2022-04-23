@@ -1,0 +1,64 @@
+<p><div id=choices></div></p>
+<hr>
+<p><div id=result></div></p>
+<style>
+  td, th { border: 1px solid gray; padding: 8px; }
+  table { border-collapse: collapse; }
+</style>
+
+<script type=module>
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {Graph} from 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graph.js'
+
+
+  const tally = list => list.reduce((s,e)=>{s[e.type] = s[e.type] ? s[e.type]+1 : 1; return s}, {})
+  const list = (hash,label) => Object.keys(hash).map(type => `${type}: ${hash[type]} ${label}`).join("<br>")
+  const title = text => text.split("\n")[0]
+  const query = text => text.split("\n").slice(1).join("\n")
+
+  let context = await frame.context()
+  let codes = context.page.story
+    .filter(item => item.type == 'code')
+    .map(item => item.text)
+  window.choices.innerHTML = codes
+    .map(text => `<span onclick=doquery(event)>${title(text)}</span>`)
+    .join("<br>")
+
+  let g = await Graph.fetch('http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/graphs/graph.json')
+  window.result.innerHTML = `${list(g.tally().nodes,'nodes')}<br><br>${list(g.tally().rels,'rels')}`
+
+
+  // M A C R O S
+
+  function avg (all) {
+    return all.reduce((s,e) => s+e)/all.length
+  }
+
+  function table (rels) {
+    let graph = rels.graph
+    let rids = rels.rids
+    let rows = rids.map(rid => {
+      let rel = graph.rels[rid]
+      let a = graph.nodes[rel.from].props['name']
+      let b = graph.nodes[rel.to].props['name']
+      return `<tr><td>${a}<td>${b}`
+    })
+    return `<table>${rows.join("")}</table>`
+  }
+
+  // Q U E R Y
+
+  window.doquery = function(event) {
+    console.log(event.target)
+    let name = event.target.innerText
+    let code = codes.find(text => title(text) == name)
+    console.log({name,code})
+    try {
+      let result = eval(query(code))
+      window.result.innerHTML = `<pre><font color=green>${query(code)}</font>\n\n${JSON.stringify(result,null,2)}</pre>`
+    } catch(err) {
+      window.result.innerHTML = err.message
+    }
+  }
+
+</script>
