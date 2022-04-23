@@ -2,7 +2,7 @@
 <script type=module>
 
   // raw = { dataflow, organization, traffic, source }
-  let assets = 'http://ward.dojo.fed.wiki/assets/pages/mock-graph-data'
+  let assets = 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data'
   let raw = await fetch(`${assets}/graphs/raw.json`).then(res => res.json())
   let found = raw.organization.filter(node => node.name.includes('Flores'))
   window.result.innerHTML = found.map(node => `
