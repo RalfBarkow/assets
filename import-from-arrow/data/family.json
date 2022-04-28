@@ -1,0 +1,226 @@
+{
+  "nodes": [
+    {
+      "id": "n0",
+      "position": {
+        "x": -39.41549669621615,
+        "y": -31
+      },
+      "caption": "",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "Ward Cunningham"
+      },
+      "style": {}
+    },
+    {
+      "id": "n1",
+      "position": {
+        "x": -148.63234059765364,
+        "y": 257.43876556301853
+      },
+      "caption": "",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "Patric Cunningham"
+      },
+      "style": {}
+    },
+    {
+      "id": "n2",
+      "position": {
+        "x": 309.06483138024305,
+        "y": 257.43876556301853
+      },
+      "caption": "",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "Christopher Cunningham"
+      },
+      "style": {}
+    },
+    {
+      "id": "n3",
+      "position": {
+        "x": 176.268116450243,
+        "y": -31
+      },
+      "caption": "",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "Karen Cunningham"
+      },
+      "style": {}
+    },
+    {
+      "id": "n4",
+      "position": {
+        "x": 55.032415690121525,
+        "y": -294.32786837272226
+      },
+      "caption": "",
+      "labels": [
+        "Town"
+      ],
+      "properties": {
+        "name": "Portland"
+      },
+      "style": {}
+    },
+    {
+      "id": "n5",
+      "position": {
+        "x": 418.38700078635605,
+        "y": 68.08721375797884
+      },
+      "caption": "",
+      "labels": [
+        "Town"
+      ],
+      "properties": {
+        "name": "Seattle"
+      },
+      "style": {}
+    },
+    {
+      "id": "n6",
+      "position": {
+        "x": -257.9545100037667,
+        "y": 68.08721375797884
+      },
+      "caption": "",
+      "labels": [
+        "Town"
+      ],
+      "properties": {
+        "name": "Medford"
+      },
+      "style": {}
+    }
+  ],
+  "relationships": [
+    {
+      "id": "n0",
+      "fromId": "n1",
+      "toId": "n0",
+      "type": "Father",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n1",
+      "fromId": "n2",
+      "toId": "n0",
+      "type": "Father",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n2",
+      "fromId": "n2",
+      "toId": "n3",
+      "type": "Mother",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n3",
+      "fromId": "n1",
+      "toId": "n3",
+      "type": "Mother",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n4",
+      "fromId": "n0",
+      "toId": "n4",
+      "type": "Residence",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n5",
+      "fromId": "n3",
+      "toId": "n4",
+      "type": "Residence",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n6",
+      "fromId": "n2",
+      "toId": "n5",
+      "type": "Residence",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n7",
+      "fromId": "n1",
+      "toId": "n6",
+      "type": "Residence",
+      "properties": {},
+      "style": {}
+    }
+  ],
+  "style": {
+    "font-family": "sans-serif",
+    "background-color": "#ffffff",
+    "node-color": "#ffffff",
+    "border-width": 4,
+    "border-color": "#000000",
+    "radius": 50,
+    "node-padding": 5,
+    "node-margin": 2,
+    "outside-position": "auto",
+    "node-icon-image": "",
+    "node-background-image": "",
+    "icon-position": "inside",
+    "icon-size": 64,
+    "caption-position": "inside",
+    "caption-max-width": 200,
+    "caption-color": "#000000",
+    "caption-font-size": 50,
+    "caption-font-weight": "normal",
+    "label-position": "inside",
+    "label-display": "pill",
+    "label-color": "#000000",
+    "label-background-color": "#ffffff",
+    "label-border-color": "#000000",
+    "label-border-width": 4,
+    "label-font-size": 40,
+    "label-padding": 5,
+    "label-margin": 4,
+    "directionality": "directed",
+    "detail-position": "inline",
+    "detail-orientation": "parallel",
+    "arrow-width": 5,
+    "arrow-color": "#000000",
+    "margin-start": 5,
+    "margin-end": 5,
+    "margin-peer": 20,
+    "attachment-start": "normal",
+    "attachment-end": "normal",
+    "relationship-icon-image": "",
+    "type-color": "#000000",
+    "type-background-color": "#ffffff",
+    "type-border-color": "#000000",
+    "type-border-width": 0,
+    "type-font-size": 16,
+    "type-padding": 5,
+    "property-position": "outside",
+    "property-alignment": "colon",
+    "property-color": "#000000",
+    "property-font-size": 16,
+    "property-font-weight": "normal"
+  }
+}
