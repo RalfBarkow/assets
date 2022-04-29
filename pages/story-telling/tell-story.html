@@ -1,0 +1,49 @@
+<p><button onclick=dotell(event)>tell story</button></p>
+<div id=menu></div>
+<div id=result></div>
+<script type=module>
+
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {wordcount, visit, getfrom} from './telling.js'
+  let context = await frame.context()
+  let metrics = {pages:0,words:0,links:0}
+
+  window.menu.innerHTML = context.page.story
+    .filter(item => item.type == 'reference')
+    .map(ref => `
+      <input type="radio" id="${ref.title}" name="ref">
+      <label for="${ref.title}">${ref.title}</label><br>`).join("\n")
+
+  window.dotell = function(event) {
+    metrics = {pages:0,words:0,links:0}
+    window.result.innerText = ''
+    document.getElementsByName('ref').forEach((i) => {if(i.checked) tell(event,i.id)})
+  }
+
+  async function tell(event,selected) {
+    let item = (await frame.context()).page.story.find(item => item.title == selected)
+    console.log(selected,item)
+    let title = `Telling ${item.title}`
+    let story = [{type:'pagefold',text:'more'}]
+    try {
+      // let page = await fetch(`//${site}/${frame.asSlug(item.title)}.json`).then(res => res.json())
+      let {site, page, sites} = await getfrom(frame.asSlug(item.title),[item.site])
+      let words = wordcount(page.story)
+      metrics.words += words
+      metrics.pages += 1
+      story.push({type:'paragraph', site, words, text:`[[${item.title}]] — ${item.text} (${words})`})
+      let outrefs = visit(page).map(title => ({type:'reference', title}))
+      story.push({type:'markdown',sites,text:outrefs.map(ref => `- [x] [[${ref.title}]]`).join("\n")})
+      story.push({type:'roster', text:sites.join("\n")})
+      metrics.links += outrefs.length
+      window.result.innerText += ' .'
+    } catch (err) {
+      window.result.innerText += ' x'
+      story.push({type:'code',text:`Trouble with ${selected}\n${err.message}`})
+    }
+    story.push({type:'frame',text:`https://wiki.ralfbarkow.ch/assets/pages/story-telling/more-story.html\nHEIGHT 100`})
+    story.unshift({type:'paragraph', text:`Story of ${metrics.pages} pages with ${metrics.words} words and ${metrics.links} more links.`})
+    frame.open({title,metrics,story},event.shiftKey,[item.site])
+  }
+
+</script>
