@@ -1,0 +1,20 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><div id="result"></div>
+<script type="module">
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  let sts = (await frame.assets()).filter(asset => asset.file.endsWith('.st'))
+  let infos = await Promise.all(sts.map(st => fetch(st.url).then(res => res.text()).then(txt => ({st,txt}))))
+  console.log(infos)
+  window.result.innerHTML = infos.map(({st,txt}) => `
+    <details><summary>${st.file}</summary>
+    ${classes(txt)}
+    </details>`).join("\n")
+
+  function classes(txt) {
+    let defns = txt.split('!').filter(defn => /\w/.test(defn) && !defn.includes('stamp:'))
+    return defns.map(defn => `
+      <details><summary>${defn.trim().split(/\r\t?/)[0]}</summary>
+      <p>${defn.replace(/\r+/g,"<br>")}</p>
+      </details>`).join("\n")
+  }
+</script></body></html>
