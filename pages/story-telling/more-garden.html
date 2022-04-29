@@ -1,0 +1,253 @@
+<p>
+  <button onclick=domore(event)>do more</button>
+  <button onclick=docontent(event)>do content</button>
+  <button onclick=doprint(event)>print this</button>
+</p>
+<div id=result></div>
+<script type=module>
+
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {wordcount, checks, getfrom, folded, linked} from './telling.js'
+  import {prolog, render} from './render.js'
+  const uniq = (value, index, self) => self.indexOf(value) === index
+
+  let folds
+  let context = await frame.context()
+  let metrics = {stories:0,pages:0,words:0,links:0}
+
+  async function refresh() {
+    context = await frame.context()
+    folds = folded(context.page.story,['stories','told','more'])
+    console.log(folds)
+
+    // let story = context.page.story
+    // let folds = story
+    //   .filter(item => item.type == 'pagefold')
+    //   .map(item => [item.text, story.indexOf(item)])
+    // let want = 'stories, garden, more'
+    // console.log({folds})
+    // if(folds.map(fold=>fold[0]).join(', ') != want) {
+    //   window.result.innerHTML = `Unexpected pagefolds.<br>Wanted ${want}.`
+    //   return
+    // }
+
+    // inauthors = story.slice(folds[0][1]+1, folds[1][1])
+    // ingarden = story.slice(folds[1][1]+1, folds[2][1])
+    // inlists = story.slice(folds[2][1]+1).filter(item => item.type == 'markdown')
+    // console.log({inauthors, ingarden, inlists})
+
+    // instory = story.filter(item => item.type == 'paragraph' && item.site)
+    // let pages = instory.length
+    // let words = instory.reduce((sum, item) => sum + (item.words||0), 0)
+    // metrics = {pages, words,links:0}
+
+    window.result.innerHTML = `<p>
+      ${folds.stories.length} stories begin this garden<br>
+      ${folds.told.length} pages in the garden so far<br>
+      ${folds.more
+        .filter(item => item.type == 'markdown')
+        .map(checks)
+        .reduce((s,e) => s+e.length,0)} checked links to more pages.</p>`
+  }
+
+  window.domore = async function(event) {
+    await refresh()
+    let forks = new Set()
+    for (let action of context.page.journal)
+      if(action.site) forks.add(action.site)
+
+    let title = `More ${context.page.title}`
+    let story = [{type:'pagefold',text:'stories'}]
+    story.push(...folds.stories)
+
+    // #1 every title in a story, #2 titles in the garden, and #3 titles in more being expanded
+    let abovewhere = await lookabove()
+    let above = Object.values(abovewhere).flat().filter(uniq)
+
+    async function lookabove() {
+      let storyed = (await Promise.all(folds.stories.map(async item => {
+        let site = item.site
+        let title = item.text.split(/\[\[|\]\]/)[1]
+        let slug = frame.asSlug(title)
+        let page = await(fetch(`//${site}/${slug}.json`).then(res => res.json()))
+        let items = page.story.filter(item => item.type=='paragraph' && item.site)
+        return items.map(item => item.text.split(/\[\[|\]\]/)[1])
+      }))).flat()
+      let gardened = folds.told.map(item => item.text.split(/\[\[|\]\]/)[1])
+      let moreed = folds.more
+        .filter(item => item.type=='paragraph' && item.site)
+        .map(item => item.text.split(/\[\[|\]\]/)[1])
+      console.log({storyed,gardened,moreed})
+      return {storyed,gardened,moreed}
+    }
+
+    story.push({type:'pagefold',text:'told'})
+    // add moreed to the garden that are not storied
+    story.push(...folds.more
+        .filter(item => item.type=='paragraph' && item.site)
+        .filter(item => !abovewhere.storyed.includes(item.text.split(/\[\[|\]\]/)[1])))
+
+
+
+    story.push({type:'pagefold',text:'more'})
+    for (let item of folds.more) {
+      for (let line of checks(item)) {
+        try {
+          console.log('checked', line)
+          let title = line.split(/\[\[|\]\]/)[1]
+          let {site,page,sites} = await getfrom(frame.asSlug(title),item.sites)
+          console.log('getfrom',title,site,sites)
+          if (!site) continue // not in sitemaps, eg about page
+          forks.add(site)
+          let words = wordcount(page.story)
+          metrics.words += words
+          metrics.pages += 1
+          story.push({type:'paragraph', site, words, text:`[[${title}]] — ${page.story[0].text.slice(0,140)} (${words})`})
+          for (let item of page.story)
+            if(item.site) forks.add(item.site)
+          let outrefs = linked(page.story)
+          metrics.links += outrefs.length
+          story.push({type:'markdown',sites,text:outrefs.map(title => `- [${above.includes(title)?' ':'x'}] [[${title}]]`).join("\n")})
+          story.push({type:'roster',text:sites.join("\n")})
+          window.result.innerHTML += ' .'
+        } catch (err) {
+          window.result.innerHTML += ' x'
+          story.push({type:'code',text:`Trouble with ${line}\n${err.message}`})
+        }
+      }
+    }
+    story.push({type:'frame',text:`https://wiki.ralfbarkow.ch/assets/pages/story-telling/more-garden.html\nHEIGHT 200`})
+    story.unshift({type:'paragraph', text:`Story of ${metrics.pages} pages with ${metrics.words} words and ${metrics.links} more links.`})
+    frame.open({title,metrics,story},event.shiftKey,[...forks])
+  }
+
+  window.doprint = async function(event) {
+    await refresh()
+    let done = new Set()
+
+    // Contents: links to stories and garden
+    let html = [prolog,`<h2 id="contents">Contents</h2>`]
+    let contents = folds.stories.map(item => {
+      let site = item.site
+      let title = item.text.split(/\[\[|\]\]/)[1]
+      let slug = frame.asSlug(title)
+      let work = title.replace(/^(More |Telling )+/,'')
+      html.push(`<li><a href=#${frame.asSlug(work)}>${work}</a></li>`)
+      return {site,title,slug,work}
+    })
+    html.push(`<li><a href=#garden>Garden</a></li>`)
+
+    // Sections: stories and garden
+    for (let con of contents) {
+      let page = await(fetch(`//${con.site}/${con.slug}.json`).then(res => res.json()))
+      let items = page.story.filter(item => item.type=='paragraph' && item.site)
+      await section(html,items,done)
+      window.result.innerHTML += '<br>'
+    }
+    let garden = [...folds.told, ...folds.more.filter(item => item.type=='paragraph' && item.site)]
+    garden.sort((a,b) => a.text < b.text ? -1 : 1)
+    html.push(`<h2 id="garden">Garden</h2>Alphebetical garden index to appear here.`)
+    await section(html,garden,done)
+
+    frame.download(html.join("\n"),'preprint.html','text/html')
+  }
+
+  async function section (html,items,done) {
+    // render list of charmed items with resolved site
+    for (let item of items) {
+      try {
+        let site = item.site
+        let title = item.text.split(/\[\[|\]\]/)[1]
+        let slug = frame.asSlug(title)
+        if(done.has(slug)) {
+          console.log('Trouble: Print encountered duplicate slug', {site,title,slug})
+          continue
+        }
+        done.add(slug)
+        let page = await fetch(`//${site}/${slug}.json`).then(res => res.json())
+        html.push(render(site,page).join("\n"))
+        window.result.innerHTML += ' .'
+      } catch (err) {
+        window.result.innerHTML += ' x'
+        console.error(err)
+      }
+    }
+  }
+
+
+  window.docontent = async function(event) {
+    // create an table of content page for the growing garden.
+    // reasoning: identify where each potential page in the garden comes from.
+    await refresh()
+
+    let title = `Contents of ${context.page.title}`
+    let story = []
+    let contents = []
+
+    for (let item of folds.more.filter(item => item.type == 'markdown')) {
+      // all or only ticked garden pages? for now only ticked
+      for (let line of checks(item)) {
+        let title = line.split(/\[\[|\]\]/)[1]
+        let {site, page, sites} = await getfrom(frame.asSlug(title),item.sites)
+        contents.push({title, site, id: item.id, page})
+        window.result.innerHTML += ' .'
+      }
+    }
+
+    function compareTitle(a,b) {
+      if (a.title < b.title) {
+        return -1
+      } else if (a.title > b.title) {
+        return 1
+      } else
+      return 0
+    }
+
+    contents.sort(compareTitle)
+    console.info(contents)
+
+    for (let item of contents) {
+      let synopsis, words
+      if (item.page != undefined && item.page.story != undefined) {
+        synopsis = item.page.story[0].text.slice(0,140)
+        words = wordcount(item.page.story)
+      } else {
+        synopsis = 'Page Not Found'
+        words = '-'
+      }
+      story.push({
+        type:'reference',
+        id: item.id,
+        site: item.site,
+        slug: frame.asSlug(item.title),
+        title: item.title,
+        text: `${synopsis} (${words})`
+      })
+    }
+
+    const targets = new Map()
+
+    contents.forEach(item => {
+      if (targets.has(item.title)) {
+        targets.set(item.title, new Set([...targets.get(item.title), item.site]))
+      } else {
+        targets.set(item.title, new Set([item.site]))
+      }
+    })
+
+    console.info(targets)
+    //const multi = targets.map(item => {item.})
+
+    story.unshift({type:'paragraph', text:`Garden has
+      ${contents.length} checked links to
+      ${targets.size} possible garden pages. With
+      ${[...targets.values()].filter(item => item.has(undefined)).length} links to pages that can't be found, and
+      ${[...targets.values()].filter(item => item.length > 1).length} pages that can be found in more than one place.`})
+
+    frame.open({title,story},event.shiftKey)
+
+  }
+
+  await refresh()
+
+</script>

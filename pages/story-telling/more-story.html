@@ -1,0 +1,94 @@
+<p>
+  <button onclick=domore(event)>do more</button>
+  <button onclick=doprint(event)>print this</button>
+</p>
+<div id=result></div>
+<script type=module>
+
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import {wordcount, checks, visit, getfrom} from './telling.js'
+  import {prolog, render} from './render.js'
+
+  let context = await frame.context()
+  let instory, inlists
+  let metrics = {pages:0,words:0,links:0}
+
+  function refresh() {
+    let story = context.page.story
+    instory = story.filter(item => item.type == 'paragraph' && item.site)
+    let pages = instory.length
+    let words = instory.reduce((sum, item) => sum + (item.words||0), 0)
+    metrics = {pages, words,links:0}
+    inlists = story.filter(item => item.type == 'markdown')
+    window.result.innerHTML = `<p>
+      ${pages} pages with ${words} words so far.<br>
+      ${inlists.map(checks).reduce((s,e) => s+e.length,0)} links to more pages.</p>`
+  }
+
+  window.domore = async function(event) {
+    context = await frame.context()
+    let forks = new Set()
+    refresh()
+    for (let action of context.page.journal)
+      if(action.site) forks.add(action.site)
+    let title = `More ${context.page.title}`
+    let story = [{type:'pagefold',text:'told'}]
+    story.push(...instory)
+    let above = visit({story:[...instory,...inlists]})
+
+    story.push({type:'pagefold',text:'more'})
+    for (let item of inlists) {
+      for (let line of checks(item)) {
+        try {
+          console.log('checked', line)
+          let title = line.split(/\[\[|\]\]/)[1]
+          let {site,page,sites} = await getfrom(frame.asSlug(title),item.sites)
+          console.log('getfrom',title,site,sites)
+          if (!site) continue // not in sitemaps, eg about page
+          forks.add(site)
+          // let page = await fetch(`//${site}/${frame.asSlug(title)}.json`).then(res => res.json())
+          let words = wordcount(page.story)
+          metrics.words += words
+          metrics.pages += 1
+          story.push({type:'paragraph', site, words, text:`[[${title}]] — ${page.story[0].text.slice(0,140)} (${words})`})
+          for (let item of page.story)
+            if(item.site) forks.add(item.site)
+          let outrefs = visit(page)
+          metrics.links += outrefs.length
+          story.push({type:'markdown',sites,text:outrefs.map(title => `- [${above.includes(title)?' ':'x'}] [[${title}]]`).join("\n")})
+          story.push({type:'roster',text:sites.join("\n")})
+          window.result.innerHTML += ' .'
+        } catch (err) {
+          window.result.innerHTML += ' x'
+          story.push({type:'code',text:`Trouble with ${line}\n${err.message}`})
+        }
+      }
+    }
+    story.push({type:'frame',text:`http://ward.dojo.fed.wiki/assets/pages/story-telling/more-story.html\nHEIGHT 100`})
+    story.unshift({type:'paragraph', text:`Story of ${metrics.pages} pages with ${metrics.words} words and ${metrics.links} more links.`})
+    frame.open({title,metrics,story},event.shiftKey,[...forks])
+  }
+
+  window.doprint = async function(event) {
+    let html = [prolog]
+    for (let item of instory) {
+      try {
+        let site = item.site
+        let title = item.text.split(/\[\[|\]\]/)[1]
+        let slug = frame.asSlug(title)
+        console.log({site,title,slug})
+        let page = await fetch(`//${site}/${slug}.json`).then(res => res.json())
+        html.push(render(site,page).join("\n"))
+        window.result.innerHTML += ' .'
+      } catch (err) {
+        window.result.innerHTML += ' x'
+        console.error(err)
+      }
+
+    }
+    frame.download(html.join("\n"),'preprint.html','text/html')
+  }
+
+  refresh()
+
+</script>
