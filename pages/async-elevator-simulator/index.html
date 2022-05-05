@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>Async Elevator Simulator</title>
+  </head>
+  <body>
+    <pre id="display">Starting Simulation.</pre>
+    <script>
+
+      // S I M U L A T O R
+
+      elevator()
+      passenger()
+      animation()
+
+      function delay(ticks) {
+        return new Promise(resolve => setTimeout(resolve, ticks*80))
+      }
+
+      // E L E V A T O R
+
+      var floor = 1
+      var going = +1
+      var riding = false
+
+      async function elevator () {
+        while (true) {
+          if (floor+going >= 1 && floor+going <= 30) {
+            floor += going
+            if (riding) at = floor
+            await delay(2)
+          } else {
+            going = -going
+            await delay(5)
+          }
+        }
+      }
+
+      // P A S S E N G E R
+
+      var at = 2
+      var want = 5
+
+      async function passenger () {
+        const heading = () => want > at ? +1 : -1
+        while (true) {
+          while (at != floor || heading() != going) {
+            await delay(1) // waiting
+          }
+          while (riding = (at != want)) {
+            await delay(1) // riding
+          }
+          do {
+            await delay(60) // working
+            want = 1 + Math.floor(Math.random()*30)
+          } while (want == at)
+        }
+      }
+
+      // A N I M A T I O N
+
+      async function animation () {
+        const draw = (ch, pos) => `${' '.repeat(pos)}${ch}`
+        while (true){
+          display.innerText = `
+            ${draw('E',floor)}
+            ${draw('P',at)}
+            ${draw('W',want)}`
+          await delay(1)
+        }
+      }
+
+    </script>
+  </body>
+</html>
