@@ -17,9 +17,8 @@
 
 
   window.dofile = async function (event) {
-      let url = event.target.getAttribute('title')
-      if(!url) return
-      console.info("convert-any-svg.html: url: ", url)
+    let url = event.target.getAttribute('title')
+    if(!url) return
     let file = await fetch(url).then(res => res.text())
     let div = document.createElement('div')
     div.innerHTML = file
