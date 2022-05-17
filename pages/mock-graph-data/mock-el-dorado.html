@@ -9,13 +9,13 @@
 <script type=module>
   import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
   import { Graph } from 'https://wardcunningham.github.io/graph/graph.js'
-  import { search } from 'http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/cypher.js'
-  const graph = await Graph.fetch('http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/graphs/graph.json')
+  import { search } from 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/cypher.js'
+  const graph = await Graph.fetch('https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graphs/graph.json')
   window.result.innerHTML = `<pre>${JSON.stringify(graph.tally(),null,2)}</pre>`
 
   window.dodoctor = function (event) {
     const param = btoa(query)
-    const doctor = 'http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/doctor.html'
+    const doctor = 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/doctor.html'
     const url = `${doctor}?${param}`
     const title = "Parse Doctor"
     const story = [
@@ -70,7 +70,7 @@
     const story = [
       {type:'paragraph', text},
       {type:'code',text:down},
-      {type:'frame',text:`http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/mock-el-dorado.html
+      {type:'frame',text:`//wiki.ralfbarkow.ch/assets/pages/mock-graph-data/mock-el-dorado.html
 HEIGHT 600`}
     ]
     frame.open({title:`${type}: ${name}`,story},event.shiftKey)
