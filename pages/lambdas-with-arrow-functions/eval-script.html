@@ -1,0 +1,17 @@
+<div id=result></div>
+<style>body {background-color: #f8f8f8; margin: 0} </style>
+<script type=module>
+ import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+ const context = await frame.context()
+ const script = context.page.story
+                       .filter(item => item.type=='code')
+                       .map(item => item.text)
+                       .join("\n")
+
+ try {
+     eval(script)
+ } catch (e) {
+     console.log(e)
+     window.result.innerText = e.message
+ }
+</script>
