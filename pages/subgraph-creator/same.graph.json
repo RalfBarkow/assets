@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "type": "Action",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Here",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "There",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 1,
+      "props": {"name":"first"}
+    },
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 1,
+      "props": {"name":"last"}
+    }
+  ]
+}

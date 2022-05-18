@@ -1,0 +1,36 @@
+{
+  "nodes": [
+    {
+      "type": "Ideal",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Creativity",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Wiki",
+        "address": "",
+        "scope": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Motivates",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    }
+  ]
+}

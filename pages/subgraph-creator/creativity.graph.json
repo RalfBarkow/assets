@@ -1,0 +1,36 @@
+{
+  "nodes": [
+    {
+      "type": "Ideal",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Creativity",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Kerry",
+        "address": "",
+        "background": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Holds",
+      "from": 1,
+      "to": 0,
+      "props": {}
+    }
+  ]
+}

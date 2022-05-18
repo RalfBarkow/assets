@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    {
+      "type": "Model",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Nodules"
+      }
+    },
+    {
+      "type": "Experiment",
+      "in": [
+        1
+      ],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Property Graphs"
+      }
+    },
+    {
+      "type": "Intention",
+      "in": [
+        2
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Systems"
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Learner"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Unfolds",
+      "from": 1,
+      "to": 0,
+      "props": {}
+    },
+    {
+      "type": "Inspires",
+      "from": 2,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Seeks",
+      "from": 3,
+      "to": 2,
+      "props": {}
+    }
+  ]
+}

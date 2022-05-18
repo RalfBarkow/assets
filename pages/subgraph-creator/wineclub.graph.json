@@ -1,0 +1,94 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0,
+        3
+      ],
+      "props": {
+        "name": "Erin",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        0,
+        2
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Store",
+        "address": "",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        1
+      ],
+      "out": [],
+      "props": {
+        "name": "Samples",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Wine",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Meetup",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Facilitates",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "Motivates",
+      "from": 3,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 4,
+      "props": {}
+    }
+  ]
+}

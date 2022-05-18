@@ -1,0 +1,15 @@
+<p><button onclick=dodownload()>download</button></p>
+<div id=result></div>
+<script type=module>
+  import { Graph } from 'https://wardcunningham.github.io/graph/graph.js'
+  import { csv } from "https://cdn.skypack.dev/d3-fetch@3"
+  try {
+    const records = await fetch('./records.json').then(res => res.json())
+    // const records = await csv('./export.csv')
+    console.log(records)
+    window.result.innerText = `${records.length} records`    
+  } catch (e) {
+    window.result.innerText = e.message
+  }
+
+</script>

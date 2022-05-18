@@ -1,0 +1,56 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Member",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Samples",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        1
+      ],
+      "out": [],
+      "props": {
+        "name": "Tasting",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Serves",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    }
+  ]
+}

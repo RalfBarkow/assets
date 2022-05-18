@@ -1,0 +1,85 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Learner"
+      }
+    },
+    {
+      "type": "Intention",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Meaning"
+      }
+    },
+    {
+      "type": "Experiment",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Write"
+      }
+    },
+    {
+      "type": "Model",
+      "in": [
+        2,
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Process Framework"
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "Learner"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Seeks",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Inspires",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "Unfolds",
+      "from": 2,
+      "to": 3,
+      "props": {}
+    },
+    {
+      "type": "Creates",
+      "from": 4,
+      "to": 3,
+      "props": {}
+    }
+  ]
+}

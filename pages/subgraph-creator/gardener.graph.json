@@ -1,0 +1,75 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Gardener",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        0
+      ],
+      "out": [
+        1,
+        2
+      ],
+      "props": {
+        "name": "Monitor",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Sensor",
+      "in": [
+        1
+      ],
+      "out": [],
+      "props": {
+        "name": "Water",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Sensor",
+      "in": [
+        1
+      ],
+      "out": [],
+      "props": {
+        "name": "Temperature",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Performs",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "Performs",
+      "from": 1,
+      "to": 3,
+      "props": {}
+    }
+  ]
+}

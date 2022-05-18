@@ -1,0 +1,156 @@
+{
+  "nodes": [
+    {
+      "type": "Ideals",
+      "in": [
+        0,
+        2,
+        3
+      ],
+      "out": [
+        9,
+        10,
+        11
+      ],
+      "props": {}
+    },
+    {
+      "type": "Orgs",
+      "in": [
+        4,
+        6,
+        9
+      ],
+      "out": [
+        0,
+        1,
+        8
+      ],
+      "props": {}
+    },
+    {
+      "type": "Actions",
+      "in": [
+        1,
+        5,
+        10
+      ],
+      "out": [
+        2,
+        6,
+        7
+      ],
+      "props": {}
+    },
+    {
+      "type": "Persons",
+      "in": [
+        7,
+        8,
+        11
+      ],
+      "out": [
+        3,
+        4,
+        5
+      ],
+      "props": {}
+    }
+  ],
+  "rels": [
+    {
+      "type": "",
+      "from": 1,
+      "to": 0,
+      "props": {
+        "PRIORITIZES": "Ideals"
+      }
+    },
+    {
+      "type": "",
+      "from": 1,
+      "to": 2,
+      "props": {
+        "FACILLITATES": "Actions"
+      }
+    },
+    {
+      "type": "",
+      "from": 2,
+      "to": 0,
+      "props": {
+        "REALIZES": "Ideals"
+      }
+    },
+    {
+      "type": "",
+      "from": 3,
+      "to": 0,
+      "props": {
+        "BELIEVES IN": "Ideals"
+      }
+    },
+    {
+      "type": "",
+      "from": 3,
+      "to": 1,
+      "props": {
+        "PARTICIPATES": "Orgs"
+      }
+    },
+    {
+      "type": "",
+      "from": 3,
+      "to": 2,
+      "props": {
+        "PERFORMS": "Actions"
+      }
+    },
+    {
+      "type": "",
+      "from": 2,
+      "to": 1,
+      "props": {
+        "TEACHES": "Orgs"
+      }
+    },
+    {
+      "type": "",
+      "from": 2,
+      "to": 3,
+      "props": {
+        "ENGAGES": "Persons"
+      }
+    },
+    {
+      "type": "",
+      "from": 1,
+      "to": 3,
+      "props": {
+        "ENROLES": "Persons"
+      }
+    },
+    {
+      "type": "",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "CATALYZES": "Orgs"
+      }
+    },
+    {
+      "type": "GUIDES: Actions",
+      "from": 0,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "",
+      "from": 0,
+      "to": 3,
+      "props": {
+        "MOTIVATES": "Persons"
+      }
+    }
+  ]
+}

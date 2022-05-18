@@ -1,0 +1,297 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0,
+        4,
+        8,
+        12
+      ],
+      "props": {
+        "name": "Jeff",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Connection",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Sharing",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        2,
+        4,
+        7,
+        10,
+        14
+      ],
+      "out": [
+        3,
+        5,
+        11
+      ],
+      "props": {
+        "name": "DeveloperTeam",
+        "address": "",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Learning",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        5
+      ],
+      "out": [
+        6
+      ],
+      "props": {
+        "name": "Teamwork",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        6
+      ],
+      "out": [
+        7
+      ],
+      "props": {
+        "name": "Productivity",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        8
+      ],
+      "out": [
+        9
+      ],
+      "props": {
+        "name": "Disconnection",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        9
+      ],
+      "out": [
+        10
+      ],
+      "props": {
+        "name": "Concentration",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        11
+      ],
+      "out": [],
+      "props": {
+        "name": "SystemEvolution",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        12
+      ],
+      "out": [
+        13
+      ],
+      "props": {
+        "name": "Transcription",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        13
+      ],
+      "out": [
+        14
+      ],
+      "props": {
+        "name": "Understanding",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "source": "jeff-connects.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 1,
+      "to": 2,
+      "props": {
+        "source": "jeff-connects.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 2,
+      "to": 3,
+      "props": {
+        "source": "jeff-connects.graph.json"
+      }
+    },
+    {
+      "type": "Facilitates",
+      "from": 3,
+      "to": 4,
+      "props": {
+        "source": "jeff-connects.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 3,
+      "props": {
+        "source": "jeff-developerteam.graph.json"
+      }
+    },
+    {
+      "type": "Facilitates",
+      "from": 3,
+      "to": 5,
+      "props": {
+        "source": "jeff-developerteam.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 5,
+      "to": 6,
+      "props": {
+        "source": "jeff-developerteam.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 6,
+      "to": 3,
+      "props": {
+        "source": "jeff-developerteam.graph.json"
+      }
+    },
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 7,
+      "props": {
+        "source": "jeff-disconnects.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 7,
+      "to": 8,
+      "props": {
+        "source": "jeff-disconnects.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 8,
+      "to": 3,
+      "props": {
+        "source": "jeff-disconnects.graph.json"
+      }
+    },
+    {
+      "type": "Facilitates",
+      "from": 3,
+      "to": 9,
+      "props": {
+        "source": "jeff-disconnects.graph.json"
+      }
+    },
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 10,
+      "props": {
+        "source": "jeff-transcribes.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 10,
+      "to": 11,
+      "props": {
+        "source": "jeff-transcribes.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 11,
+      "to": 3,
+      "props": {
+        "source": "jeff-transcribes.graph.json"
+      }
+    }
+  ]
+}

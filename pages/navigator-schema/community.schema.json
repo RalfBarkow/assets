@@ -1,0 +1,113 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0,
+        1,
+        2
+      ],
+      "props": {
+        "name": "",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        0,
+        3
+      ],
+      "out": [
+        4
+      ],
+      "props": {
+        "name": "",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        1,
+        4
+      ],
+      "out": [
+        5
+      ],
+      "props": {
+        "name": "",
+        "address": "",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        2,
+        5
+      ],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Holds",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "strength": ""
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 2,
+      "props": {
+        "role": ""
+      }
+    },
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 3,
+      "props": {
+        "effort": ""
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 3,
+      "to": 1,
+      "props": {
+        "dimension": ""
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 1,
+      "to": 2,
+      "props": {
+        "dimension": ""
+      }
+    },
+    {
+      "type": "Facilitates",
+      "from": 2,
+      "to": 3,
+      "props": {
+        "role": ""
+      }
+    }
+  ]
+}

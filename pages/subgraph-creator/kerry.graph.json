@@ -1,0 +1,96 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Kerry",
+        "address": "UK",
+        "background": "Systems evangelist"
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Wellbeing",
+        "scope": "All living beings",
+        "success": "Ethical resilient society"
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "ReLocalize Creativity",
+        "address": "",
+        "scope": "Global"
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        2
+      ],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "See the Systems",
+        "scope": "Young people",
+        "success": "Local youth activism"
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Wellbeing",
+        "scope": "",
+        "success": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Holds",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Motivates",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "Facilitates",
+      "from": 2,
+      "to": 3,
+      "props": {}
+    },
+    {
+      "type": "Serves",
+      "from": 3,
+      "to": 4,
+      "props": {}
+    }
+  ]
+}

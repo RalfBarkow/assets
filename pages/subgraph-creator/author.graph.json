@@ -1,0 +1,95 @@
+{
+  "nodes": [
+    {
+      "type": "Action",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Fork",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0,
+        1
+      ],
+      "props": {
+        "name": "Author",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Curation",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        2
+      ],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "Quality",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Foundation",
+        "address": "",
+        "scope": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Performs",
+      "from": 1,
+      "to": 0,
+      "props": {}
+    },
+    {
+      "type": "Performs",
+      "from": 1,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "Serves",
+      "from": 2,
+      "to": 3,
+      "props": {}
+    },
+    {
+      "type": "Motivates",
+      "from": 3,
+      "to": 4,
+      "props": {}
+    }
+  ]
+}

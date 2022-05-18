@@ -1,0 +1,92 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0,
+        1,
+        2
+      ],
+      "props": {
+        "name": "Foodie",
+        "address": "USA",
+        "background": ""
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Sustainability",
+        "scope": "world",
+        "success": "OneEarth"
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "EatPalmOil",
+        "scope": "",
+        "success": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        0
+      ],
+      "out": [],
+      "props": {
+        "name": "Unilever",
+        "address": "Europe",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Nature",
+      "in": [
+        3
+      ],
+      "out": [],
+      "props": {
+        "name": "Indonesia",
+        "address": "Indonesia",
+        "scope": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Holds",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Performs",
+      "from": 0,
+      "to": 2,
+      "props": {}
+    },
+    {
+      "type": "DependsOn",
+      "from": 0,
+      "to": 3,
+      "props": {}
+    },
+    {
+      "type": "DependsOn",
+      "from": 3,
+      "to": 4,
+      "props": {}
+    }
+  ]
+}

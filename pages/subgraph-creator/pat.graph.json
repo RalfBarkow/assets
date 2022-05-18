@@ -1,0 +1,55 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Pat",
+        "address": "",
+        "background": ""
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        0,
+        1
+      ],
+      "out": [],
+      "props": {
+        "name": "C2",
+        "address": "",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Ward",
+        "address": "",
+        "background": ""
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Serves",
+      "from": 0,
+      "to": 1,
+      "props": {}
+    },
+    {
+      "type": "Serves",
+      "from": 2,
+      "to": 1,
+      "props": {}
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "nodes": [
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Kerry",
+        "address": "UK",
+        "background": "Systems evangelist"
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        0,
+        3
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Wellbeing",
+        "scope": "All living beings",
+        "success": "Ethical resilient society"
+      }
+    },
+    {
+      "type": "Org",
+      "in": [
+        1,
+        5,
+        6
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "ReLocalize Creativity",
+        "address": "1310 Harris Avenue",
+        "scope": "Global"
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        2
+      ],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "See the Systems",
+        "scope": "Young people",
+        "success": "Local youth activism"
+      }
+    },
+    {
+      "type": "Person",
+      "in": [],
+      "out": [
+        4,
+        6,
+        7
+      ],
+      "props": {
+        "name": "Marc",
+        "address": "Bellingham",
+        "background": "ReLocalize"
+      }
+    },
+    {
+      "type": "Ideal",
+      "in": [
+        4,
+        8
+      ],
+      "out": [
+        5
+      ],
+      "props": {
+        "name": "Subsidiarity",
+        "scope": "Neighborhoods",
+        "success": "Ratio of imports to exports"
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        7
+      ],
+      "out": [
+        8
+      ],
+      "props": {
+        "name": "Deploy wiki",
+        "scope": "Columbia Valley Community, Whatcom County, WA",
+        "success": "Usage log"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Holds",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "source": "kerry.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 1,
+      "to": 2,
+      "props": {
+        "source": "kerry.graph.json"
+      }
+    },
+    {
+      "type": "Facilitates",
+      "from": 2,
+      "to": 3,
+      "props": {
+        "source": "kerry.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 3,
+      "to": 1,
+      "props": {
+        "source": "kerry.graph.json"
+      }
+    },
+    {
+      "type": "Holds",
+      "from": 4,
+      "to": 5,
+      "props": {
+        "source": "marc.graph.json"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 5,
+      "to": 2,
+      "props": {
+        "source": "marc.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 4,
+      "to": 2,
+      "props": {
+        "source": "marc.graph.json"
+      }
+    },
+    {
+      "type": "Performs",
+      "from": 4,
+      "to": 6,
+      "props": {
+        "source": "marc.graph.json"
+      }
+    },
+    {
+      "type": "Serves",
+      "from": 6,
+      "to": 5,
+      "props": {
+        "source": "marc.graph.json"
+      }
+    }
+  ]
+}
