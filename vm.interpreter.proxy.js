@@ -1,0 +1,1 @@
+SqueakJS/vm.interpreter.proxy.js

@@ -1,0 +1,1 @@
+SqueakJS/globals.js

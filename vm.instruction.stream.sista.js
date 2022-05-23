@@ -1,0 +1,1 @@
+SqueakJS/vm.instruction.stream.sista.js

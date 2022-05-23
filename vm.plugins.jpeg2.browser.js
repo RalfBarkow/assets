@@ -1,0 +1,1 @@
+SqueakJS/vm.plugins.jpeg2.browser.js

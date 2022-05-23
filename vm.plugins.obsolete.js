@@ -1,0 +1,1 @@
+SqueakJS/vm.plugins.obsolete.js

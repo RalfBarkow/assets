@@ -1,0 +1,1 @@
+SqueakJS/vm.files.browser.js

@@ -1,0 +1,1 @@
+SqueakJS/vm.instruction.stream.js
