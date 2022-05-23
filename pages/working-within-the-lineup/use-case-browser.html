@@ -1,0 +1,195 @@
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟨</text></svg>">
+
+<div id=result></div>
+<section style="display:flex">
+  <!-- <div id=metadata style="flex:20%; padding:16px;"></div> -->
+  <div id=basemap style="flex:100%"></div>
+</section>
+
+<script type=module>
+
+  const params = Object.fromEntries(new URLSearchParams(location.search).entries())
+
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+  const upper = word => word.charAt(0).toUpperCase() + word.slice(1)
+
+  window.detail = async function(i) {
+    let doit = doits[i]
+    let title = `${doit[1]} ${upper(doit[0])}`
+    let link = doit[2].text.replace(/^.*?\[/,'[')
+    let text = `We share the online material we examined when reporting this case. ${link}`
+    let more = await moredetail(link)
+    let story = [{type:'paragraph', text}, ...more]
+    console.log({title,story})
+    open({title,story})
+  }
+
+
+// L O A D   D A T A
+
+  let doits = []
+  let basemap = ''
+  let site = `http://code.fed.wiki`
+  let assets = `${site}/assets/pages/working-within-the-lineup`
+  let find = null
+
+  let loading = Promise.all([
+    fetch(`${site}/use-case-survey.json`).then(req => req.json()).then(page => parse(page)),
+    fetch(`${assets}/${params['svg']||'working-within-the-lineup'}.svg`).then(req => req.text()).then(text => {basemap = text})
+  ])
+  await loading
+
+  function parse(page) {
+    for (let item of page.story) {
+      if(item.type == 'markdown' && item.text.startsWith('#'))
+        doits.push(['site',item.text.split(/ *[#\[] */)[1],item])
+      if(item.type == 'paragraph' && item.text.endsWith('github]'))
+        doits.push(['script',item.text.replace(/ *\[.*$/,''),item])
+      if(item.type == 'markdown' && item.text.startsWith('-'))
+        for (let line of item.text.split(/\n/))
+          doits.push(['trace',line.replace(/^- */,'').split(/ *⇒ */)])
+    }
+  }
+
+  let annotation = `<g id="site"></g><g id="script"></g><g id="trace"></g>\n`
+  basemap = basemap
+    .replace(/<svg width=".*?" height=".*?"/,"<svg ")
+    .replace(/<\/g>\n<\/svg>/,`${annotation}</g>\n</svg>`)
+    .replace(/fill="white"/,'fill=none')
+  window.basemap.innerHTML = basemap
+
+  let places = {}
+  let nodes = window.basemap.getElementsByClassName('node')
+  for (let node of [...nodes]) {
+    let title = [...node.getElementsByTagName('text')].map(text => text.innerHTML).join(' ')
+    let text = node.getElementsByTagName('text').item(0)
+    let x = text.getAttribute('x')
+    let y = text.getAttribute('y')
+    places[asSlug(title)] = {x,y}
+  }
+
+
+// R E P O R T   M I S A L I G N M E N T
+
+  let used = [...doits
+    .filter(doit => doit[0]=='trace')
+    .reduce((sum,trace) => new Set([...sum, ...trace[1]]), new Set())
+    ].map(use => asSlug(use))
+    .sort()
+  let have = Object.keys(places).sort()
+  let missing = used.filter(use => !have.includes(use))
+  let unused = have.filter(place => !used.includes(place))
+  console.log({have,used})
+  console.log({missing,unused})
+  if (missing.length) window.result.innerHTML = `<p>missing: ${missing.join(', ')}</p>`
+
+  function moredetail(link) {
+    console.log(link)
+    // [http://sofi.dojo.fed.wiki/view/sofi-administration/view/sofi-scripts scripts]
+    let scripts = link.match(/^\[https?:\/\/(.+?)\/(.+?) scripts\]$/)
+    if (scripts) return scriptdetail(...scripts)
+
+    // [https://github.com/WardCunningham/seattle-scripts/blob/main/make-new-places.html github]
+    let github = link.match(/^\[https?:\/\/github.com\/(.+?)\/(.+?)\/blob\/(master|main)\/(.+?) github\]$/)
+    if (github) return githubdetail(...github)
+    return []
+  }
+
+  async function scriptdetail(link, origin, lineup) {
+    let words = lineup.split(/\//)
+    let story = []
+    for (let i=0; i<words.length; i+=2) {
+      let site = words[i]=='view' ? origin : words[i]
+      let slug = words[i+1]
+      let page = await fetch(`http://${site}/${slug}.json`).then(res => res.json())
+      let title = page.title
+      let text = page.story[0].text
+      story.push({type:'reference', site, slug, title, text})
+    }
+    return story
+  }
+
+  async function githubdetail(link,user,repo,branch,file) {
+    let url = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${file}`
+    let src = await fetch(url).then(res => res.text())
+    let funs = src.split(/\n/)
+      .filter(line => line.includes('function'))
+      .map(line => `- ${line.replace(/^ +/,'').replace(/ *\{.*$/,'')}`)
+    return [{type:'markdown', text:funs.join("\n")}]
+  }
+
+
+// P L A Y   A N I M A T I O N
+
+  document.querySelectorAll('.node').forEach(node => {
+    node.addEventListener('mouseenter', event => {
+      find = [...event.target.getElementsByTagName('text')].map(text => text.innerHTML).join(' ')
+    })
+    node.addEventListener('mouseleave', event => {
+      find = null
+    })
+  })
+
+  let f = places['federation']
+  while (true) {
+    for (let i = 0; i<doits.length; i++) {
+
+      const delayskip = ms => {
+        if (!find) return delay(ms)
+        for (let j = i+1; j<doits.length; j++) {
+          if (doits[j][0] == 'trace' && doits[j][1].includes(find)) return delay(ms)
+          if (doits[j][0] == doits[i][0]) return delay(100)
+        }
+        return delay(100)
+      }
+
+      let [verb, noun] = doits[i]
+      switch(verb) {
+        case 'site':
+          window.site.innerHTML = `<text onclick="detail(${i})" text-anchor="middle" x="${f.x}" y="${f.y-64}">${noun}</text>`
+          window.script.innerHTML = ''
+          window.trace.innerHTML = ''
+          await delayskip(2000)
+          break
+        case 'script':
+          window.script.innerHTML = `<text onclick="detail(${i})" text-anchor="middle" x="${f.x}" y="${f.y-42}">${noun}</text>`
+          window.trace.innerHTML = ''
+          await delayskip(1000)
+          break
+        case 'trace':
+          window.trace.innerHTML = ''
+          await delayskip(200)
+          await display(noun)
+          break
+      }
+    }
+  }
+
+  async function display (moves) {
+    if (find && !moves.includes(find)) return
+    let p = []
+    let squiggle = []
+    for (let move of moves) {
+      p.unshift(places[asSlug(move)])
+      squiggle.push(`<circle cx="${p[0].x}" cy="${p[0].y}" r="8" stroke="red" fill="red"/>`)
+      if(p.length > 1)
+        squiggle.push(`<line x1="${p[0].x}" y1="${p[0].y}" x2="${p[1].x}" y2="${p[1].y}" stroke="red" stroke-width="8" stroke-opacity=".4" />`)
+      window.trace.innerHTML = squiggle.join("\n")
+      await delay(p.length == 1 ? 400 : 200)
+    }
+  }
+
+
+// U T I L I T I E S
+
+function open(page, keepLineup=false, forks=[]) {
+  const dup = obj => JSON.parse(JSON.stringify(obj))
+  let date = Date.now()
+  for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+  page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+  let message = {action: "showResult", page, keepLineup}
+  window.parent.postMessage(message, "*");
+}
+
+</script>

@@ -1,0 +1,105 @@
+<html>
+<head></head>
+<body>
+<style>
+  img { padding:4px; }
+</style>
+<div id=report>working</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+<script>
+
+const params = Object.fromEntries(new URLSearchParams(location.search).entries())
+
+start()
+
+
+// A P P L I C A T I O N
+
+async function start () {
+    const {site, slug, item, page} = await frameContext()
+    let assets = page.story.filter(item => item.type == 'assets')
+    if (!assets.length) return report.text = 'need Assets plugin on this page'
+    let markup = assets[0].text
+    let url = `//${site}/plugin/assets/list?assets=${markup}`
+    let list = await fetch(url).then(res => res.json())
+    if(list.error != null) return report.text = 'need files in this Assets folder'
+    let files = list.files.filter(name => name.match(/^[\w-]+\.(jpg|jpeg)$/i)).sort()
+    if(!files.length) return report.text = 'need jpg image files to continue'
+    report.innerHTML = `${files.length} files in this asset<br>`
+    let images = await fetch(`http://trails.ward.asia.wiki.org/assets/pages/chronological-wandering/images.json`).then(res => res.json())
+    let done = Object.values(images[slug]||{}).flat()
+    report.innerHTML += `${done.length} of these in trail pages<br>`
+    const thumbnail = file => `<img width=45% src="//${site}/assets/${markup}/${file}" onclick="pick(event)">`
+    report.innerHTML += files.filter(file => !done.includes(file)).map(thumbnail).join(" ")
+}
+
+async function pick(event) {
+  let page = await build(event.target)
+  open(page,event.shiftKey)
+}
+
+async function build(img){
+  let {date, lat, lon} = await exif(img)
+  let map = `https://www.google.com/search?q=${lat},%20${lon}`
+  let day = date.toLocaleString('en-us', {weekday:'long'})
+  let month = date.toLocaleString('en-us', {month:'long'})
+  let daydate = `${day}, ${month} ${date.getDate()}, ${date.getYear()+1900}`
+  return  {title:"Photo with Map Template", story:[
+    {type:'paragraph',text:"describe this trail"},
+    {type:'html',text:`<img width=100% src=${img.src}>`},
+    {type:'paragraph',text:daydate},
+    {type:'map',text:`${lat}, ${lon}\n[${map} google map]`}
+  ]}
+}
+
+
+// U T I L I T I E S
+
+function frameContext() {
+  return new Promise(resolve => {
+    let handler = event => {
+      let {data} = event
+      if (!data.action == "frameContext") return
+      window.removeEventListener('message',handler)
+      resolve(data)
+    }
+    window.addEventListener('message',handler)
+    window.parent.postMessage({action:"sendFrameContext"},"*")
+  })
+}
+
+function open(page, keepLineup=false, forks=[]) {
+  const dup = (obj) => JSON.parse(JSON.stringify(obj))
+  let date = Date.now()
+  for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+  page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+  let message = {action: "showResult", page, keepLineup}
+  window.parent.postMessage(message, "*")
+}
+
+// https://github.com/exif-js/exif-js
+
+function exif(img) {
+  const latlon = exif => {
+    let deg = exif[0] + exif[1]/60 + exif[2]/60/60
+    if ('SW'.includes(exif[3])) deg = -deg
+    deg = deg.toFixed(7)
+    return +deg
+  }
+  return new Promise((resolve, reject) => {
+    EXIF.getData(img, function() {
+      let file = img.src.split('/').pop()
+      let make = EXIF.getTag(this, "Make");
+      let model = EXIF.getTag(this, "Model");
+      let clock = EXIF.getTag(this, "DateTimeOriginal")
+      let str = clock.split(" ");
+      let iso = str[0].replace(/:/g, "-");
+      let date = new Date(iso + " " +str[1]);
+      let lat = latlon([...EXIF.getTag(this, "GPSLatitude"), EXIF.getTag(this, "GPSLatitudeRef")])
+      let lon = latlon([...EXIF.getTag(this, "GPSLongitude"), EXIF.getTag(this, "GPSLongitudeRef")])
+      resolve({file,make,model,date,lat,lon})
+    })
+  })
+}
+
+</script>

@@ -1,0 +1,49 @@
+<p>View results on debug console.<p>
+
+<script>
+
+// call: "N0PUI"
+// color: 0
+// distance: null
+// drift: 0
+// dt: 0.2
+// frequency: 1280
+// locator: "EN34"
+// mode: "FT8"
+// msg: "E72X N0PUI EN34"
+// power: 0
+// snr: -17
+// time: "2020-11-14T04:43:45Z"
+// tunedfrequency: 3573000
+// valid: true
+
+
+// P A R A M E T E R S
+
+function hashed(hash, arg) {
+    let op = arg.split(/=/)
+    if (op[1]) hash[op[0]] = op[1]
+    return hash
+}
+
+let query = window.location.href.split(/\?/)[1]||''
+let params = query.split(/&/).reduce(hashed,{})
+
+
+// L I S T E N
+
+const socket = new WebSocket(`ws://${params['domain']||'localhost'}:4649/Spark`)
+
+socket.addEventListener('open', (event) => {
+  socket.send('{"cmd":"subscribeToSpots","Enable":true}')
+})
+
+socket.addEventListener('message', (event) => {
+    let msg = JSON.parse(event.data)
+    console.table(msg.spots)
+})
+
+socket.addEventListener("error", (event) => console.log('ws error', event))
+socket.addEventListener("close", (event) => console.log('ws close', event))
+
+</script>

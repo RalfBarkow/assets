@@ -1,0 +1,296 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.14.2/d3.js"></script>
+  </head>
+  <body style="font-family:sans-serif;">
+    <style>
+      .grid {color:#ccc;}
+      .decode {font-size:9px;}
+    </style>
+    <table cellpadding=30><tr>
+      <td>
+        We simulate in 2d a visualization we intend to produce in 3d table-top augmented reality.<br>
+        Signals from multiple radios are plotted by frequency and time and layered vertically.<br>
+        Portland blue, Medford green, previously contacted stations show as brown.<br>
+        Viewpoints sequence through six positions including looking straight down.
+      <td>
+        <table>
+          <tr><td><input type=radio name=quad value=" 1, 1" onclick="viewpoint(value)"></input>
+              <td><input type=radio name=quad value=" 0, 1" onclick="viewpoint(value)"></input>
+              <td><input type=radio name=quad value="-1, 1" onclick="viewpoint(value)"></input>
+          <tr><td><input type=radio name=quad value=" 1, 0" onclick="viewpoint(value)"></input>
+              <td><input type=radio name=quad value=" 0, 0" onclick="viewpoint(value)" checked></input>
+              <td><input type=radio name=quad value="-1, 0" onclick="viewpoint(value)"></input>
+          <tr><td><input type=radio name=quad value=" 1,-1" onclick="viewpoint(value)"></input>
+              <td><input type=radio name=quad value=" 0,-1" onclick="viewpoint(value)"></input>
+              <td><input type=radio name=quad value="-1,-1" onclick="viewpoint(value)"></input>
+        </table>
+        <center>viewpoint</center>
+      <td id="output">
+    </table>
+    <div id="scene"></div>
+    <script>
+
+
+// P A R A M S
+  
+      function hashed(hash, assign) {
+        let op = assign.split(/=/)
+        if (op[1]) hash[op[0]]=op[1]
+        return hash
+      }
+
+      let query = window.location.href.split(/\?/)[1]||''
+      let args = query.split(/&/)
+      let params = args.reduce(hashed,{})
+      let log = params.log || 'http://found.ward.bay.wiki.org/assets/pages/k9ox-ft8-log/wsjtx_log.adi'
+      let copy = params.copy || 'http://ward.asia.wiki.org/plugin/wsjt/copy'
+      // also offset, search, width & height below
+
+
+// D A T A
+
+      let logged = {}
+      let decodes = []
+      let done = {}
+      let viewpoint
+
+      fetch(log)
+        .then(res=>res.text())
+        .then(text=>rawlog(text.split(/\r?\n/)))
+
+      fetch(copy)
+        .then(res=>res.text())
+        .then(text=>rawcopy(text.split(/\r?\n/)))
+
+      // http://ward.asia.wiki.org/plugin/wsjt/copy?last=500
+
+
+      function rawlog(lines) {
+        for (let line of lines) {
+          if (!line.match(/^</)) continue 
+          let field = /<(\w+):\d+>([^<]*)/g
+          let r = {}
+          while (m = field.exec(line)) {
+            r[m[1]] = m[2].trim()
+          }
+
+          // r.qso_date
+          // r.time_on
+          // r.call
+          // r.gridsquare
+          // r.rst_sent
+          // r.rst_rcvd
+
+          logged[r.call] = true
+        }
+        console.log('logged', logged)
+        done['rawlog'] = true
+        if (done['rawcopy']) report()
+      }
+
+      function rawcopy(lines) {
+        let today = Date.now()-Date.now()%86400000
+        for (let line of lines) {
+          if (!line.length) continue
+          let fields = line.replace(/  +.*$/,'').split(' ')
+          // if (fields[0] != '73.157.190.193') continue
+          let addr = fields[0]
+          let slot = fields[1]
+          let time = new Date(today+sec(slot)*1000)
+          let freq = 1*fields[2]
+          let elev = 200
+          if(addr=='75.139.193.15') {
+            freq += 1*(params.offset||0)
+            elev -= 100
+          }
+          // if (time/15%2 != 0) continue
+          let call = fields[fields.length-2]
+          let idnt = fields.slice(3,-1).join(' ')
+          let info = fields.slice(-1)[0]
+          decodes.push({addr,slot,time,freq,elev,call,idnt,info})
+        }
+        console.log('decodes',decodes)
+        offsetter()
+        done['rawcopy'] = true
+        if (done['rawlog']) report()
+      }
+
+      let prev = null
+      function sec(slot) {
+        let m = slot.match(/(..)(..)(..)/)
+        let now = 3600*m[1]+60*m[2]+1*m[3]
+        if (!prev) {
+          prev = now
+        }
+        else if (now < prev) {
+          now += 24*60*60
+        }
+        return now
+      }
+
+
+// C A L I B R A T I O N
+
+      function offsetter () {
+        let matches = {}
+        for (let d of decodes) {
+          let slots = matches[d.slot] = matches[d.slot] || {}
+          let calls = slots[d.call] = slots[d.call] || {count:0}
+          calls.count += 1
+          calls[d.addr=='73.157.190.193' ? 'me' : 'him'] = d.freq
+        }
+        let sum = n = 0
+        for (let k of Object.keys(matches).sort()) {
+          let slots = matches[k]
+          for (let j of Object.keys(slots).sort()) {
+            let call = slots[j]
+            if (call.count == 2 && call.him && call.me) {
+              sum += (call.me - call.him)
+              n++
+            }
+          }
+        }
+        let stats = [`${decodes.length} decodes`]
+        if (n!=0) {
+          stats.push(`${n} callsign matches`)
+          stats.push(`${Math.floor(sum/n)} Hz additional offset`)
+        }
+        stats.push(`See <a href=http://ft8.ward.asia.wiki.org/decode-waterfall.html target=_blank>wiki</a> for details`)
+        output.innerHTML = stats.join("<br>")
+      }
+
+
+// R E P O R T
+
+      function report() {
+
+        var margin = {top: 30, right: 30, bottom: 30, left: 60},
+            width = (params.width||1200) - margin.left - margin.right,
+            height = (params.height||6000) - margin.top - margin.bottom;
+
+        var svg = d3.select("#scene")
+          .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// A X I S
+
+        // https://stackoverflow.com/questions/35953892/d3-scale-linear-vs-d3-scalelinear
+        // https://stackoverflow.com/questions/46510876/what-is-the-alternative-of-orient-in-the-new-d3-api
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          .domain([0, 3500])
+          .range([ 0, width ]);
+        svg.append("g")
+          .call(d3.axisTop(x));
+        svg.append("g")
+          .attr("class", "grid")
+          .call(d3.axisTop(x)
+            .tickSize(-height)
+            .tickFormat("")
+          )
+
+        // Add Y axis
+        var y = d3.scaleTime()
+          .domain([decodes[0].time, decodes[decodes.length-1].time])
+          .range([ height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+        svg.append("g")
+          .attr("class", "grid")
+          .call(d3.axisLeft(y)
+            .ticks(40)
+            .tickSize(-width)
+            .tickFormat("")
+          )
+
+
+// R E N D E R
+
+        function color(d) {
+          if(d.addr != '73.157.190.193')
+            return "#8f8"
+          else if(logged[d.call])
+            return "#f80"
+          else
+            return "#08f"
+        }
+
+        let xw = x(1050)-x(1000)
+        let yh = y(decodes[0].time)-y(new Date(decodes[0].time.getTime()+15000))
+
+        let waterfall = svg.append('g')
+          .selectAll("decode")
+          .data(decodes)
+          .enter()
+            .append("g")
+            .attr("class", "decode")
+            .attr("transform",d=>`translate(${x(d.freq)},${y(d.time)})`)
+
+        waterfall
+          .append("rect")
+            .attr("width", xw)
+            .attr("height", yh)
+            .on("mouseover", over)
+            .on("mouseout", out)
+            .style("fill", color)
+            .style("fill-opacity", 0.5)
+          .filter(d => params.search && (d.idnt.includes(params.search) || d.info.includes(params.search)))
+            .attr("stroke","black")
+            .attr("stroke-width",0.5)
+
+        waterfall
+          .append("text")
+            .attr("dx", 3)
+            .attr("dy", 15)
+            .on("mouseover", over)
+            .on("mouseout", out)
+            .text(d=>`${d.info}`)
+            .style("visibility","hidden")
+
+
+// A N I M A T E
+
+        let p = [0, 0]
+        let dp = d => `translate(${x(d.freq) + d.elev*p[0]/10},${y(d.time) + d.elev*p[1]/10})`
+
+        viewpoint = function animate(xy) {
+          p = xy.split(/,/).map(s=>1*s)
+          waterfall.transition().duration(500)
+            .attr("transform",dp)
+        }
+
+        let readout = svg.append("text")
+          .attr("class", "decode")
+          .attr("dy",-5)
+          .style("text-anchor","end")
+
+        function out(d) {
+          readout
+            .text("")
+        }
+
+        function over(d) {
+          decorate(d.idnt)
+          readout
+            .text(d.idnt)
+            .attr("transform",dp(d) + " rotate(-90)")
+        }
+
+        function decorate(idnt) {
+          let tndi = idnt.split(' ').reverse().join(' ')
+          waterfall.selectAll("text")
+            .style("visibility", d => d.idnt==idnt||d.idnt==tndi ? "visible" : "hidden")
+        }
+
+        return
+      }
+
+
+    </script>
+  </body>
+</html>      

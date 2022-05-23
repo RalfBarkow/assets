@@ -1,0 +1,164 @@
+<div id=buttons></div>
+<div id=result>working</div>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; }
+</style>
+
+<script>
+
+  const site = 'http://trails.ward.asia.wiki.org'
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+  const uniq = (value, index, self) => self.indexOf(value) === index
+
+  let history = {}
+  let images = {}
+
+  main()
+
+  async function main() {
+    let slug = location.search || 'chronological-destinations'
+    let index = await fetch(`${site}/${slug.replace('?','')}.json`).then(res => res.json())
+    let work = []
+    for (let item of index.story) {
+      if (item.type == 'pagefold')
+        console.log(item.text)
+      else if (item.type == 'paragraph') {
+        let m = item.text.match(/^\[\[(.+?)\]\](.*)$/)
+        if (m) {
+          let title = m[1]
+          let slug = asSlug(title)
+          work.push(trail(title, slug))
+        }
+      }
+    }
+    await Promise.all(work)
+    const chronological = (a,b) => new Date(a) < new Date(b) ? -1 : 1
+    let when = Object.keys(history).sort(chronological)
+    result.innerHTML = when.map(lineup).join('<br>')
+    if (slug == 'chronological-destinations')
+      buttons.innerHTML = `<p><button onclick=dodownload()>download</button></p>`
+  }
+
+  function dodownload () {
+    download(JSON.stringify(images,null,2),'images.json')
+  }
+
+  async function trail(title, slug) {
+    let page = await fetch(`${site}/${slug}.json`).then(res => res.json())
+    result.innerText += ' .'
+    let story = page.story || []
+    let synopsis = story[0].text
+    let assets = new Set()
+    for (let item of story) {
+      if (item.type == 'html') {
+        let m = item.text.match(/\bsrc=http:\/\/trails.ward.asia.wiki.org\/assets\/pages\/(.*?)\/(.*)>/)
+        if (m) {
+          assets.add(m[1])
+          let season = images[m[1]] ||= {}
+          let list = season[title] ||= []
+          if(list.includes(m[2])) {
+            console.log('duplicate', {title,slug,season:m[1],image:m[2]})
+          }
+          list.push(m[2])
+        }
+      }
+    }
+    let date = page.story.find(item => item.text.length<30 && !isNaN(new Date(item.text))).text
+    let day = history[date] = history[date] || []
+    day.push({title, slug, synopsis, story, assets:[...assets]})
+  }
+
+  function lineup(date) {
+    let trails = history[date]
+    let assets = trails.map(trail => trail.assets).flat().filter(uniq)
+    let all = `<span onclick="showall(event)">${date}</span>`
+    let each = `<span onclick="showeach(event)" data-date="${date}">  » </span>`
+    let images = `<br><span style="color:gray; font-size:small;">${assets.join(', ')}</span>`
+    let list = trails.map(trail => `<li title="${trail.synopsis}">${trail.title}`).join("\n")
+    return `${all} ${each} ${images}<ul>${list}</ul>`
+  }
+
+  function showall(event) {
+    let date = event.target.innerText
+    let day = history[date]
+    openpage(date,day)
+  }
+
+  function showeach(event) {
+    let date = event.target.getAttribute('data-date')
+    let day = history[date]
+    openpage(date,day)
+    let titles = day.map(d => d.title)
+    openlist(titles, event)
+  }
+
+
+// E X P O R T
+
+function openlist(titles, event) {
+  let action = "doInternalLink"
+  let keepLineup = true
+  for (let title of titles) {
+    if (window && window.frameElement) {
+      let pageKey = window.frameElement.name
+      window.parent.postMessage({ action, title, pageKey, keepLineup })
+    }
+  }
+}
+
+const id = () => Math.trunc(Math.random()*1000000000000).toString()
+const deepcopy = (obj) => JSON.parse(JSON.stringify(obj))
+const paragraph = (text) => ({type: "paragraph", text, id:id()})
+const item = (fields) => Object.assign(fields, {id:id()})
+const create = (item) => ({type: "create", date: Date.now(), item: deepcopy(item)})
+const fork = (site) => ({type: "fork", site, date: Date.now()})
+
+function openpage(date, day) {
+  let title = `Wandering ${new Date(date).toDateString()}`
+  let story = [
+      ...day.map(d => paragraph(`
+        ${d.synopsis} See [[${d.title}]],
+        ${d.assets.map(slug=>'[['+slug+']]').join(', ')}`)),
+      item({type:'map',text:markers(day).join("\n")+`\n${date}`}),
+     ]
+  let page = { title, story }
+  page.journal = [ create(page) ]
+  console.log(page)
+  if (window && window.frameElement) {
+    window.parent.postMessage({
+      action: "showResult",
+      pageKey: window.frameElement.name,
+      keepLineup: event.shiftKey,
+      page
+    })
+  }
+
+  function markers (pages) {
+    let markers = []
+    for (let page of pages) {
+      for (let item of page.story) {
+        if (item.type == 'map') {
+          for (let line of item.text.split(/\n+/)) {
+            if(line.match(/^[\+\-]?\d+(\.\d+)?,? *[\+\-]?\d+(\.\d+)?\b/)) {
+              markers.push(`${line} [[${page.title}]]`)
+            }
+          }
+        }
+      }
+    }
+    return markers
+  }
+}
+
+
+function download(string, file) {
+  var data = "data:text/json;charset=utf-8," + encodeURIComponent(string);
+  var anchor = document.createElement('a');
+  anchor.setAttribute("href",     data);
+  anchor.setAttribute("download", file);
+  document.body.appendChild(anchor); // required for firefox
+  anchor.click();
+  anchor.remove();
+}
+
+</script>

@@ -1,0 +1,50 @@
+<pre id=result></pre>
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  let assets = (await frame.assets()).filter(asset => asset.file.endsWith('.ics'))
+  for (let asset of assets) {
+    window.result.innerText += JSON.stringify(asset,null,2)+"\n\n"
+    let ics = await fetch(asset.url).then(res => res.text())+"\n\n"
+    // window.result.innerText += ics+"\n\n"
+    let struct = parse(ics.trim().split(/\r?\n/))
+    window.result.innerText += JSON.stringify(struct,null,2)+"\n\n"
+  }
+
+  // BEGIN:VCALENDAR
+  //   BEGIN:VTIMEZONE
+  //     BEGIN:DAYLIGHT
+  //     END:DAYLIGHT
+  //     BEGIN:STANDARD
+  //     END:STANDARD
+  //   END:VTIMEZONE
+  //   BEGIN:VEVENT
+  //     BEGIN:VALARM
+  //     END:VALARM
+  //   END:VEVENT
+  // END:VCALENDAR
+
+  // Given a list of lines, return a list of blocks
+  // where blocks list lines between a BEGIN and END.
+
+  function parse (list) {
+    let results = []
+    let suspended = []
+    let block = []
+    list.forEach((line,num) => {
+      let numline = `${num}: ${line}`
+      if (line.startsWith('BEGIN:')) {
+        block.push(numline)
+        suspended.push(block)
+        block = [numline]
+        results.push(block)
+      } else if (line.startsWith('END:')) {
+        block.push(numline)
+        block = suspended.pop()
+      } else {
+        block.push(numline)
+      }
+    })
+    return results
+  }
+
+</script>

@@ -1,0 +1,33 @@
+<p><button onclick=dopreview(event)>preview</button></p>
+<div id=result>working</div>
+
+<script type=module>
+  import {open} from "http://code.fed.wiki/assets/v1/frame.js"
+  let svg = await fetch(`http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/Dobbs-SequenceDiagram.svg`).then(res=>res.text())
+  window.result.innerText = `${svg.length} bytes`
+
+  window.dopreview = function (event) {
+    let div = document.createElement('div')
+    div.innerHTML = svg
+    let elm = div.querySelector('svg')
+    let width = elm.getAttribute('width')
+    let height = elm.getAttribute('height')
+    elm.setAttribute('width',"100%")
+    elm.removeAttribute('height')
+    elm.setAttribute('viewbox',`0 0 ${width} ${height}`)
+
+    elm.querySelectorAll('text').forEach(text => {
+      let link = text.innerHTML.replace(/&nbsp;/g,' ')
+      if(/\S/.test(link)) {
+        console.log(link)
+        text.outerHTML = `\n\n<a href="#" data-title="${link}">${text.outerHTML}</a>\n\n`
+      }
+    })
+
+    window.result.innerHTML += `<br>${div.innerHTML.length} bytes`
+    let title = "Test Sequence Diagram"
+    let story = [{type:'html',text:div.innerHTML}]
+    open({title,story},event.shiftKey)    
+  }
+
+</script>

@@ -1,0 +1,192 @@
+<p>
+  <input id=search type=text placeholder="optional search"></input>
+  <button onclick="fromgoogle(event)">google</button>
+  <button onclick="fromfriend(event)">friend</button>
+  <button onclick="frombatch(event)">batch</button>
+</p>
+<div id=result></div>
+
+<script type="module">
+  import {csv} from "https://cdn.skypack.dev/d3-fetch@3"
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const site = 'http://localhost/assets/pages/login-migration-assistant'
+
+  let owners = await fetch(`${site}/asia-owners.json`).then(res => res.json())
+  window.result.innerHTML = `${owners.length} owned sites<br>`
+
+  let google = owners.filter(owner => owner[1].google)
+  window.result.innerHTML += `${google.length} claimed from google<br>`
+
+  let friend = owners.filter(owner => owner[1].friend)
+    window.result.innerHTML += `${friend.length} claimed from friend<br>`
+
+  let users = {}
+  for (let owner of google) {
+    let uid = `${owner[1].google.id} ${owner[1].name}`
+    let user = users[uid] ||= []
+    user.push(owner[0])
+  }
+  // window.result.innerHTML += `${Object.keys(users).length} google users<br>`
+
+  window.fromgoogle = function (event) {
+    users = {}
+    for (let owner of google) {
+      let uid = `${owner[1].google.id} ${owner[1].name}`
+      let user = users[uid] ||= []
+      user.push(owner[0])
+    }
+    let search = window.search.value.toLowerCase()
+    let want = use => !search || use[0].toLowerCase().includes(search) || use[1].join(" ").toLowerCase().includes(search)
+    let sites = Object.entries(users).sort((a,b) => b[1].length - a[1].length)
+    window.result.innerHTML = sites.filter(want).map(use => `
+      <details><summary>${use[1].length} × ${use[0]}</summary>
+      <p>
+        <input type=text placeholder="optional pin"></input>
+        <button onclick="convert(event,'${use[0]}')">convert</button>
+      </p>
+      <p>${use[1].sort().join("<br>")}</p>
+      </details>`).join("\n")
+  }
+
+  window.fromfriend = function (event) {
+    users = {}
+    for (let owner of friend) {
+      let uid = `${owner[1].friend.secret.substring(0,5)} ${owner[1].name}`
+      let user = users[uid] ||= []
+      user.push(owner[0])
+    }
+    let search = window.search.value.toLowerCase()
+    let want = use => !search || use[0].toLowerCase().includes(search) || use[1].join(" ").toLowerCase().includes(search)
+    let show = site => `${site}<br><pre>${JSON.stringify(owners.find(each => each[0]==site)[1],null,2)}</pre>`
+    let sites = Object.entries(users).sort((a,b) => b[1].length - a[1].length)
+    window.result.innerHTML = sites.filter(want).map(use => `
+      <details><summary>${use[1].length} × ${use[0]}</summary>
+      <p>
+        <input type=text placeholder="optional pin"></input>
+        <button onclick="convert(event,'${use[0]}')">convert</button>
+      </p>
+      <p>${use[1].sort().map(show).join("<br>")}</p>
+      <p>
+      </details>`).join("\n")
+  }
+
+  window.frombatch = async function (event) {
+    let search = window.search.value.toLowerCase()
+    let assets = (await allassets())
+      .filter(asset => asset.file.startsWith('batch-want') && (!search || asset.file.includes(search)))
+    if (assets.length != 1) {
+      window.result.innerHTML = `Select one of ${assets.length} batch csv assets.`
+      return
+    }
+    let batch = await csv(assets[0].url)
+    let script = [
+      `export DENO="deno run --allow-read --allow-write"`,
+      `export CODE="$DENO reset-pin.js"`,
+      `export NAME="$DENO reset-name.js"`]
+    let result = []
+    for (let row of batch) {
+      let owner = owners.find(owner => owner[0] == row.site) || ["non-existant site",null]
+      function check (op,want,have) {
+        if (want == have) {
+          return '<font color=green>✔︎</font>'
+        } else {
+          if(owner[1]) script.push(`$${op} '${want}' ${row.site}`)
+          return '<font color=red>✘</font>'
+        }
+      }
+      result.push(`
+        <details>
+        <summary>
+          name ${check('NAME',row.name,owner[1]?.name)}
+          code ${check('CODE',row.code,owner[1]?.friend?.secret)}
+          ${row.site}
+        </summary>
+        <pre>${JSON.stringify({row,owner},null,2)}</pre>
+        </details>
+      `)
+    }
+    script.push(`systemctl restart wiki`)
+    script.push(`echo done`)
+    result.push(`<p><button>convert</button></p>`)
+    window.result.innerHTML = result.join("\n")
+    document.querySelector('#result button').addEventListener('click', event => {
+      let title = 'Batch Update'
+      let story = [{type:'code',text:script.join("\n")}]
+      open({title,story},event.shiftKey)
+    })
+
+  }
+
+  // https://stackoverflow.com/questions/1167746/how-to-assign-a-heredoc-value-to-a-variable-in-bash
+
+  window.convert = function (event,user) {
+    let pin = event.target.parentNode.getElementsByTagName('input').item(0).value ||
+      '00000000'.split('').map(digit => Math.floor(Math.random()*9)+1).join('')
+    let words = user.trim().split(/ /)
+    let details = google
+      .filter(owner => owner[1].google.id == words[0])
+    let samples = details
+      .map(owner => JSON.stringify(owner[1].google.emails))
+      .filter(uniq)
+      .join("\n")
+    let title = words.length > 1 ? words.slice(1).join(' ') : words[0]
+    let synopsis =
+      `We have coverted our wiki farm you use to "friend" style login using recovery code ${pin}.
+      You will use this instead of your Google identity which is no longer available to us.
+      Save it in a safe place.
+      We have no automatic way to recover lost codes other than appealing to me as your friend.
+      This code applies to these sites.`
+    let doit = `export DOIT='run --allow-read --allow-write reset-pin.js ${pin}'\n`
+    let restart = `systemctl restart wiki\n`
+    let text = doit + users[user].map(site => `deno $DOIT ${site}\n`).join('') + restart
+    let story = [
+      {type:'paragraph',text:synopsis},
+      {type:'markdown',text:users[user].map(site => `- ${site}\n`).join('')},
+      {type:'code',text:samples},
+      {type:'shell',text}]
+    console.table(story)
+    open({title, story},event.shiftKey)
+  }
+
+
+// U T I L I T I E S
+
+  function open(page, keepLineup=false, forks=[]) {
+    const dup = obj => JSON.parse(JSON.stringify(obj))
+    let date = Date.now()
+    for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+    page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+    let message = {action: "showResult", page, keepLineup}
+    window.parent.postMessage(message, "*");
+  }
+
+  async function allassets() {
+    let assets = await sources('assets')
+    let result = []
+    for (let source of assets){
+      let site = source.panel.site
+      let slug = source.panel.slug
+      let item = source.panel.itemId
+      for (let dir of Object.keys(source.assetsData))
+        for (let path of Object.keys(source.assetsData[dir]))
+          for (let file of source.assetsData[dir][path])
+            result.push({site,slug,item,dir,path,file,url:`${path}/${dir}/${file}`})
+    }
+    return result
+  }
+
+  function sources(topic) {
+    const action = 'requestSourceData'
+    return new Promise(resolve => {
+      let fn = event => {
+        let {data} = event
+        if (!data.action == action) return
+        window.removeEventListener('message', fn)
+        resolve(data.sources)
+      }
+      window.addEventListener('message', fn)
+      window.parent.postMessage({action, topic},"*")
+    })
+  }
+
+</script>

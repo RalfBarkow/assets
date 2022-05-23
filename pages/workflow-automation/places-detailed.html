@@ -1,0 +1,221 @@
+
+<style>
+  td { width:3em; }
+</style>
+
+<div id=result></div>
+<p><button onclick=scan(event)>scan</button>
+  <button onclick=grid(event)>grid</button>
+  <button onclick=allx(event)>all</button></p>
+
+<script>
+
+  let ctrails = []
+  let markers = {}
+  let latlons = []
+  let squares = {}
+  let site = 'http://trails.ward.asia.wiki.org'
+
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+  const uniq = (value, index, self) => self.indexOf(value) === index
+
+  situation()
+
+  async function situation() {
+    let slug = location.search || 'chronological-destinations'
+    let index = await fetch(`${site}/${slug.replace('?','')}.json`).then(res => res.json())
+    let list = []
+    for (let item of index.story) {
+      if (item.type == 'paragraph') {
+        let m = item.text.match(/^\[\[(.+?)\]\]/)
+        if (m) list.push(m[1])
+      }
+    }
+    ctrails = list.filter(uniq)
+    result.innerHTML = `${ctrails.length} trail pages can be scanned<br>`
+
+    markers = await fetch(`${site}/assets/pages/places-detailed/markers.json`).then(res => res.json())
+    latlons = Object.values(markers).flat()
+    result.innerHTML += `${Object.keys(markers).length} cached markers from previous scans<br>`
+
+  }
+
+  async function scan() {
+    let slug = location.search || 'chronological-destinations'
+    let index = await fetch(`${site}/${slug.replace('?','')}.json`).then(res => res.json())
+    let work = []
+    for (let item of index.story) {
+      if (item.type == 'paragraph') {
+        let m = item.text.match(/^\[\[(.+?)\]\]/)
+        if (m) {
+          let title = m[1]
+          let slug = asSlug(title)
+          work.push(trail(title, slug))
+        }
+      }
+    }
+    await Promise.all(work)
+    download(JSON.stringify(markers,null,2),'markers.json')
+  }
+
+  function grid() {
+
+    let latm = Math.min(...(latlons.map(latlon => latlon[0])))
+    let latx = Math.max(...(latlons.map(latlon => latlon[0])))
+    let lonm = Math.min(...(latlons.map(latlon => latlon[1])))
+    let lonx = Math.max(...(latlons.map(latlon => latlon[1])))
+    let dlat = latx - latm
+    let dlon = lonx - lonm
+
+    for (let trail in markers) {
+      for (let latlon of markers[trail]) {
+        let y = Math.floor((latlon[0]-latm) / dlat * 9.99999)
+        let x = Math.floor((latlon[1]-lonm) / dlon * 9.99999)
+        let xy = `${x} ${y}`
+        let square = squares[xy] = squares[xy] || []
+        if(!square.includes(trail)) square.push(trail)
+      }
+    }
+
+    let iota = [0,1,2,3,4,5,6,7,8,9]
+    let cells = iota.slice().reverse().map(y => {
+      let row = iota.map(x => {
+        let xy = `${x} ${y}`
+        return `<td id="${xy}")">${squares[xy] ? squares[xy].length : '.'}`
+      })
+      return `<tr>${row.join("")}`
+    }).join("")
+    result.innerHTML = `<table id=table onclick="click(event)" onmousedown="down(event)" onmouseup="up(event)">${cells}</table>`
+
+    let base = {
+      url: `${site}/assets/pages/pandemic-wandering/fanno-creek-watershed.jpg`,
+      sw: [45.4003109, -122.8674870],
+      ne: [45.5128174, -122.6499923]
+    }
+    document.body.style.backgroundImage = `url(${base.url}`
+    document.body.style.backgroundSize = `390px 238px`
+    document.body.style.backgroundPosition = `0px 0px`
+
+    const place = (z, zm, dz) => zm + (z+0.5)/10 * dz
+    let text = 'Places where we can construct composit surveys of photographs. See [[Places Detailed]]'
+    let want = iota.map(x => iota.map(y => ({x,y,s:squares[`${x} ${y}`]}))).flat().filter(a => a.s)
+    let markup = want.map(a => `${place(a.y,latm,dlat)}, ${place(a.x,lonm,dlon)} ${a.s.length} (${a.x}, ${a.y})`).join("\n")
+    let page = {
+      title: 'Detail Square Centers',
+      story: [{type:'paragraph', text},{type:'map', text:markup}]
+    }
+    open(page)
+  }
+
+  function allx(event) {
+    let markup = [
+      `WEBLINK https://www.google.com/search?q={LAT},%20{LON}`,
+      `double-click marker for google map`]
+    for (let trail in markers)
+      for (let latlon of markers[trail])
+        markup.push(`${latlon[0]},${latlon[1]} [[${trail}]]`)
+    let story = [
+        {type:'paragraph',text:`
+          As a commuter I traveled through neighborhoods with one place in mind, my destination.
+          Now as a wanderer I stop to look around and where I stop becomes a place of note.`},
+        {type:'map',text:markup.join("\n")},
+        {type:'paragraph',text:'See [[Aerial Map]] or [[Topo Map]] tiles.'},
+        {type:'paragraph',text:'See [[Places to Consider]] on future weekends.'}]
+    open({title:`Places with Trails and Photos`,story}, event.shiftKey)
+  }
+
+  function click(event) {
+    event.target.style.color = "#a00"
+    event.target.style.fontWeight = 'bold'
+    let xy = event.target.id
+    show(xy,event.shiftKey)
+  }
+
+  function show(xy, keepLineup=false) {
+    if (!squares[xy]) return
+    let markup = []
+    for (let trail of squares[xy]) {
+      for (let mark of markers[trail]) {
+        markup.push(`${mark.join(',')} [[${trail}]]`)
+      }
+    }
+    let title = `Map Square ${xy}`
+    let text = `Trails with markers in this square. Click a marker to identify which trail. See [[Places Detailed]]`
+    let story = [
+      {type:'paragraph', text},
+      {type:'markdown', text:squares[xy].map(trail => `- [[${trail}]]`).join("\n")},
+      {type:'map', text:markup.join("\n")},
+      {type:'paragraph', text:'See [[Street Map]] or [[Aerial Map]] or [[Topo Map]] tiles.'}
+    ]
+    open({title,story}, keepLineup)
+  }
+
+  let downxy = null
+  function down(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    downxy = event.target.id
+  }
+
+  function up(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (!downxy) return
+    let [dx, dy] = downxy.split(/ /).map(v => +v)
+    let [ux, uy] = event.target.id.split(/ /).map(v => +v)
+    for (let y of order(dy,uy))
+      for(let x of order(dx,ux))
+        show(`${x} ${y}`,true)
+  }
+
+  function order (start, finish) {
+    let list = []
+    if (finish >= start)
+      for (let i = start; i <= finish; i++)
+        list.push(i)
+    else
+      for (let i = start; i >= finish; i--)
+        list.push(i)
+    return list
+  }
+
+  function open(page, keepLineup=false) {
+    for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+    page.journal = [{type:'create', date:Date.now(), item:JSON.parse(JSON.stringify(page))}]
+    let message = {
+      action: "showResult",
+      page,
+      keepLineup
+    }
+    window.parent.postMessage(message, "*")
+  }
+
+  async function trail(title, slug) {
+    let page = await fetch(`${site}/${slug}.json`).then(res => res.json())
+    result.innerText += ' .'
+    let story = page.story || []
+    let latlon = []
+    for (let item of story) {
+      if (item.type == 'map') {
+        for (let line of item.text.split(/\n/)) {
+          let m = line.match(/^(\d+\.\d+), *(-\d+\.\d+)\b/)
+          if (m) latlon.push([+m[1], +m[2]])
+        }
+      }
+    }
+    markers[title] = latlon
+    latlons.push(...latlon)
+  }
+
+  function download(string, file) {
+    var data = "data:text/json;charset=utf-8," + encodeURIComponent(string);
+    var anchor = document.createElement('a');
+    anchor.setAttribute("href",     data);
+    anchor.setAttribute("download", file);
+    document.body.appendChild(anchor); // required for firefox
+    anchor.click();
+    anchor.remove();
+  }
+
+
+</script>

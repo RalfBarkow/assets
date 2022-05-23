@@ -1,0 +1,80 @@
+<html>
+<head>
+  <meta charset="UTF-8"><meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟪</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+  <div id="map"></div>
+  <style>
+    body { padding: 0; margin: 0; }
+    html, body, #map { height: 100%; width: 100%; }
+  </style>
+
+  <script>
+    const google = (latlon, title) => `<a href="https://www.google.com/search?q=${latlon}" target=_blank>${title}</a>`
+    const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+
+    // https://github.com/Leaflet/Leaflet/issues/7255#issuecomment-849638476
+    var map = L.map('map',{ "tap": false })
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map)
+
+    fetch(`trails.json`).then(res => res.json()).then(trails => {
+      let n = Math.max(...trails.map(trail => trail.latlon[0]))
+      let s = Math.min(...trails.map(trail => trail.latlon[0]))
+      let e = Math.max(...trails.map(trail => trail.latlon[1]))
+      let w = Math.min(...trails.map(trail => trail.latlon[1]))
+      map.fitBounds([[s, w],[n, e]])
+      trails.map(trail => L.marker(trail.latlon).addTo(map)
+        .bindPopup(google(trail.latlon,trail.title)))      
+    })
+
+    fetch(`markers.json`).then(res => res.json()).then(trails => {
+      for (trail in trails) {
+        let link = `<a href=http://trails.ward.asia.wiki.org/${asSlug(trail)}.html target=_blank>${trail}</a>`
+        let line = []
+        for (latlon of trails[trail]) {
+          line.push(latlon)
+          let dot = L.circle(latlon,4,{color:'red'})
+          dot.addTo(map).bindPopup(link)
+        }
+        L.polyline(line,{color:'red',opacity:0.3}).addTo(map).bindPopup(link)
+      }
+      const Tally = L.Control.extend({options: {position: 'bottomleft'},
+        onAdd: function (map) {
+          var container = L.DomUtil.create('div', 'tally')
+          container.innerHTML = `<span>
+            ${Object.keys(trails).length} trails<br>
+            ${Object.values(trails).flat().length} images</span>`
+          return container
+        }
+      })
+      map.addControl(new Tally())
+    })
+
+
+
+    map.on('locationfound', e => {
+      let radius = e.accuracy;
+      let latlon = [e.latlng.lat, e.latlng.lng]
+      L.marker(e.latlng).addTo(map).bindPopup(google(latlon, "Current Location"))
+      L.circle(e.latlng, radius).addTo(map)
+    })
+    map.locate({setView:false})
+
+    map.on('click', e => console.log(`${e.latlng.lat.toFixed(7)}, ${e.latlng.lng.toFixed(7)}\n`))
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<center>
+  <table id=mosaic ondragstart=drag(event) ondragover=over(event) ondrop=drop(event) onmousemove=move(event)>
+  </table>
+  <div id=readout></div>
+</center>
+<style>
+  table {border-spacing:0;}
+  td {padding:0;background-color:#ddd;width:40px;height:40px;}
+</style>
+<script type=module>
+
+
+  // T I L E S
+
+  let tiles = ['elbow','faucet','reverse','spout','straight','tee','tank']
+  let rows = [0,1,2,3,4,5,6,7]
+  let cols = [0,1,2,3,4,5,6,7,8]
+  let rmax = rows.length-1
+  let cmax = cols.length-1
+
+  let rand = (n) => Math.floor(Math.random() * n)
+  let tile = (n) => `<img src="./tiles/${tiles[n]}.png" data-tile=${tiles[n]}>`
+  let maby = (n) => rand(100)<n
+  let rntd = () => cols.map(c =>`<td>${maby(60)?tile(rand(tiles.length)):''}`).join('')
+  let rntr = () => rows.map(r =>`<tr>${rntd()}`).join('')
+
+  let iota = Array.from({length: 27}, (_, i) => i + 1)
+  let tanks = await Promise.all(iota.map(i =>
+    new Promise(resolve => {
+      let img = new Image()
+      img.dataset.tile = 'tank'
+      img.onload = resolve(img)
+      img.src = `./tanks/tank${i}.png`
+    })
+  ))
+
+  window.mosaic.innerHTML = location.search ? restore(location.search) : rntr()
+  let nodes = {}
+  align()
+  setInterval(compute,16)
+
+
+  // H I S T O R Y
+
+  function restore(search) {
+    let rows = search.slice(1).split('/')
+    let mosaic = rows.map(row => `<tr>${row.split('').map(col =>`<td>${col=='.' ? '' : tile(+col)}`).join('')}`)
+    return mosaic.join('')
+  }
+
+  window.onpopstate = function(event) {
+    if(!event.state) return
+    window.mosaic.innerHTML = restore(event.state)
+    nodes = {}
+    align()
+  }
+
+
+  // D R A G   A N D   D R O P
+
+  let dragged
+  window.drag = event => {dragged = event.shiftKey ? event.target.cloneNode(true) : event.target}
+  window.over = event => {event.preventDefault()}
+  window.drop = event => {event.preventDefault()
+    let target = event.target
+    switch(target.nodeName) {
+      case 'TD': target.appendChild(dragged); break
+      case 'IMG': target.parentElement.replaceChild(dragged,target); break
+    }
+    let search = align()
+    history.pushState(search, '', location.origin+location.pathname+search)
+  }
+
+
+  // R E A D O U T
+
+  let readout
+  window.move = event => {
+    let target = event.target
+    let node = Object.values(nodes).find(node => node.node == target)
+    if(node) {
+      let cr = [node.c, node.r]
+      let rect = target.getBoundingClientRect();
+      let x = event.clientX - (rect.left+rect.right)/2
+      let y = event.clientY - (rect.top+rect.bottom)/2
+      let side = Math.abs(y) > Math.abs(x) ? (y<0 ? 0 : 2) : (x>0 ? 1 : 3)
+      readout = {cr, side}
+    } else {
+      readout = null
+    }
+  }
+
+
+  // U P D A T E   M O D E L S
+
+  function align() {
+    let search = '?'
+    let tr = document.querySelector('table tr')
+    for (let r of rows) {
+      let td = tr.firstChild
+      for (let c of cols) {
+        let node = td.firstChild
+        if(node) {
+          let tile = node.dataset.tile
+          search += tiles.indexOf(tile)
+          let prev = nodes[[c,r]]
+          if (!prev || !(prev.tile==tile)) {
+            if (prev) {
+              // console.log('rep',c,r,prev.tile)
+            }
+            nodes[[c,r]] = {c,r,node,tile:node.dataset.tile, v:[0,0,0,0]}
+          }
+        } else {
+          search += '.'
+          if(nodes[[c,r]]) {
+            delete nodes[[c,r]]
+          }
+        }
+        td = td.nextSibling
+      }
+      search += '/'
+      tr = tr.nextSibling
+    }
+    return search.slice(0,-1)
+  }
+
+
+  // N E T W O R K   P H Y S I C S
+  //
+  //      0         nodes offer v facing each of four
+  //   3     1      directions, 0, 1, 2, 3. nodes retrieve
+  //      2         facing v from nv, sv, ev, wv functions.
+
+  function compute() {
+    for (let key in nodes) {
+      let node = nodes[key]
+      const nv = () => node.r > 0 && nodes[[node.c,node.r-1]] ? nodes[[node.c,node.r-1]].v[2] : 0
+      const sv = () => node.r < rmax && nodes[[node.c,node.r+1]] ? nodes[[node.c,node.r+1]].v[0] : 0
+      const wv = () => node.c > 0 && nodes[[node.c-1,node.r]] ? nodes[[node.c-1,node.r]].v[1] : 0
+      const ev = () => node.c < cmax && nodes[[node.c+1,node.r]] ? nodes[[node.c+1,node.r]].v[3] : 0
+      switch(node.tile) {
+        case 'faucet':
+          node.v = [0,0,100,0]
+          break
+        case 'spout':
+          let v = node.v[0] = (node.v[0]+nv())/2
+          let src = v>=10 ? 'flowing' : 'spout'
+          if(!node.node.getAttribute('src').includes(src))
+            node.node.setAttribute('src', `./tiles/${src}.png`)
+          break
+        case 'straight':
+          node.v[0] = node.v[2] = (node.v[0]+node.v[2]+nv()+sv())/4
+          node.v[1] = node.v[3] = (node.v[1]+node.v[3]+ev()+wv())/4
+          break
+        case 'elbow':
+          node.v[0] = node.v[1] = (node.v[0]+node.v[1]+nv()+ev())/4
+          node.v[2] = node.v[3] = (node.v[2]+node.v[3]+sv()+wv())/4
+          break
+        case 'reverse':
+          node.v[0] = node.v[3] = (node.v[0]+node.v[3]+nv()+wv())/4
+          node.v[2] = node.v[1] = (node.v[2]+node.v[1]+sv()+ev())/4
+          break
+        case 'tee':
+          node.v[0] = node.v[1] = node.v[3] = (node.v[0]+node.v[1]+node.v[3]+nv()+ev()+wv())/6
+          break
+        case 'tank':
+          node.v[2] = (node.v[2]+sv())/2
+          let tank = Math.round(26*(100-node.v[2])/100)
+          node.node.replaceWith(tanks[tank].cloneNode(true))
+          break
+      }
+    }
+    if(readout && nodes[readout.cr]) {
+      let v = nodes[readout.cr].v[readout.side]
+      window.readout.innerText = v ? v.toFixed(1) : ''
+    } else {
+      window.readout.innerText = ''
+    }
+  }
+
+</script>
