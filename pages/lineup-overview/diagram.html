@@ -1,0 +1,171 @@
+<p><button onclick="draw(event)">draw</button> <span id=counts></span></p>
+<div id=result>working</div>
+
+<style>
+  body { font-family: verdana, helvetica, sans; font-size: smaller; }
+  th, td, span { text-align:center;  }
+}
+</style>
+
+<script type=module>
+
+  const dup = obj => JSON.parse(JSON.stringify(obj))
+  const quote = text => `"${text.replace(/([a-z]) ([A-Z])/g,'$1\n$2')}"`
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+
+  let graph = {} // root => [point]
+  let forks = new Set()
+
+  let sitemap
+  let colored = new Set()
+
+  find()
+
+  async function main() {
+    window.result.innerHTML = `ready`
+  }
+
+  async function find(event) {
+    let {site, page} = await frameContext()
+    console.log({site})
+    sitemap = fetch(`//${site}/system/sitemap.json`).then(res => res.json())
+    let lineup = (await sources('graph'))
+    lineup.reverse()
+    sitemap = await sitemap
+    for (let spot of lineup) {
+      forks.add(spot.panel.site)
+      for (let root in spot.graphData) {
+        let points = graph[root] ||= []
+        for (let point of spot.graphData[root])
+          if (!points.includes(point)) points.push(point)
+      }
+    }
+    window.counts.innerHTML = `${Object.keys(graph).length} nodes`
+    stats()
+    loopsearch(page, lineup)
+  }
+
+  function stats() {
+    let rows = Object.keys(graph).map(root => {
+      let inputs = Object.values(graph).flat().filter(point => point==root).length
+      let outputs = graph[root].length
+      return `<tr><td>${root}<td>${inputs}<td>${outputs}`
+    })
+    window.result.innerHTML = `<table><tr><th>node<th>in<th>out</tr>${rows.join("\n")}`
+  }
+
+  window.draw = function draw(event) {
+    console.log('sitemap',sitemap)
+    if(!Object.keys(graph).length) return
+    let markup = []
+    markup.push("node [fillcolor=lightblue]")
+    for (let root in graph) {
+      let slug = asSlug(root)
+      if (!colored.has(root) && sitemap.find(info => info.slug == slug)) {
+        markup.push(quote(root))
+      }
+    }
+    markup.push("node [fillcolor=palegreen]")
+    for (let root in graph) {
+      for (let point of graph[root])
+        markup.push(`${quote(root)} -> ${quote(point)}`)
+    }
+    let text = `strict digraph { node[shape=box style=filled]\n${markup.join("\n")}\n}`
+    let story = [
+      {type:'paragraph', text:`We found ${Object.keys(graph).length} nodes in the lineup`},
+      {type:'graphviz', text}
+    ]
+    open({title:`Merged Graphs from Lineup`,story},event.shiftKey,[...forks])
+  }
+
+  import { parse } from "./parse.js"
+
+  async function loopsearch(page, lineup) {
+    let m = page.story[0].text.match(/\[(.+?) mdl\]/)
+    if (!m) return
+    let model = await parse(m[1])
+    let path = []
+    let last
+    for (let spot of lineup) {
+      let graph = spot.graphData
+      let keys = Object.keys(graph)
+      if (keys.length != 2) return
+      path.push(keys[0])
+      last = keys[1]
+    }
+    path.push(last)
+    let paths = enumerate(path, last)
+    window.result.innerHTML += `<hr><p><button onclick="drawloops(event)">draw</button> ${paths.length} loops</p>`
+    for (path of paths) {
+      window.result.innerHTML += `<p>${path.length} ► ${[...path,path[0]].join(' ⇒ ')}</p>\n`
+    }
+
+    window.drawloops = function drawloops (event) {
+      graph = {}
+      for (path of paths) {
+        for (let i = 0; i<path.length; i++) {
+          let root = graph[path[i]] ||= []
+          root.push(path[(i+1)%path.length])
+        }
+      }
+      draw(event)
+    }
+
+    function enumerate(path, last) {
+      let many = []
+      loops(path, last)
+      many.sort((a,b) => a.length - b.length)
+      return many
+
+      function loops(path, next) {
+        let choices = model[next].downstream
+        for (let choice of choices) {
+          if (choice == path[0]) {
+            many.push(path.slice())
+          } else if (!path.includes(choice)) {
+            loops([...path, choice], choice)
+          }
+        }
+      }
+    }
+  }
+
+
+  // U T I L I T I E S
+
+  function sources(topic) {
+    const action = 'requestSourceData'
+    return new Promise(resolve => {
+      let handler = event => {
+        let {data} = event
+        if (!data.action == action) return
+        window.removeEventListener('message',handler)
+        resolve(data.sources)
+      }
+      window.addEventListener('message',handler)
+      window.parent.postMessage({action, topic},"*")
+    })
+  }
+
+  function frameContext() {
+    return new Promise(resolve => {
+      let handler = event => {
+        let {data} = event
+        if (!data.action == "frameContext") return
+        window.removeEventListener('message',handler)
+        resolve(data)
+      }
+      window.addEventListener('message',handler)
+      window.parent.postMessage({action:"sendFrameContext"},"*")
+    })
+  }
+
+  function open(page, keepLineup=false, forks=[]) {
+    let date = Date.now()
+    for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+    page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+    let message = {action: "showResult", page, keepLineup}
+    window.parent.postMessage(message, "*")
+  }
+
+</script>

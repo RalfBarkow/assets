@@ -1,0 +1,351 @@
+<html>
+  <body>
+    <center>
+      <canvas id="c" width="1280px" height="800px" style="border: 1px solid gray;"></canvas>
+      <p>
+        <input type="range" id="zoom" name="zoom" min="3" max="80" value=40><label for="zoom">zoom</label>
+        <input type="range" id="high" name="high" min="0" max="30" value=15><label for="high">high</label>
+      </p><p>
+        <input type="radio" id="live" name="copy" value="live"><label for="live">live</label>
+        <input type="radio" id="1jan" name="copy" value="1jan-3pm-7938.txt"><label for="1jan">1jan</label>
+        <input type="radio" id="3pm" name="copy" value="3pm.txt"><label for="3pm">3pm</label>
+        <input type="radio" id="4pm" name="copy" value="4pm.txt"><label for="4pm">4pm</label>
+        <input type="radio" id="7am" name="copy" value="7am.txt"><label for="7am">7am</label>
+        <input type="radio" id="P49X" name="copy" value="P49X.txt"><label for="P49X">p49x</label>
+      </p><p>
+        <input type="radio" id="exchange" name="decorate" value="exchange"><label for="exchange">exchange</label>
+        <input type="radio" id="transmit" name="decorate" value="transmit"><label for="transmit">transmit</label>
+      </p>
+    </center>
+    <script type="module">
+      import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r113/build/three.module.js';
+
+      // http://found.ward.bay.wiki.org/threejs-fundamentals.html
+      // https://github.com/WardCunningham/assets/blob/master/pages/k9ox-ft8-log/waterfall.html
+
+
+// P A R A M S
+  
+      function hashed(hash, assign) {
+        let op = assign.split(/=/)
+        if (op[1]) hash[op[0]]=op[1]
+        return hash
+      }
+
+      let query = window.location.href.split(/\?/)[1]||''
+      let args = query.split(/&/)
+      let params = args.reduce(hashed,{})
+      let log = params.log || 'http://found.ward.bay.wiki.org/assets/pages/k9ox-ft8-log/wsjtx_log.adi'
+      let copy = params.copy || 'http://ward.asia.wiki.org/plugin/wsjt/copy'
+
+      document.getElementsByName('copy')
+        .forEach((i) => i
+          .addEventListener('change', (e) => {
+            if (e.target.value=='live') {
+              delete params.copy
+            } else {
+              params.copy = `http://ft8.ward.asia.wiki.org/assets/pages/decode-waterfall/${e.target.value}`
+            }
+            let args = Object.keys(params).map(key=>`${key}=${params[key]}`).join("&")
+            let url = `${location.protocol}//${location.hostname}${location.pathname}?${args}`
+            location.href = url
+          }))
+
+
+// D A T A
+
+      let logged = {}
+      let decodes = []
+      let done = {}
+      let viewpoint
+
+      fetch(log)
+        .then(res=>res.text())
+        .then(text=>rawlog(text.split(/\r?\n/)))
+
+      fetch(copy)
+        .then(res=>res.text())
+        .then(text=>rawcopy(text.split(/\r?\n/)))
+
+      // http://ward.asia.wiki.org/plugin/wsjt/copy?last=500
+
+
+      function rawlog(lines) {
+        for (let line of lines) {
+          if (!line.match(/^</)) continue 
+          let field = /<(\w+):\d+>([^<]*)/g
+          let r = {}
+          let m
+          while (m = field.exec(line)) {
+            r[m[1]] = m[2].trim()
+          }
+
+          // r.qso_date
+          // r.time_on
+          // r.call
+          // r.gridsquare
+          // r.rst_sent
+          // r.rst_rcvd
+
+          logged[r.call] = true
+        }
+        console.log('logged', logged)
+        done['rawlog'] = true
+        if (done['rawcopy']) report()
+      }
+
+      function rawcopy(lines) {
+        let today = Date.now()-Date.now()%86400000
+        for (let line of lines) {
+          if (!line.length) continue
+          let fields = line.replace(/  +.*$/,'').split(' ')
+          // if (fields[0] != '73.157.190.193') continue
+          let addr = fields[0]
+          let slot = fields[1]
+          let time = new Date(today+sec(slot)*1000)
+          let freq = 1*fields[2]
+          let elev = 200
+          if(addr=='75.139.193.15') {
+            freq += 1*(params.offset||0)
+            elev -= 50
+          }
+          // if (time/15%2 != 0) continue
+          let call = fields[fields.length-2]
+          let idnt = fields.slice(3,-1).join(' ')
+          let info = fields.slice(-1)[0]
+          decodes.push({addr,slot,time,freq,elev,call,idnt,info})
+        }
+        decodes.sort((a,b) => a.time - b.time )
+        console.log('decodes',decodes)
+        offsetter()
+        done['rawcopy'] = true
+        if (done['rawlog']) report()
+      }
+
+      let prev = null
+      function sec(slot) {
+        let m = slot.match(/(..)(..)(..)/)
+        let now = 3600*m[1]+60*m[2]+1*m[3]
+        if (!prev) {
+          prev = now
+        }
+        else if (now < prev) {
+          now += 24*60*60
+        }
+        return now
+      }
+
+
+// C A L I B R A T I O N
+
+      function offsetter () {
+        let matches = {}
+        for (let d of decodes) {
+          let slots = matches[d.slot] = matches[d.slot] || {}
+          let calls = slots[d.call] = slots[d.call] || {count:0}
+          calls.count += 1
+          calls[d.addr=='73.157.190.193' ? 'me' : 'him'] = d.freq
+        }
+        let sum = 0
+        let n = 0
+        for (let k of Object.keys(matches).sort()) {
+          let slots = matches[k]
+          for (let j of Object.keys(slots).sort()) {
+            let call = slots[j]
+            if (call.count == 2 && call.him && call.me) {
+              sum += (call.me - call.him)
+              n++
+            }
+          }
+        }
+        let offset = Math.floor(sum/n)
+        console.log('additional offset', offset)
+        for (let d of decodes) {
+          if(d.addr=='75.139.193.15') {
+            d.freq += offset
+          }
+        }
+      }
+
+
+// R E N D E R I N G
+
+// https://threejs.org/docs/#api/en/core/Object3D.lookAt
+// https://threejsfundamentals.org/threejs/lessons/threejs-fundamentals.html
+
+      const mat = {width: 31.5, length: 42, color: 0x808080}
+      const band = {min: 0, max: 3500, width: 3500, grid: 500}
+      const time = {min: 0, max: 1200, duration: 1200, grid: 60}
+
+      const freq_inch = (hz) => mat.width * hz / band.width
+      const time_inch = (sec) => mat.length * sec / time.duration
+      const freq_time = (hz, y, sec) => [mat.width/2-freq_inch(hz), y, mat.length/2-time_inch(sec)];
+
+      const focus = [0,0,10]
+
+      function report() {
+        const canvas = document.querySelector('#c');
+        const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
+        renderer.setClearColor (0xFFFFFF, 1);
+   
+        const fov = zoom.value;
+        const aspect = 2.5;  // the canvas default
+        const near = 0.1;
+        const far = mat.length*2;
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.z = 30;
+        camera.position.y = high.value;
+        camera.lookAt ( ...focus )
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0xcccccc );
+        
+        {
+          const color = 0xFFFFFF;
+          const intensity = 1;
+          const light = new THREE.DirectionalLight(color, intensity);
+          light.position.set(0, 10, 4);
+          scene.add(light);
+        }
+
+        {
+          const geometry = new THREE.BoxGeometry(mat.width, .5, mat.length);
+          const material = new THREE.MeshPhongMaterial({color:mat.color});
+          material.opacity=.5;
+          material.side = THREE.DoubleSide;
+          material.transparent = true;
+          material.depthWrite = false;
+          scene.add(new THREE.Mesh(geometry, material));
+        }
+
+        {
+          // https://threejs.org/docs/index.html#manual/en/introduction/Drawing-lines
+          let material = new THREE.LineBasicMaterial( { color: 0xffff80 } );
+          function gridline (p1, p2) {
+            let points = [ new THREE.Vector3(...p1), new THREE.Vector3(...p2)]
+            let geometry = new THREE.BufferGeometry().setFromPoints(points);
+            scene.add(new THREE.Line( geometry, material ))
+          }
+          for (let t=time.min; t<=time.max; t+=time.grid) {
+            gridline (freq_time(band.min, 0, t), freq_time(band.max, 0, t))
+          }
+          for (let f=band.min; f<=band.max; f+=band.grid) {
+            gridline (freq_time(f, 0, time.min), freq_time(f, 0, time.max))
+          }
+        }
+
+        function signal(color, x, y, z) {
+          const geometry = new THREE.BoxGeometry(freq_inch(50), .1, time_inch(15));
+          const material = new THREE.MeshPhongMaterial({color});
+          const cube = new THREE.Mesh(geometry, material);
+          let pos = {x: mat.width/2-x, y: y+1, z: mat.length/2-z}
+          cube.position.x = pos.x
+          cube.position.y = pos.y
+          cube.position.z = pos.z
+          scene.add(cube);
+          return pos
+        }
+
+// addr: "73.157.190.193"
+// slot: "235230"
+// time: Sun Feb 23 2020 15:52:30 GMT-0800 (Pacific Standard Time) {}
+// freq: 1143
+// elev: 200
+// call: "N7NDR"
+// idnt: "<ZZ50Y> N7NDR"
+// info: "CN85"
+
+        let now = decodes[decodes.length-1].time.getTime()
+        for (let decode of decodes) {
+          let when = (now-decode.time.getTime())/1000
+          let where = decode.freq
+          if (when >= time.min && when <= time.max && where >= band.min && where <= band.max) {
+            let x = freq_inch(where)
+            let y = decode.elev/100 - 1 + Math.random()/2
+            let z = time_inch(when)
+            let c = color(decode)
+            decode.pos = signal(c, x, y, z)
+          }
+        }
+
+        function connect (a, b, color) {
+          // https://threejs.org/docs/#api/en/extras/curves/CubicBezierCurve3
+          let dst = Math.sqrt(Math.abs(a.x-b.x)**2 + Math.abs(a.z-b.z)**2)
+          let avg = (a.y + b.y) / 2
+          let mid = avg+dst/3
+          var curve = new THREE.CubicBezierCurve3(
+            new THREE.Vector3( a.x, a.y, a.z ),
+            new THREE.Vector3( a.x, mid, a.z ),
+            new THREE.Vector3( b.x, mid, b.z ),
+            new THREE.Vector3( b.x, b.y, b.z)
+          );
+          var points = curve.getPoints( 30 );
+          var geometry = new THREE.BufferGeometry().setFromPoints( points );
+          var material = new THREE.LineBasicMaterial( { color } );
+          scene.add(new THREE.Line( geometry, material ))
+        }
+
+        function exchange () {
+          let prev = {}
+          for (let d of decodes) {
+            if (d.pos && !d.idnt.match(/^(CQ|<)/)) {
+              let other = d.idnt.split(' ').reverse().join(' ')
+              // console.log(d.idnt, other)
+              let r = prev[other]
+              if (r) {
+                console.log(d.idnt, d.info)
+                connect(d.pos, r, 0xFFFF80)
+              }
+              prev[d.idnt] = d.pos
+            }
+          }
+        }
+
+        function transmit () {
+          let prev = {}
+          for (let d of decodes) {
+            let us = d.idnt.split(' ')[1]
+            let r = prev[us]
+            if (r && d.pos) {
+              console.log('transmit', us, Math.round(d.pos.x-r.x), Math.round(d.pos.y-r.y))
+              if (Math.abs(d.pos.x-r.x)< 0.3)
+                1
+                // connect(d.pos, r, 0x80c080)
+              else
+                connect(d.pos, r, 0xFF80FF)
+            }
+            prev[us] = d.pos
+          }
+        }
+
+        transmit()
+
+        function color(d) {
+          if(d.addr != '73.157.190.193')
+            return "#8f8"
+          else if(logged[d.call])
+            return "#f80"
+          else
+            return "#08f"
+        }
+
+
+        // renderer.render(scene, camera);
+
+        function render(time) {
+          time *= 0.001;  // convert time to seconds
+          camera.position.x = Math.sin(time)*5
+          camera.fov = zoom.value
+          camera.position.y = high.value;
+          camera.updateProjectionMatrix();
+          camera.lookAt ( ...focus )
+          renderer.render(scene, camera);
+          requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);        
+
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+<div id=result>working</div>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; }
+  span { cursor: pointer; }
+</style>
+
+<script>
+
+  const site = 'http://trails.ward.asia.wiki.org'
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const creekname = /\b(?!The)([A-Z][a-z]+('s)?) [Cc]reek\b/g
+  // const gaps = (value, index, self) => !index || self[index-1]+10 < value
+
+  let creeks = {}
+
+  main()
+
+  async function main() {
+    let names = crossed()
+    let slug = location.search || 'chronological-destinations'
+    let index = await fetch(`${site}/${slug.replace('?','')}.json`).then(res => res.json())
+    let work = []
+    for (let item of index.story) {
+      if (item.type == 'paragraph') {
+        let m = item.text.match(/^\[\[(.+?)\]\]/)
+        if (m) {
+          let title = m[1]
+          let slug = asSlug(title)
+          work.push(trail(title, slug))
+        }
+      }
+    }
+    await Promise.all(work)
+    names = await names
+    const chronological = (a,b) => new Date(a.dates[0]) < new Date(b.dates[0]) ? -1 : 1
+    const link = (text) => `<span onclick=dolink(event)>${text}</span>`
+    const sect = (creek) => `<b>${creek} Creek</b>${names.includes(creek) ? ' ✔︎' : ''}`
+    result.innerHTML = Object.keys(creeks).sort().map(creek =>
+      `<p>${sect(creek)}<br>
+        ${creeks[creek].filter(uniq).sort().map(link).join("<br>")}`).join("\n")
+  }
+
+  async function crossed() {
+    const fold = item => item.type == 'pagefold'
+    let page = await fetch(`${site}/creeks-i-have-crossed.json`).then(res => res.json())
+    let story = page.story
+    story = story.slice(story.findIndex(fold)+1)
+    story = story.slice(0,story.findIndex(fold))
+    return story.map(item => item.text.replace(/\[\[Crossing (.*?) Creek\]\]/,'$1')).join("<br>")
+  }
+
+  async function trail(title, slug) {
+    let page = await fetch(`${site}/${slug}.json`).then(res => res.json())
+    result.innerText += ' .'
+    tally(title, title)
+    let story = page.story || []
+    for (let item of story) {
+      if (item.type == 'paragraph') tally(title, item.text)
+    }
+  }
+
+  function tally (title, text) {
+    for (m of text.matchAll(creekname)) {
+      let list = creeks[m[1]] = creeks[m[1]] || []
+      list.push(title)
+    }
+  }
+
+  function dolink (event) {
+    let title = event.target.innerText
+    let message = {
+      action:"doInternalLink",
+      title,
+      keepLineup: event.shiftKey
+    }
+    window.parent.postMessage(message, "*")
+  }
+
+
+</script>

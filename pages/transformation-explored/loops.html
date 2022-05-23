@@ -1,0 +1,175 @@
+<meta charset="utf-8"/>
+<button onclick=vars(event)>vars</button>
+<button onclick=rels(event)>rels</button>
+<button onclick=loops(event)>loops</button>
+<div id=result></div>
+<script type=module>
+
+  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+  let date = Date.now()
+
+  window.vars = event => {
+    let pages = {}
+    for (let title in model) {
+      let markup = []
+      for (let upstream of model[title].upstream) markup.push(`${upstream} --> HERE`)
+      for (let downstream of model[title].downstream) markup.push(`HERE --> ${downstream}`)
+      let loops = members[title].map(loop => `- [[${loop}]]`)
+      let story = [
+        {type:'paragraph',text:'Explain what is measured by this variable.'},
+        {type:'graph',text:markup.join("\n")},
+        {type:'paragraph',text:'[[Lineup Viewer]]'},
+        {type:'markdown',text:loops.join("\n")}]
+      pages[asSlug(title)] = page(title, story)
+    }
+    let message = { action:"importer", pages, keepLineup: event.shiftKey}
+    window.parent.postMessage(message, "*")
+  }
+
+  window.rels = event => {
+    const effects = ['Increases','Improves','Raises','Lifts','Expands','Decreases','Destroys','Lessens','Reduces','Contracts','Affects','Creates','Causes']
+    const hash = word => [...word].reduce((sum,ch) => sum+ch.charCodeAt(0),0)
+    const squeeze = phrase => phrase.split(' ')
+      .filter(word => /^[A-Z]/.test(word) && !['Amongst', 'School'].includes(word))
+      .map(word => word.slice(0,4))
+      .join('')
+    let pages = {}
+    for (let rel of [...done].sort()) {
+      let effect = effects[hash(rel) % effects.length]
+      let [above, below] = rel.split(', ')
+      let title = `${squeeze(above)} ${effect} ${squeeze(below)}`
+      let story = [
+        {type:'paragraph',text:'Explain nature of this relationship.'},
+        {type:'graph',text:`${above} -->\n${below}`},
+        {type:'paragraph',text:'[[Lineup Viewer]]'}
+      ]
+      pages[asSlug(title)] = page(title, story)
+    }
+    let message = { action:"importer", pages, keepLineup: event.shiftKey}
+    window.parent.postMessage(message, "*")
+  }
+
+  window.loops = event => {
+    let message = { action:"importer", pages:wiki, keepLineup: event.shiftKey}
+    window.parent.postMessage(message, "*")
+  }
+
+  import { parse } from "./parse.js"
+
+  const result = document.getElementById('result')
+  let tiers = {}        // tier => Set of canonical loops
+  let seen = new Set()  // variable a
+  let done = new Set()  // relations a -> b
+  let wiki = {}         // slug => page
+  let members = {}      // variable a -> [loops]
+
+  let context = await frameContext()
+  let m = context?.page?.story[0].text.match(/\[(.+?) mdl\]/) || []
+  console.log(context, m)
+  let model = await parse(m[1])
+  for (let root in model) {
+    enumerate(root)
+    members[root] = []
+  }
+
+  for (let rank of Object.keys(tiers).sort((a,b) => (+a) - (+b))){
+    result.innerHTML += `<h3>tier ${rank}</h3>`
+    let tier = tiers[rank]
+    for (let row of tier) {
+      let path = row.split(/, /)
+      generate(path)
+      report(path)
+    }
+  }
+
+  function enumerate(root) {
+    let many = []
+
+    function loops(path, next) {
+      let choices = model[next].downstream
+      for (let choice of choices) {
+        if (choice == path[0]) {
+          many.push(path.slice())
+          // result.innerHTML += `<ul>${[...path, choice].map(step => `<li>${step}`).join("\n")}</ul>\n`
+        } else if (!path.includes(choice)) {
+          loops([...path, choice], choice)
+        }
+      }
+    }
+
+    loops([root], root)
+    many.sort((a,b) => a.length - b.length)
+
+    let touched = []
+    for (let path of many) {
+      let touch = path.filter(variable => !touched.includes(variable))
+      if (!touch.length) continue
+      touched.push(...touch)
+      tally(path)
+    }
+  }
+
+  function tally(path) {
+    let rank = path.length
+    if (rank > 20) return
+    let first = path.slice().sort()[0]
+    while(path[0] != first) path.push(path.shift())
+    let tier = tiers[rank] ||= new Set()
+    tier.add(path.join(", "))
+  }
+
+  function generate(path) {
+    let start = path.find(node => !seen.has(node))
+    if (!start) return
+    while(path[0] != start) path.push(path.shift())
+    let title = `${start} Loop`
+    for (let node of path) members[node].push(title)
+    let story = [
+      {type:'paragraph',text:'Explain why this loop is important.'},
+      {type:'graph',text:[...path, path[0]].join(" -->\n")},
+      {type:'paragraph',text:'[[Lineup Viewer]]'}
+    ]
+    wiki[asSlug(title)] = page(title, story)
+  }
+
+  function report(path) {
+    const bold = node => {let result = seen.has(node) ? node : `<b>${node}</b>`; seen.add(node); return result}
+    let print = []
+    for (let i = 0; i < path.length; i++) {
+      let rel = `${path[i]}, ${path[(i+1)%path.length]}`
+      if (!done.has(rel)) {
+        print.push(`${bold(path[i])} ➜`)
+        done.add(rel)
+      } else {
+        print.push(bold(path[i]))
+      }
+    }
+    print.push(path[0])
+    result.innerHTML += `${print.join(", ")}<br><br>`
+  }
+
+
+  // U T I L I T I E S
+
+  function page(title, story) {
+    for (let item of story) item.id = (Math.random()*2**20).toFixed(0)
+    let page = {title,story}
+    page.journal = [{type:'create',date,item:JSON.parse(JSON.stringify(page))},{type:'fork',date}]
+    return page
+  }
+
+  function frameContext() {
+    return new Promise(resolve => {
+      let handler = event => {
+        let {data} = event
+        if (!data.action == "frameContext") return
+        window.removeEventListener('message',handler)
+        resolve(data)
+      }
+      window.addEventListener('message',handler)
+      window.parent.postMessage({action:"sendFrameContext"},"*")
+    })
+  }
+
+
+</script>

@@ -1,0 +1,51 @@
+
+<head><script src="https://cdn.plot.ly/plotly-latest.min.js"></script></head>
+<body>
+<pre id="result">waiting</pre>
+<div id="graph" style="width:100%;height:90%;"></div>
+
+<script>
+
+
+// L I S T E N
+
+let params = Object.fromEntries(new URLSearchParams(location.search).entries())
+let socket = new WebSocket(`ws://${params['domain']||'localhost'}:4649/Spark`)
+socket.addEventListener('open', event => socket.send('{"cmd":"subscribeToSpots","Enable":true}'))
+socket.addEventListener('message', event => tally(JSON.parse(event.data).spots))
+
+
+// R E C O R D
+
+let data = []
+let prev = {}
+let when = {}
+
+function tally(spots) {
+  let type = 'scatter'
+  let band = (Math.floor(spots[0].tunedfrequency/100000)/10).toFixed(1)
+  let time = new Date()
+  let count = spots.length
+  let avg = count
+  let trace = data.find(trace => trace.name == band)
+  if (trace == null) {
+    trace = {name:band, type, x:[time], y:[count]}
+    data.push(trace)
+  } else {
+    if (Date.now() > when[band]+65000) {
+      trace.x.push(null)
+      trace.y.push(null)
+    } else {
+      avg = count + (prev[band]||0) / 2
+    }
+    prev[band] = count
+    trace.x.push(time)
+    trace.y.push(avg)
+  }
+  when[band] = Date.now()
+  result.innerHTML = `Updated ${time}`
+  Plotly.newPlot('graph', data)
+}
+
+</script>
+</body>

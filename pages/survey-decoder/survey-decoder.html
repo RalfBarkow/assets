@@ -1,0 +1,105 @@
+<div id=report></div>
+
+<script type=module>
+
+import {csv} from "https://cdn.skypack.dev/d3-fetch@3"
+import * as frame from "http://code.fed.wiki/assets/v1/frame.js"
+const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+
+let context = await frame.context()
+report('context',context)
+
+let neighbors = await frame.neighbors()
+report('neighbors',{neighbors})
+
+let assets = await frame.sources('assets')
+report('sources',{assets})
+
+let panel = assets[0].panel
+report('panel',panel)
+
+let assetData = assets[0].assetsData
+let folder = Object.keys(assetData)[0]
+let files = assetData[folder]['/assets']
+report('assets',{folder,files})
+
+let inquiries = {}
+for (let file of files.filter(file => file.endsWith('.csv'))) {
+  window.report.innerHTML += '<br>'
+  let inquiry = file.split(' ')[0]
+  let url = `//${neighbors[0]}/assets/${folder}/${file}`
+  report('file',{file, inquiry, url})
+
+  let data = await csv(url)
+  let columns = data.columns
+  report('csv',{columns,data})
+
+  let survey = {}
+  let dates = {}
+  for (let row of data) {
+    let who = row[columns[1]]
+    survey[who] = {}
+    dates[who] = Date.parse(row[columns[0]])
+    for (let col of columns.slice(2)) {
+      let key = col.split('>')[0]
+      survey[who][key] = row[col]
+    }
+  }
+  report('survey',{survey,dates})
+  inquiries[inquiry] = {file,columns,survey,dates}
+}
+
+
+window.report.innerHTML += `<p><button onclick=doimport(event)>import</button></p>`
+
+window.doimport = function (event) {
+  let newstory = []
+  for (let inquiry in inquiries) {
+    newstory.push({type:'paragraph',text:inquiries[inquiry].file})
+    let pages = {}
+    let index = []
+    for (let who in inquiries[inquiry].survey) {
+      let title = `${who}: ${inquiry}`
+      let text = 'Reported degree of agreement. 1 star is low agreement and 5 stars is a high agreement.'
+      let story = [{type:'paragraph', text}]
+      for (let col of inquiries[inquiry].columns.slice(2)) {
+        let [key, description] = col.split(/ *> */)
+        story.push({type:'paragraph',text:`[[${key}]]`})
+        story.push({type:'fivestar',text:key,key,stars:`${inquiries[inquiry].survey[who][key]}`})
+        story.push({type:'paragraph',text:description})
+      }
+      story.push({type:'pagefold',text:`Analysis`})
+      story.push({type:'paragraph',text:`Analyze with a [[Radar Chart]]`})
+      let page = journal({title, story})
+      page.journal[0].date = inquiries[inquiry].dates[who]
+      pages[asSlug(title)] = page
+      index.push(`- [[${title}]]\n`)
+    }
+    let title = `${inquiry} Index`
+    let story = [
+      {type:'paragraph',text:'Pages imported with [[Survey Decoder]].'},
+      {type:'markdown',text:index.join("")}
+    ]
+    pages[asSlug(title)] = journal({title, story})
+    newstory.push({type:'importer',pages})
+  }
+  frame.open({title:'Survey Importer',story:newstory},event.shiftKey)
+}
+
+function report(label, data) {
+  window.report.innerHTML += `
+    <details>
+      <summary>${label} — ${Object.keys(data).join(", ")}</summary>
+      <pre>${JSON.stringify(data,null,2)}</pre>
+    </details>\n`
+}
+
+function journal(page,forks=[]) {
+  const dup = obj => JSON.parse(JSON.stringify(obj))
+  let date = Date.now()
+  for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)
+  page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+  return page
+}
+
+</script>

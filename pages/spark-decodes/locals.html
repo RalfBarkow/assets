@@ -1,0 +1,126 @@
+<head>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+</head>
+
+<body>
+<style>
+  body {font-family:helvetica,Arial,Sans;}
+  span { font-size:10px; }
+  th { width: 90px; padding:8px; }
+  td { vertical-align:top; padding:8px; cursor:pointer; }
+</style>
+
+<table border="1" style="border-collapse:collapse; border-color:#ccc;" >
+  <thead><tr><th>call<th>address<th>lat/lon<th>miles</thead>
+  <tbody id=output></tbody>
+</table>
+
+<pre id=markup></pre>
+
+<pre id=callbook onclick="uselookup()"></pre>
+
+<script>
+
+let here = [45.4700303,-122.7481467]
+
+const params = Object.fromEntries(new URLSearchParams(location.search).entries())
+let skunk = JSON.parse(atob(params.skunk))
+
+let addrs = {} // call =>
+  // {
+  //   "call": "K9OX",
+  //   "op": "Cunningham, Howard G",
+  //   "address": "6896 SW 67TH AVE",
+  //   "qth": "Portland",
+  //   "state": "OR",
+  //   "zip": "97223",
+  //   "lotw": true,
+  //   "last_lotw_upload": "2019-12-15T22:31:01Z",
+  //   "class": "E"
+  // }
+
+
+output.innerHTML = skunk.map(call => `<tr>
+  <td onclick="find(event)">${call}
+  <td onclick="map(event)">
+  <td ondragenter="dropok(event)" ondragover="dropok(event)" ondrop="latlon(event)">
+  <td>`).join("\n")
+
+let target
+
+async function find(event) {
+  async function flash(msg) {
+    console.log('flash', msg)
+    let td = event.target.nextSibling
+    td.innerText = msg
+    setInterval(() => td.innerText = '', 2000)
+  }
+	let call = event.target.innerText
+  target = event.target
+  lookup(call)
+  if (!addrs[call]) {
+    addrs[call] = await fetch(`http://localhost:7890/${call}`)
+      .then(res => res.ok ? res.json() : flash(res))
+      .catch(err => flash(err))
+  }
+  let addr = addrs[call]
+  if (addr && addr.address)
+    event.target.nextSibling.innerText = `${addr.address}, ${addr.qth} ${addr.state} ${addr.zip}`
+  else if (addr)
+    flash(addr.op)
+}
+
+function lookup(call) {
+  fetch(`https://callook.info/${call}/json`)
+    .then(res => callbook.innerText = res.text())
+    .then(text => callbook.innerText = text)
+}
+
+function uselookup() {
+  let data = JSON.parse(callbook.innerText)
+  target.nextSibling.innerText = data.address.line1 + "\n" + data.address.line2
+}
+
+async function map(event) {
+  // https://developers.google.com/maps/documentation/urls/get-started
+  let addr = event.target.innerText
+  if (!addr) return
+  let url = `https://www.google.com/maps/search/?api=1&query=${addr}`
+  window.open(url, '_blank').focus()
+}
+
+async function latlon(event) {
+  let link = event.dataTransfer.getData("URL");
+  let latlon = link.match(/@(-?[0-9.]+,-?[0-9\.]+)\b/)[1]
+  event.target.innerText = latlon
+  event.preventDefault()
+  markers()
+  let dist = distance(here, latlon.split(/,/))
+  event.target.nextSibling.innerText = dist.toFixed(1)
+}
+
+function dropok(event) {
+  let target = event.target
+  if (!target.innerText && target.previousSibling.innerText) event.preventDefault()
+}
+
+function markers() {
+  let lines = output.innerText.split("\n")
+  let fields = lines.map(r => r.split("\t")).filter(r => r[2])
+  markup.innerText = fields.map(r => `${r[2]} ${r[0]}`).join("\n")
+}
+
+function distance(here,there) {
+  // http://js.ward.asia.wiki.org/great-circle-distance.html
+  let rad = (deg) => 2 * Math.PI * deg / 360
+  let sin = Math.sin
+  let cos = Math.cos
+  let acos = Math.acos
+  let [lat1,lon1] = here.map(deg => rad(deg))
+  let [lat2,lon2] = there.map(deg => rad(deg))
+  let earth = 3958.8
+  return earth * acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1-lon2))
+}
+
+</script>
+</body>

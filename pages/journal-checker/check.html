@@ -1,0 +1,61 @@
+<head>
+  <body>
+    <h3>Story/Journal Checker</h3>
+    <li><b><font color=red>nulls</font></b> story contains null items or null type in item.
+    <li><b><font color=red>huge</font></b> page is too big to fork, over 5 MB.
+    <li><b><font color=red>bloated</font></b> journal is 20 times larger than story.
+    <li><b><font color=red>chronology</font></b> journal contains items out of order.
+    <li><b><font color=red>revision</font></b> journal cannot construct the current version.
+    <h3 id=sitelink></h3>
+    <div id=output><p>waiting</p></div>
+
+    <script type=module>
+      import {asSlug, open} from 'http://code.fed.wiki/assets/v1/frame.js'
+      import {checkJournal} from 'http://ward.asia.wiki.org/assets/pages/journal-checker/modules/journal-checker.js'
+
+      let params = Object.fromEntries(new URLSearchParams(location.search).entries())
+      let site = params.site || 'found.ward.bay.wiki.org'
+
+      sitelink.innerHTML = `<a href="http://${site}" target=_blank>${site}</a>`
+      fetch(`http://${site}/system/sitemap.json`)
+        .then(res => res.json())
+        .then(map => scan(site, map))
+
+      function scan (site, map) {
+        if (params.recent) {
+          map.sort((a,b) => b.date - a.date)
+          map = map.slice(0, params.recent)
+        }
+        output.innerHTML = map
+          .map(info =>`
+            <li><a href="http://${site}/${info.slug}.html" target=_blank onclick=doexplore(event)>${info.title}</a>
+            <span id=${info.slug}></span> </li>`)
+          .join("\n")
+        map.map(info => fetch(`http://${site}/${info.slug}.json`)
+          .then(res=>res.json())
+          .then(page=>check(site, info.slug, page)))
+      }
+
+      function check (site, slug, page) {
+        let trouble = [...checkJournal(page, site, slug).keys()].join(', ')
+        document.getElementById(slug).innerHTML = trouble == '' ? '✓' : `<b><font color=red>${trouble}</font></b>`
+      }
+
+
+      window.doexplore = function(event) {
+        if (window.parent == window) return
+        event.preventDefault()
+        let title = event.target.innerText
+        let slug = asSlug(title)
+        let script = 'http://ward.asia.wiki.org/assets/pages/journal-checker/explore.html'
+        let story = [
+          {type:'paragraph',text:'We examine the wiki page representation so we can understand both what might have gone wrong and how we might provide corrections.'},
+          {type:'reference',site,slug,title,text:'View current page'},
+          {type:'frame',text:`${script}?site=${site}&slug=${slug}\nHEIGHT 800`}
+        ]
+        open({title:`${title} Explored`,story},event.shiftKey)
+      }
+
+    </script>
+  </body>
+</head>

@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>Markers</title>
+    <link id='favicon' href='/favicon.png' rel='icon' type='image/png'>
+  </head>
+  <body style="font-family:sans-serif;">
+    <pre id=log></pre>
+    <script>
+
+      function hashed(hash, assign) {
+        op=assign.split(/=/)
+        if (op[1]) hash[op[0]]=op[1]
+        return hash
+      }
+
+      let query = window.location.href.split(/\?/)[1]||''
+      let args = query.split(/&/)
+      var params = args.reduce(hashed,{})
+
+      Promise.all([get('callbook.txt'), get('wsjtx_log.adi')])
+        .then(f => log.innerHTML = markers(f[1], callbook(f[0])))
+
+      function get(file) {
+        return fetch(`http://found.ward.bay.wiki.org/assets/pages/k9ox-ft8-log/${file}`)
+          .then(res=>res.text())
+          .then(text=>text.trim().split(/\r?\n/))
+      }
+
+      function callbook(spots) {
+        // curl -s 'https://pskreporter.info/cgi-bin/pskdata.pl?adif=1&days=7&receiverCallsign=k9ox'| \
+        //   perl -ne 'print "$1\t$2\n" if /<CALL:\d+>(.*?)<.*?<GRIDSQUARE:\d+>(.*?)</' | sort | uniq > callbook.txt
+        let latlon = {}
+        for (let spot of spots) {
+          let [call, grid] = spot.split(/\t/)
+          latlon[call] = maidenhead(grid.toUpperCase())
+        }
+        return latlon
+      }
+
+      function match(want, row) {
+        let regex = new RegExp(`^${want}`, 'i')
+        return row.gridsquare.match(regex)
+      }
+
+      function markers(contacts, latlon) {
+        // http://found.ward.bay.wiki.org/about-map-plugin.html
+        let report = []
+        for (let contact of contacts) {
+          if (!contact.match(/^</)) continue
+          let row = fields(contact)
+          if (params.allow && !match(params.allow,row)) continue
+          if (params.deny && match(params.deny,row)) continue
+          let geo = latlon[row.call] || maidenhead(row.gridsquare)
+          report.push(`${geo[0]}, ${geo[1]} ${row.call}`)
+        }
+        return report.join("\n")
+      }
+
+      function fields(contact) {
+        // http://www.adif.org.uk/
+        const field = /<(\w+):\d+>([^<]*)/g
+        let row = {}
+        while (m = field.exec(contact)) {
+          row[m[1]] = m[2].trim()
+        }
+        return row
+      }
+
+      function maidenhead(grid) {
+        // https://en.wikipedia.org/wiki/Maidenhead_Locator_System
+        const a = i => grid.charCodeAt(i)-'A'.charCodeAt(0) || 0
+        const n = i => grid.charCodeAt(i)-'0'.charCodeAt(0) || 0
+        let lat = a(1)*10 + n(3)*1 + a(5)/24 + n(7)/240 - 90
+        let lon = a(0)*20 + n(2)*2 + a(4)/12 + n(6)/120 - 180
+        return [1*lat.toFixed(5),1*lon.toFixed(5)]
+      }
+
+    </script>
+  </body>
+</html>      

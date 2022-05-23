@@ -1,0 +1,297 @@
+<html>
+<body>
+
+<style>
+  body {font-family:helvetica;}
+</style>
+
+<button onclick="doopen(event)">download</button>
+<h3>Contents</h3>
+<pre id=contents onclick="doclick(event)"></pre>
+<h3>Reference</h3>
+<pre id=reference onclick="doclick(event)"></pre>
+
+<script>
+
+const params = Object.fromEntries(new URLSearchParams(location.search).entries())
+const sequential = +(params.sequential ?? 1)
+const alphabetical = +(params.alphabetical ?? 1)
+
+let context, present
+let neighborhood = {}
+
+const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+const isjson = res => res.ok ? res.json() : {}
+const ispresent = title => present.includes(asSlug(title))
+const absent = title => ispresent(title) ? '' : ' <font color=red>✘</font>'
+const line = title => `<span>${title}</span>${absent(title)}\n`
+
+window.addEventListener("message", handler)
+let message = { action:"sendFrameContext" }
+window.parent.postMessage(message, "*")
+
+let titles = []
+let refs = []
+
+let counters = {}
+const count = (counter, count=1) => {
+  counters[counter] = counters[counter] || 0
+  counters[counter] += count
+}
+const counts = () => `
+  <table border=1 cellpadding=8>
+    ${Object.keys(counters).sort().map(k =>
+      `<tr><td style="text-align:right">${counters[k].toLocaleString()}<td>${k}`).join("\n")}
+  </table>`
+
+let troubles = {}
+const trouble = (prob, title) => {
+  count('troubles reported')
+  let list = troubles[prob] = troubles[prob] || []
+  if(!list.includes(title)) list.push(title)
+}
+
+let preferred = {} // slug => title
+const prefer = title => preferred[asSlug(title)] || (preferred[asSlug(title)] = title)
+
+let prolog = `
+  <meta charset="utf-8"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟢</text></svg>">
+  <style>
+    body { font-family:helvetica; width:550px; }
+    h2 { page-break-before:always; }
+    a { text-decoration:none; }
+  </style>
+
+`
+
+let sections = {}
+
+async function handler ({data}) {
+  if (data.action == "frameContext") {
+    window.removeEventListener("message", handler)
+    context = data
+    let roster = context.page.story.find(item => item.type == 'roster') || {text:context.site}
+    let sites = roster.text.split(/ *\n */).filter(line => /[\w-]+\.[\w-]+/.test(line))
+    let flights = await Promise.all(sites.map(site => fetch(`//${site}/system/sitemap.json`).then(res => res.json())))
+    neighborhood = {}
+    for (let i = 0; i<sites.length; i++) neighborhood[sites[i]] = flights[i]
+    present = Object.values(neighborhood).map(sitemap => sitemap.map(info => info.slug)).flat()
+    visit(context.page)
+    contents.innerHTML = titles.map(line).join("")
+  }
+}
+
+function visit(page) {
+  const link = /\[\[(.*?)\]\]/g
+  for (let item of page.story) {
+    let text = item.text
+    while (match = link.exec(text)) {
+      titles.push(match[1])
+    }
+  }
+}
+
+function doclick(event) {
+  let title = event.target.innerText
+  console.log(title)
+}
+
+async function doopen(event) {
+
+  titles = []
+  refs = []
+  troubles = {}
+  counters = {}
+  visit(context.page)
+  // html = html.slice(0,1)
+  sections = {
+    sequenced: [],
+    alphabetized: [],
+    omitted: []
+  }
+
+  reference.innerText = ''
+  count(`argument for sequential`, sequential)
+  count(`argument for alphabetical`, alphabetical)
+
+
+  reference.scrollIntoView(false)
+  let panels = await Promise.all(titles.filter(ispresent).map(title => getpanel(title)))
+  emit(panels, 'sequenced')
+  count(`tier 1 titles sequenced`, titles.length)
+
+  tier = 2
+  while(refs.length && tier <= sequential+alphabetical+1) {
+    let disposition = tier <= sequential ? 'sequenced' : tier <= sequential+alphabetical ? 'alphabetized' : 'omitted'
+    reference.innerHTML += `<i>tier ${tier}</i><br>` + refs.map(line).join("")+"\n"
+    reference.scrollIntoView(false)
+    panels = await Promise.all(refs.filter(ispresent).map(title => getpanel(title)))
+    count(`tier ${tier} titles ${disposition}`, panels.length)
+    titles.push(...refs)
+    refs = []
+    emit(panels, disposition)
+    tier += 1
+  }
+
+  function contents(list, title) {
+    return `
+      <h2>${title} Contents</h2>
+      ${list.map(body => {
+        let head = body[0]
+        let m = head.match(/>(.+?)</)
+        return `<li><a href="#${asSlug(m[1])}">${m[1]}</a></li>`
+      }).join("\n")}
+    `
+  }
+
+  sections.alphabetized.sort((a,b) => a[0] < b[0] ? -1 : 1)
+  let html = [
+    prolog,
+    contents(sections.sequenced,"Story"),
+    ...sections.sequenced,
+    contents(sections.alphabetized,"Garden"),
+    ...sections.alphabetized
+  ].flat()
+  download(html.join("\n"),'draft-pages.html')
+
+  let story = Object.keys(troubles).sort().map(key => ({
+    type:'paragraph',
+    text:`${key} ⇒ ${troubles[key].map(title => `[[${title}]]`).join(', ')}`
+  }))
+  if(!story.length) story = [{type:'paragraph', text:'No problems encountered.'}]
+  story.unshift({type:'html',text:counts()})
+  story.unshift({type:'paragraph',text:'Problems and other statistics found while printing.'})
+  let journal = [
+    {type:'create',date:Date.now(),item:JSON.parse(JSON.stringify(story))},
+    ...Object.keys(neighborhood).map(site => ({type:'fork',date:Date.now(),site}))
+  ]
+  let message = {
+    action: "showResult",
+    page: {title:'Print Statistics', story, journal},
+    keepLineup: event.shiftKey
+  }
+  window.parent.postMessage(message, "*");
+}
+
+// const getpage = title => fetch(`//${context.site}/${asSlug(title)}.json`).then(isjson)
+function getpanel(title) {
+  let slug = asSlug(title)
+  let candidates = []
+  for (let site in neighborhood) {
+    let info = neighborhood[site].find(info => info.slug == slug)
+    if (info) candidates.push([site, info.date])
+  }
+  candidates.sort((a,b) => a[1]-b[1])
+  let site = candidates[0][0]
+  count(`pages from ${site}`)
+  return new Promise(async response => {
+    let page = await fetch(`//${site}/${asSlug(title)}.json`).then(isjson)
+    response({site,page})})
+}
+
+function emit(panels, disposition) {
+  const words = text => text.split(/\W+/).length
+  for (let panel of panels) {
+    let {site, page} = panel
+    if (!page || !page.title) continue
+    let html = []
+    sections[disposition].push(html)
+    count('pages encountered')
+
+    function resolve(text) {
+      const link = /\[\[(.*?)\]\]/g
+      return text.replace(link, (match, word) => {
+        let title = prefer(word)
+        if (!titles.includes(title) && !refs.includes(title)) {
+          refs.push(title)
+        }
+        if (ispresent(title)) {
+          return `<a href=#${asSlug(title)}>${title}</a>`
+        }
+        else {
+          trouble(`Can't link to ${title}`, page.title)
+          return `<font color=gray>${title}</font>`
+        }
+      }).replace(/\[(https?:.*?) (.*?)\]/g,'<a href="$1">$2</a> '+linkmark())
+    }
+
+    let age = (Date.now() - page.journal.slice(-1)[0].date) / (24*60*60*1000)
+    let when = age < 1 ? 'today' : age<7 ? 'this week' : age<30 ? 'this month' : age<365 ? 'this year' : 'years ago'
+    count(`pages revised ${when}`)
+    let slug = asSlug(page.title)
+    html.push(`<h2 id="${slug}">${page.title}<a href="http://${site}/${slug}.html" target=_blank> ⬀ </a></h2>`)
+    for (let item of page.story) {
+      switch (item.type) {
+
+        case 'paragraph':
+          count(`words ${disposition}` ,words(item.text))
+          html.push(`<p>${resolve(item.text)}</p>`)
+          break
+
+        case 'image':
+          html.push(`<p><img width=100% src="${item.source || item.url}"><center>${resolve(item.text || item.caption)}</center></p>`)
+          break
+
+        case 'reference':
+          html.push(`<p>${resolve(`[[${item.title}]]`)} — ${resolve(item.text)}<p>`)
+          break
+
+        case 'html':
+          let div = document.createElement('div')
+          div.innerHTML = item.text
+          html.push(`<div>${resolve(div.innerHTML)}</div>`)
+          break
+
+        case 'markdown':
+          count(`words ${disposition}`,words(item.text))
+          let text = item.text
+          text = text.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")
+          text = text.replace(/\*(.+?)\*/g,"<b>$1</b>")
+          text = text.replace(/_(.+?)_/g,"<i>$1</i>")
+          text = text.replace(/(\n|^)- /g,"$1● ")
+          text = text.replace(/\n/g,"<br>\n")
+          text = text.replace(/# (.*?)<br>/g,"<h3>$1</h3>")
+          if (text.match(/^[*+]/) || ((text.match(/[*]/g)||[]).length%2))
+            trouble('This markdown too hard', page.title)
+          html.push(`<p>${resolve(text)}</p>`)
+          break
+
+        case 'pagefold':
+          html.push(`<div style="height: 10px; border-top: 2px solid lightgray; margin-top: 24px; text-align: center; position: relative; clear: both;">
+              <span style="position: relative; top: -.8em; background: white; display: inline-block; color: gray; ">
+                &nbsp; ${item.text} &nbsp;
+              </span>
+            </div>`)
+          break
+
+        case 'graphviz':
+          count('graphviz diagrams omitted')
+          break
+
+        default:
+          trouble(`Can't yet print ${item.type}`, page.title)
+      }
+    }    
+  }
+}
+
+function download(string, file) {
+  count('bytes downloaded', string.length)
+  var data = "data:text/json;charset=utf-8," + encodeURIComponent(string);
+  var anchor = document.createElement('a');
+  anchor.setAttribute("href",     data);
+  anchor.setAttribute("download", file);
+  document.body.appendChild(anchor); // required for firefox
+  anchor.click();
+  anchor.remove();
+}
+
+function linkmark() {
+  return `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAC0WlDQ1BJQ0MgUHJvZmlsZQAAKJGNlM9LFGEYx7+zjRgoQWBme4ihQ0ioTBZlROWuv9i0bVl/lBLE7Oy7u5Ozs9PM7JoiEV46ZtE9Kg8e+gM8eOiUl8LALALpblFEgpeS7Xlnxt0R7ccLM/N5nx/f53nf4X2BGlkxTT0kAXnDsZJ9Uen66JhU+xEhHEEdwqhTVNuMJBIDoMFjsWtsvofAvyute/v/OurStpoHhP1A6Eea2Sqw7xfZC1lqBBC5XsOEYzrE9zhbnv0x55TH8659KNlFvEh8QDUtHv+auEPNKWmgRiRuyQZiUgHO60XV7+cgPfXMGB6k73Hq6S6ze3wWZtJKdz9xG/HnNOvu4ZrE8xmtN0bcTM9axuod9lg4oTmxIY9DI4YeH/C5yUjFr/qaoulEk9v6dmmwZ9t+S7mcIA4TJ8cL/TymkXI7p3JD1zwW9KlcV9znd1Yxyeseo5g5U3f/F/UWeoVR6GDQYNDbgIQk+hBFK0xYKCBDHo0iNLIyN8YitjG+Z6SORIAl8q9TzrqbcxtFyuZZI4jGMdNSUZDkD/JXeVV+Ks/JX2bDxeaqZ8a6qanLD76TLq+8ret7/Z48fZXqRsirI0vWfGVNdqDTQHcZYzZcVeI12P34ZmCVLFCpFSlXadytVHJ9Nr0jgWp/2j2KXZpebKrWWhUXbqzUL03v2KvCrlWxyqp2zqtxwXwmHhVPijGxQzwHSbwkdooXxW6anRcHKhnDpKJhwlWyoVCWgUnymjv+mRcL76y5o6GPGczSVImf/4RVyGg6CxzRf7j/c/B7xaOxIvDCBg6frto2ku4dIjQuV23OFeDCN7oP3lZtzXQeDj0BFs6oRavkSwvCG4pmdxw+6SqYk5aWzTlSuyyflSJ0JTEpZqhtLZKi65LrsiWL2cwqsXQb7Mypdk+lnnal5lO5vEHnr/YRsPWwXP75rFzeek49rAEv9d/AvP1FThgxSQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAKtJREFUGJVtkLERwjAMRZ+5UHmmNNpCrpMloMi5gCXcO1MkLWwBS6SCO1EQgkP4d2q+nr50cmZGqbZt18YsV4IxRqv2FcfD8XeYXWl0Xefutzsxxk1iFUJYrfLeU9f1BtwB5JzJOeO9R1UREcZxXCVX5R0l1Pc9AKfz6ZsIoKpcrpcFmqaJlJJ7Pp6klByqah8Nw2BN05iZ2ezzqWU1gIggIv/e+AZDCH+bpV442lpGxygDswAAAABJRU5ErkJggg==" alt="" />`
+}
+
+</script>
+
+</body>
+</html>

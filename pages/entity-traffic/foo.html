@@ -1,0 +1,25 @@
+<h3>Watch this space</h3>
+<ul>
+  <li> Joshua -- <span id=Joshua></span>
+  <li> Beth --   <span id=Beth></span>
+  <li> Ward --   <span id=Ward></span>
+</ul>
+<script>
+
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+  let people = ['Joshua', 'Beth', 'Ward']
+  for (let peep of people) {
+    work(peep)
+  }
+
+  async function work(peep) {
+    for (let i = 0; i<80; i++) {
+      console.log(peep, 'working')
+      document.getElementById(peep).innerText += '|'
+      await delay(Math.random()*peep.length*100)
+    }
+  }
+
+
+</script>
