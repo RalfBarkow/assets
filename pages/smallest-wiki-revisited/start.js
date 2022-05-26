@@ -2,7 +2,7 @@
 // usage: deno run --allow-net --allow-read start.js
 
 
-import { serve } from "https://deno.land/std@0.79.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.106.0/http/server.ts";
 import * as host from "./host.js";
 
 let server = serve({ port: +(Deno.args[0] || 4444) });
