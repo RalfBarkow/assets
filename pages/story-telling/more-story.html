@@ -76,8 +76,9 @@
         let site = item.site
         let title = item.text.split(/\[\[|\]\]/)[1]
         let slug = frame.asSlug(title)
+        let url = new URL(`http://${site}/${slug}.json`)
         console.log({site,title,slug})
-        let page = await fetch(`//${site}/${slug}.json`).then(res => res.json())
+        let page = await fetch(url).then(res => res.json())
         html.push(render(site,page).join("\n"))
         window.result.innerHTML += ' .'
       } catch (err) {
