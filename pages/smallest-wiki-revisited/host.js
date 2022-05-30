@@ -6,60 +6,60 @@ import { serve } from "https://deno.land/std/http/server.ts";
 export { dispatch }
 
 async function dispatch (req) {
-  let [path,query] = req.url.split('?')
+    let [path,query] = req.url.split('?');
 
   let headers = new Headers();
-  headers.set('access-control-allow-origin','*')
-  headers.set('content-type', 'application/javascript')
+    headers.set('access-control-allow-origin','*');
+    headers.set('content-type', 'application/javascript');
 
 
   switch (path) {
     case '':
     case '/':
-      welcome(); break
+      welcome(); break;
     case '/favicon.png':
     case '/favicon.ico':
-      favicon(); break
+      favicon(); break;
     case '/system/sitemap.json':
-      sitemap(); break
+      sitemap(); break;
     case '/view.js':
-      module(); break
+      module(); break;
     default:
-      variable()
+      variable();
   }
 
   function welcome() {
-    let body = client()
-    headers.set('content-type', 'text/html')
-    req.respond({status:200, headers, body})
+      let body = client();
+      headers.set('content-type', 'text/html');
+      req.respond({status:200, headers, body});
   }
 
   function favicon() {
-    headers.set('content-type', 'image/png')
+      headers.set('content-type', 'image/png');
     Deno.readFile(`${req.wiki}/status/favicon.png`)
-      .then(body => req.respond({status:200, headers, body}))
+          .then(body => req.respond({status:200, headers, body}));
   }
 
   function sitemap() {
     Deno.readTextFile(`${req.wiki}/status/sitemap.json`)
-      .then(body => req.respond({status:200, headers, body}))
+          .then(body => req.respond({status:200, headers, body}));
   }
 
   function module() {
-    headers.set('content-type', 'application/javascript')
+      headers.set('content-type', 'application/javascript');
     Deno.readTextFile(`.${path}`)
-      .then(body => req.respond({status:200, headers, body}))
+          .then(body => req.respond({status:200, headers, body}));
   }
 
   function variable() {
-    let m
-    if (m = path.match(/^\/([a-z-]+)\.json/)) {
-      let file = `${req.wiki}/pages/${m[1]}`
+      let m;
+    if (m == path.match(/^\/([a-z-]+)\.json/)) {
+        let file = `${req.wiki}/pages/${m[1]}`;
       Deno.readTextFile(file)
         .then(body => req.respond({status:200, headers, body}))
-        .catch(err => req.respond({status:404, headers, body:'not found'})  )
+            .catch(err => req.respond({status:404, headers, body:'not found'})  );
     } else {
-      req.respond({status:400, headers, body:'bad request'})
+        req.respond({status:400, headers, body:'bad request'});
     }
   }
 }
@@ -80,5 +80,5 @@ function client() {
         start()
       </script>
     </body>
-  </html>`
+  </html>`;
 }
