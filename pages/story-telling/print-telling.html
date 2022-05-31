@@ -53,7 +53,8 @@
         let title = link(content.text)
         let site = content.site
         let slug = frame.asSlug(title)
-        let url = new URL(`http://${site}/${slug}.json`)
+        console.log({site,title,slug})
+        let url = new URL(`//${site}/${slug}.json`)
         let page = await fetch(url).then(res => res.json())
         html.push(...render(site, page))
         window.result.innerHTML += ' .'       

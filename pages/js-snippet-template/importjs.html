@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <title>wiki javascript snippet runner</title>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>➡</text></svg>">
+
+  <body>
+    <pre id=show>waiting</pre>
+    <div id=output><div>
+      <script type=module>
+
+       window.addEventListener("message", handler)
+       window.parent.postMessage({ action:"sendFrameContext" }, "*")
+
+       function handler ({data}) {
+         if (data.action == "frameContext") {
+           window.removeEventListener("message", handler)
+           const {slug, item, page} = data
+           let code = page.story.filter(it => it.type == 'code').map(it => it.text)
+           if (code.length) { render(code.join("\n")) }
+         }
+       }
+
+       async function render (text) {
+         try {
+           let module = await import(`data:text/javascript;base64,${btoa(text)}`)
+           console.log({text, module})
+           show.innerHTML = ''
+           if (!module) return
+           let result = Object.assign({default:""}, module).default
+           if (typeof result == typeof "" && result.match(/\s*</)) {
+             output.insertAdjacentHTML("beforeend", result)
+           } else {
+             let maybe = JSON.stringify(result)
+             if (maybe.length > 50) maybe = JSON.stringify(result,null,2)
+             output.insertAdjacentHTML("beforeend", `<pre>${maybe}</pre>`)
+           }
+         } catch (e) {
+           show.innerHTML = `<pre>${e.message}</pre>`
+         }
+       }
+
+      </script>
+  </body>
+</html>

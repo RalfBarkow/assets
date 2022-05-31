@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<title>Search Outpost</title>
+<style>
+  section {display: none;}
+</style>
+
+<section id="init">
+  checking for running lsserve.ts...
+</section>
+
+<section id="launch">
+<pre>
+cd ~/.wiki
+deno run \
+  --reload=<span id="origin">http://example.com</span> \
+  --allow-read=. \
+  --allow-net \
+  <span id="url">http://example.com</span>
+</pre>
+<button class="check">Check Again</button>
+</section>
+
+<section id="running">
+  <p>found lsserve.ts running locally</p>
+  <button id="update">Update Search</button>
+  <button class="check">Check Again</button>
+</section>
+
+<script>
+ const pageKey = window.frameElement.name;
+ const origin = window.location.origin
+ const local = 'http://localhost:8000'
+
+ switchTo('#init')
+ checkAgain()
+ document.querySelectorAll('.check').forEach(el =>
+   el.addEventListener('click', checkAgain))
+
+ document.querySelector('#origin').innerHTML = origin
+ document.querySelector('#url').innerHTML = new URL('./lsserve.ts', window.location)
+ async function checkAgain(event) {
+   try {
+     await fetch(local, {method: "HEAD"})
+     switchTo('#running')
+   } catch (err) {
+     switchTo('#launch')
+     const div = document.createElement('div')
+     div.innerText = "No Luck"
+     document.querySelector('#launch').appendChild(div)
+   }
+ }
+
+ function switchTo(id) {
+   for (let el of document.querySelectorAll('section')) {
+     el.style.display = 'none'
+   }
+   document.querySelector(id).style.display = 'block'
+ }
+
+ document.querySelector('#update').addEventListener('click', async event => {
+   const res = await fetch(new URL('/search.json', local))
+   const page = await res.json()
+   window.parent.postMessage({
+     action: "showResult",
+     page,
+     pageKey,
+     keepLineup: event.shiftKey
+   })
+ })
+</script>

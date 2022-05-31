@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Minimal GoJS Sample</title>
+</head>
+
+<body>
+    <!-- * * * * * * * * * * * * * -->
+    <!-- Start of GoJS sample code -->
+    <script src="https://unpkg.com/gojs"></script>
+    <div id="allSampleContent" class="p-4 w-full">
+
+<div id="sample">
+  <!-- The DIV for the Diagram needs an explicit size or else we won't see anything.
+       This also adds a border to help see the edges of the viewport. -->
+  <div id="myDiagramDiv" style="border: solid 1px black; width:400px; height:400px"></div>
+  <p>
+    This isn't a truly <i>minimal</i> demonstration of <b>GoJS</b>,
+    because we do specify a custom Node template and turn on undo/redo support, but it's pretty simple.
+    The whole source for the sample is shown below if you click on the link.
+  </p>
+  <p>
+      This sample sets the <a>Diagram.nodeTemplate</a>, with a <a>Node</a> template that data binds both the text string and the shape's fill color.
+      For an overview of building your own templates and model data, see the <a href="https://github.com/NorthwoodsSoftware/GoJS/blob/e19b773104cf34f9aff6873b57cd3187d038719c/learn/index.html">Getting Started tutorial.</a>
+  </p>
+  <p>
+    Using the mouse and common keyboard commands, you can pan, select, move, copy, delete, undo, and redo.
+    On touch devices, use your finger to act as the mouse, and press and hold your finger stationary to bring up a context menu.
+    The default context menu supports most of the standard commands that are enabled at that time for the selected object.
+  </p>
+  <p>
+    For a more elaborate sample, supporting grouping and tooltips and custom context menus,
+    see the <a href="basic.html">Basic</a> sample.
+  </p>
+</div>
+
+<script id="code">
+ const myDiagram =
+     new go.Diagram("myDiagramDiv",  // create a Diagram for the HTML Div element
+                    { "undoManager.isEnabled": true });  // enable undo & redo
+
+ // define a simple Node template
+ myDiagram.nodeTemplate =
+     new go.Node("Auto")  // the Shape will go around the TextBlock
+           .add(new go.Shape("RoundedRectangle",
+                             { strokeWidth: 0, fill: "white" })  // no border; default fill is white
+                      .bind("fill", "color"))  // Shape.fill is bound to Node.data.color
+           .add(new go.TextBlock(
+               { margin: 8, font: "bold 14px sans-serif", stroke: '#333' })  // some room around the text
+                      .bind("text", "key"));  // TextBlock.text is bound to Node.data.key
+
+ // but use the default Link template, by not setting Diagram.linkTemplate
+
+ // create the model data that will be represented by Nodes and Links
+ myDiagram.model = new go.GraphLinksModel(
+     [
+         { key: "Alpha", color: "lightblue" },
+         { key: "Beta", color: "orange" },
+         { key: "Gamma", color: "lightgreen" },
+         { key: "Delta", color: "pink" }
+     ],
+     [
+         { from: "Alpha", to: "Beta" },
+         { from: "Alpha", to: "Gamma" },
+         { from: "Beta", to: "Beta" },
+         { from: "Gamma", to: "Delta" },
+         { from: "Delta", to: "Alpha" }
+ ]);
+</script>
+
+    </div>
+    <!-- * * * * * * * * * * * * * -->
+    <!--  End of GoJS sample code  -->
+  </div>
+</body>
+<!--  This script is part of the gojs.net website, and is not needed to run the sample -->
+<script src="./goSamples.js"></script>
+</html>
