@@ -187,7 +187,7 @@ export async function StartWorldcore(options) {
         return service.asyncStart();
     }));
 
-    const session = await Session.join(options);
+    const session = await Croquet.Session.join(options);
 
     return session;
 }
