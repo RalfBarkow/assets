@@ -9,7 +9,7 @@
 
 // Extends the model base class with Worldcore-specific methods.
 
-export class WorldcoreModel extends Model {
+export class WorldcoreModel extends Croquet.Model {
 
     service(name) { return this.wellKnownModel(name) }
 
