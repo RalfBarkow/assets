@@ -73,7 +73,7 @@ export function GetModelService(name) { return viewRoot.wellKnownModel(name) }
 
 // Extends the view base class with Worldcore-specific methods.
 
-export class WorldcoreView extends View {
+export class WorldcoreView extends Croquet.View {
 
     service(name) { return viewServices.get(name) }
     modelService(name) { return this.wellKnownModel(name) }
