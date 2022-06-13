@@ -1,9 +1,8 @@
-// import { Constants } from "https://wiki.ralfbarkow.ch/assets/pages/world-core-tutorial-1/croquet.min.js";
-import { m4_identity } from "..";
-// import { Constants } from "@croquet/worldcore-kernel";
-import { PM_Dynamic, GetPawn } from "./Pawn";
-import { v3_zero, q_identity, v3_unit, m4_scaleRotationTranslation, m4_translation, m4_rotationX, m4_multiply, v3_lerp, v3_equals,
-    q_slerp, q_equals, v3_isZero, q_isZero, q_normalize, q_multiply, v3_add, v3_scale, m4_rotationQ, v3_transform, q_euler, TAU, clampRad, q_axisAngle } from  "./Vector";
+// import { Constants } from "@croquet/croquet";
+// import { m4_identity } from "..";
+// // import { Constants } from "@croquet/worldcore-kernel";
+// import { PM_Dynamic, GetPawn } from "./Pawn";
+//import { v3_zero, q_identity, v3_unit, m4_scaleRotationTranslation, m4_translation, m4_rotationX, m4_multiply, v3_lerp, v3_equals, q_slerp, q_equals, v3_isZero, q_isZero, q_normalize, q_multiply, v3_add, v3_scale, m4_rotationQ, v3_transform, q_euler, TAU, clampRad, q_axisAngle } from  "./Vector";
 
 // Mixin
 //
@@ -82,11 +81,11 @@ import { v3_zero, q_identity, v3_unit, m4_scaleRotationTranslation, m4_translati
 //-- Mixin ---------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 
-Constants.WC_MIXIN_REGISTRY = [];
-Constants.WC_MIXIN_USAGE = [];
+Croquet.Constants.WC_MIXIN_REGISTRY = [];
+Croquet.Constants.WC_MIXIN_USAGE = [];
 
 export const mix = superclass => new MixinFactory(superclass);
-export const RegisterMixin = mixin => Constants.WC_MIXIN_REGISTRY.push(mixin);
+export const RegisterMixin = mixin => Croquet.Constants.WC_MIXIN_REGISTRY.push(mixin);
 
 class MixinFactory  {
     constructor(superclass) {
@@ -94,7 +93,7 @@ class MixinFactory  {
     }
 
     with(...mixins) {
-        Constants.WC_MIXIN_USAGE.push(mixins);
+        Croquet.Constants.WC_MIXIN_USAGE.push(mixins);
         return mixins.reduce((c, mixin) => mixin(c), this.superclass);
     }
 }

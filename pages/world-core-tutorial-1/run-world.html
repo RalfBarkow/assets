@@ -1,4 +1,5 @@
 <style>body {background-color: #f8f8f8; margin: 0} </style>
+<script src="https://unpkg.com/@croquet/croquet@1.0.5"></script>
 <script type=module>
 
  window.addEventListener("message", collectCodeFromContext, {once: true})
@@ -30,6 +31,5 @@
          document.body.innerHTML = `<pre>${JSON.stringify({name, message}, null, 2)}</pre>`
      }
  }
-
 
 </script>
