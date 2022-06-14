@@ -1,12 +1,4 @@
 
-export function search (graph, cypher) {
-  const tree = parse(cypher)
-  // console.dir(tree, {depth:15})
-  const code = gen(0,tree[0][0],{})
-  // console.log(code)
-  return apply(graph, code)
-}
-
 export function parse(text, log=()=>{}) {
   const r = {}, x = {}               // rules defined and traced
   let left = '', right = text      // text parsed and pending
@@ -39,7 +31,6 @@ export function parse(text, log=()=>{}) {
 
   // Parse Instrumentation
 
-  const show = 'match,node,rel,bind,type,prop,expr'.split(',')
   for (const op in r) {
     x[op] = (...args) => {
       log(`${left}%c${op}%c${right}`,"color:red","color:black");
@@ -149,7 +140,24 @@ export function gen(level, tree, code, log=()=>{}) {
   return code
 }
 
-function apply(graph, code) {
+export function check(tally, code, errors) {
+  if(code?.node?.type && errors) {
+    if(!tally.nodes[code.node.type]) {
+      errors.push(`No node of type "${code.node.type}" in the graph.`)
+    }
+  }
+  if(code?.rel?.type && errors) {
+    if(!tally.rels[code.rel.type]) {
+      errors.push(`No relation of type "${code.rel.type}" in the graph.`)
+    }
+  }
+  if(Object.keys(code.chain).length) {
+    check(tally,code.chain, errors)
+  }
+
+}
+
+export function apply(graph, code) {
   const nodes = graph.nodes
   const rels = graph.rels
   const results = []
