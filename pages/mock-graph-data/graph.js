@@ -1,5 +1,7 @@
 'use strict';
 
+import * as cypher from './cypher.js'
+
 const uniq = (value, index, self) => self.indexOf(value) === index
 
 export class Graph {
@@ -9,15 +11,15 @@ export class Graph {
   }
 
   addNode(type, props={}){
-    let obj = {type, in:[], out:[], props};
+    const obj = {type, in:[], out:[], props};
     this.nodes.push(obj);
     return this.nodes.length-1;
   }
 
   addRel(type, from, to, props={}) {
-    let obj = {type, from, to, props};
+    const obj = {type, from, to, props};
     this.rels.push(obj);
-    let rid = this.rels.length-1;
+    const rid = this.rels.length-1;
     this.nodes[from].out.push(rid)
     this.nodes[to].in.push(rid);
     return rid;
@@ -38,13 +40,13 @@ export class Graph {
   }
 
   static async fetch(url) {
-    let obj = await fetch(url).then(res => res.json())
+    const obj = await fetch(url).then(res => res.json())
     return Graph.load(obj)
   }
 
   static async read(path) {
-    let json = await Deno.readTextFile(path);
-    let obj = JSON.parse(json);
+    const json = await Deno.readTextFile(path);
+    const obj = JSON.parse(json);
     return Graph.load(obj)
   }
 
@@ -56,10 +58,39 @@ export class Graph {
   n(type=null, props={}) {
     let nids = Object.keys(this.nodes).map(key => +key)
     if (type) nids = nids.filter(nid => this.nodes[nid].type == type)
-    for (let key in props) nids = nids.filter(nid => this.nodes[nid].props[key] == props[key])
+    for (const key in props) nids = nids.filter(nid => this.nodes[nid].props[key] == props[key])
     return new Nodes(this, nids)
   }
+
+  /**
+   * Converts a graph to a JavaScript Object Notation (JSON) string using JSON.stringify.
+   @param - replacer A function that transforms the results.
+   @param - space Adds indentation, white space, and line break characters to the return-
+   * @returns {string} JSON string containing serialized graph
+  */
+  stringify(...args) {
+    const obj = { nodes: this.nodes, rels: this.rels }
+    return JSON.stringify(obj, ...args)
+  }
+
+
+  search (query, opt={}) {
+    const tree = cypher.parse(query)
+    // console.dir(tree, {depth:15})
+    const code = cypher.gen(0,tree[0][0],{})
+    // console.log(code)
+    cypher.check(this.tally(),code,opt.errors)
+    return cypher.apply(this, code)
+  }
+
 }
+
+
+
+
+
+
+// Fluent Interface (deprecated?)
 
 export class Nodes {
   constructor (graph, nids) {
@@ -80,7 +111,7 @@ export class Nodes {
     // console.log('Nodes.i',{type,props})
     let rids = this.nids.map(nid => this.graph.nodes[nid].in).flat().filter(uniq)
     if (type) rids = rids.filter(rid => this.graph.rels[rid].type == type)
-    for (let key in props) rids = rids.filter(rid => this.graph.rels[rid].props[key] == props[key])
+    for (const key in props) rids = rids.filter(rid => this.graph.rels[rid].props[key] == props[key])
     return new Rels(this.graph, rids)
   }
 
@@ -88,7 +119,7 @@ export class Nodes {
     // console.log('Nodes.o',{type,props})
     let rids = this.nids.map(nid => this.graph.nodes[nid].out).flat().filter(uniq)
     if (type) rids = rids.filter(rid => this.graph.rels[rid].type == type)
-    for (let key in props) rids = rids.filter(rid => this.graph.rels[rid].props[key] == props[key])
+    for (const key in props) rids = rids.filter(rid => this.graph.rels[rid].props[key] == props[key])
     return new Rels(this.graph, rids)
   }
 
@@ -111,18 +142,18 @@ export class Nodes {
   }
 
   filter(f) {
-    let nodes = this.graph.nodes
-    let nids = this.nids.filter(nid => {
-      let node = nodes[nid]
+    const nodes = this.graph.nodes
+    const nids = this.nids.filter(nid => {
+      const node = nodes[nid]
       return f(node.type,node.props)
     })
     return new Nodes(this.graph,nids)
   }
 
   map(f) {
-    let nodes = this.graph.nodes
-    let result = this.nids.map(nid => {
-      let node = nodes[nid]
+    const nodes = this.graph.nodes
+    const result = this.nids.map(nid => {
+      const node = nodes[nid]
       return f(node)
     })
     return result
@@ -140,7 +171,7 @@ export class Rels {
     // console.log('Rels.f',{type,props})
     let nids = this.rids.map(rid => this.graph.rels[rid].from).filter(uniq)
     if (type) nids = nids.filter(nid => this.graph.nodes[nid].type == type)
-    for (let key in props) nids = nids.filter(nid => this.graph.nodes[nid].props[key] == props[key])
+    for (const key in props) nids = nids.filter(nid => this.graph.nodes[nid].props[key] == props[key])
     return new Nodes(this.graph, nids)
   }
 
@@ -148,7 +179,7 @@ export class Rels {
     // console.log('Rels.t',{type,props})
     let nids = this.rids.map(rid => this.graph.rels[rid].to).filter(uniq)
     if (type) nids = nids.filter(nid => this.graph.nodes[nid].type == type)
-    for (let key in props) nids = nids.filter(nid => this.graph.nodes[nid].props[key] == props[key])
+    for (const key in props) nids = nids.filter(nid => this.graph.nodes[nid].props[key] == props[key])
     return new Nodes(this.graph, nids)
   }
 
@@ -171,18 +202,18 @@ export class Rels {
   }
 
   filter(f) {
-    let rels = this.graph.rels
-    let rids = this.rids.filter(rid => {
-      let rel = rels[rid]
+    const rels = this.graph.rels
+    const rids = this.rids.filter(rid => {
+      const rel = rels[rid]
       return f(rel.type,rel.props)
     })
     return new Rels(this.graph,rids)
   }
 
   map(f) {
-    let rels = this.graph.rels
-    let result = this.rids.map(rid => {
-      let rel = rels[rid]
+    const rels = this.graph.rels
+    const result = this.rids.map(rid => {
+      const rel = rels[rid]
       return f(rel)
     })
     return result
