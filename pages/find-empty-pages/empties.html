@@ -5,7 +5,7 @@
 </style>
 <script type=module>
 
-  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
   const context = await frame.context()
   const sitemap = await fetch(`${context.origin}/system/sitemap.json`).then(res => res.json())
   const empties = sitemap
