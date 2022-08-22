@@ -1,0 +1,192 @@
+<meta charset="utf-8"/>
+<div id=result>working</div>
+<p id=gallery></p>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+<script type=module>
+
+// [
+//     {
+//         "panel": {
+//             "pageKey": "84d8d7bb",
+//             "itemId": "684aff73b47dcf20",
+//             "site": "ward.dojo.fed.wiki",
+//             "slug": "phototelling-quickstart",
+//             "title": "Phototelling Quickstart"
+//         },
+//         "assetsData": {
+//             "pages/phototelling-quickstart": {
+//                 "/assets": [
+//                     "IMG_5606.JPG"
+//                 ],
+//                 "//ward.dojo.fed.wiki/assets": [
+//                     "IMG_5602.JPG",
+//                     "IMG_5603.JPG",
+//                     "IMG_5604.JPG",
+//                     "IMG_5605.JPG",
+//                     "IMG_5606.JPG"
+//                 ]
+//             }
+//         }
+//     }
+// ]
+
+let origin
+indexer()
+
+async function indexer() {
+  origin = (await requestNeighborhood())[0]
+  let allassets = await sources('assets')
+  if (allassets.error) return result(allassets.error)
+  let data = allassets[0].assetsData
+  let folder = Object.keys(data)[0]
+  let endpoint = '/assets' // for origin only
+  let files = (data[folder][endpoint]||[]).filter(file => /\.jpe?g$/i.test(file))
+
+  let done = await alldone()
+  let todo = files.filter(file => !done.includes(file))
+  const thumbnail = file => `<img width=47% src="//${origin}${endpoint}/${folder}/${file}" onclick="pick(event)">`
+  if (todo.length) {
+    window.gallery.innerHTML = todo.map(thumbnail).join(" ")
+  } else {
+    window.gallery.innerHTML = `<center><i>No unused images among ${files.length} uploaded</i></center>`
+    console.log({files,done,todo})
+  }
+
+  result(`
+    <p>Name the Place Now or Look Ahead</p>
+    <input id=title name=title size=50 placeholder="New Page Title">
+    <p>Click First Photo of Sequence</p>
+  `)
+}
+
+async function alldone() {
+  let sitemap = await fetch(`//${origin}/system/sitemap.json`).then(res => res.json())
+  let infos = sitemap.filter(info => info.synopsis.startsWith('▷'))
+  let pages = await Promise.all(infos.map(info => fetch(`//${origin}/${info.slug}.json`).then(res => res.json())))
+  let images = pages.reduce((sum, each) => sum.concat(pictures(each)),[])
+  return images
+
+  function pictures(page) {
+    let items = page.story.filter(item => item.type == 'html' && item.text.startsWith('<img '))
+    return items.map(item => {
+      let m = item.text.match(/src=(.*?)>/)
+      let path = m[1].split('/').reverse()
+      return decodeURIComponent(path[0])
+    })
+  }
+}
+
+function result(html) {
+  window.result.innerHTML = html
+}
+
+window.pick = async function (event) {
+  let page = await build(event.target)
+  open(page,event.shiftKey)
+  window.title.value = ''
+}
+
+async function build(img){
+  let {date, lat, lon} = await exif(img)
+
+  let src = img.getAttribute('src').split(/\//)
+  let latlon = src[src.length-1].match(/^([0-9\.-]+), *([0-9\.-]+)\.(jpg|jpeg)$/i)
+  if (latlon && (!lat || !lon)) {
+    lat = +latlon[1]
+    lon = +latlon[2]
+  }
+  
+  let fake = {date:new Date(), lat:47.6077558, lon:-122.3359538, warning:' Improve date and map.'}
+  let warning = []
+  if (!date) { date = fake.date; warning.push('date')}
+  if (!lat || !lon) {lat = fake.lat; lon = fake.lon; warning.push('map')}
+  warning = warning.length ? ` Improve the ${warning.join(' and ')}.` : ''
+
+  let map = `https://www.google.com/search?q=${lat},%20${lon}`
+  let day = date.toLocaleString('en-us', {weekday:'long'})
+  let month = date.toLocaleString('en-us', {month:'long'})
+  let daydate = `${day}, ${month} ${date.getDate()}, ${date.getYear()+1900}`
+  let title = window.title.value || "Photo with Map Preview"
+  return  {title, story:[
+    {type:'paragraph',text:"▷Seattle. Describe this place." + warning},
+    {type:'html',text:`<img width=100% src=${img.src}>`},
+    {type:'paragraph',text:daydate},
+    {type:'map',text:`${lat}, ${lon}\n[${map} google map]`}
+  ]}
+}
+
+
+// U T I L I T I E S
+
+
+function sources(topic) {
+  const action = 'requestSourceData'
+  return new Promise(resolve => {
+    let handler = event => {
+      let {data} = event
+      if (!data.action == action) return
+      window.removeEventListener('message',handler)
+      resolve(data.sources)
+    }
+    window.addEventListener('message',handler)
+    window.parent.postMessage({action, topic},"*")
+  })
+}
+
+function open(page, keepLineup=false, forks=[]) {
+  const dup = (obj) => JSON.parse(JSON.stringify(obj))
+  let date = Date.now()
+  for (let item of page.story) item.id = (Math.random()*10**20).toFixed(0)
+  page.journal = [{type:'create', date, item:dup(page)}, ...forks.map(site => ({type:'fork',date,site}))]
+  let message = {action: "showResult", page, keepLineup}
+  window.parent.postMessage(message, "*")
+}
+
+// https://github.com/exif-js/exif-js
+
+function exif(img) {
+
+  const bedate = tag => {
+    if (!tag) return undefined
+    let str = tag.split(" ");
+    let iso = str[0].replace(/:/g, "-");
+    return new Date(iso + " " +str[1]);
+  }
+
+  const latlon = (tag, ref) => {
+    if (!tag) return undefined
+    let deg = tag[0] + tag[1]/60 + tag[2]/60/60
+    if ('SW'.includes(ref)) deg = -deg
+    deg = deg.toFixed(7)
+    return +deg
+  }
+
+  return new Promise((resolve, reject) => {
+    EXIF.getData(img, function() {
+      let file = img.src.split('/').pop()
+      let make = EXIF.getTag(this, "Make")
+      let model = EXIF.getTag(this, "Model")
+      let date = bedate(EXIF.getTag(this, "DateTimeOriginal"))
+      let lat = latlon(EXIF.getTag(this, "GPSLatitude"), EXIF.getTag(this, "GPSLatitudeRef"))
+      let lon = latlon(EXIF.getTag(this, "GPSLongitude"), EXIF.getTag(this, "GPSLongitudeRef"))
+      resolve({file,make,model,date,lat,lon})
+    })
+  })
+}
+
+function requestNeighborhood() {
+  return new Promise((resolve, reject) => {
+    window.addEventListener("message", neighborhood)
+    function neighborhood({data}) {
+      if (data.action != "neighborhood") return
+      window.removeEventListener(
+        "message", neighborhood)
+      resolve(data.neighborhood)
+    }
+    window.parent.postMessage({
+      action: "requestNeighborhood"
+    }, "*")
+  })
+}
+</script>

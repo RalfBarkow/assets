@@ -1,0 +1,58 @@
+<pre id=result></pre>
+<script type=module>
+
+  import { context, open } from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import { Graph } from 'https://wardcunningham.github.io/graph/graph.js'
+
+  class UniqGraph extends Graph {
+      constructor (nodes=[], rels=[]) {
+          super(nodes, rels)
+    }
+    nodeId (node) {
+      const nid = this.nodes.findIndex(n => n
+          === node)
+      return nid < 0 ? null : nid
+    }
+    addUniqNode (type,props) {
+      const nid = this.nodes.findIndex(n => n.type == type && n.props.name == props.name)
+      if (nid >= 0)
+        return nid
+      else
+        return this.addNode(type,props)
+    } 
+    addUniqRel (type,from,to) {
+      const nid = this.nodes.findIndex(n => n.type == type && n.props.name == props.name)
+      if (nid >= 0)
+        return nid
+      else
+        return this.addNode(type,props)
+    } 
+  }
+
+  Graph.prototype.addUniqNode = (type,props) => {
+    const nid = this.nodes.findIndex(n => n.type == type && n.props.name == props.name)
+    if (nid >= 0)
+      return nid
+    else
+      return this.addNode(type,props)
+  }
+
+  const url = 'https://wiki.ralfbarkow.ch/assets/pages/fork-network-graph/forks.json'
+  const g0 = await Graph.fetch(url) 
+  const g = new UniqGraph(g0.nodes,g0.rels)
+  window.result.innerText = JSON.stringify(g.tally(),null,2)
+
+  const h = new UniqGraph()
+  const nids = {}
+  const want = g.search('match (f:Site)-[:Slug]->(:Page)-[:Action]->(:Fork)-[:Remote]->(t:Site)')
+  for (const w of want) {
+    const f = nids[g.nodeId(w.f)] = h.addUniqNode(w.f.type, w.f.props)
+    const t = nids[g.nodeId(w.t)] = h.addUniqNode(w.t.type, w.t.props)
+  }
+  window.result.innerText += JSON.stringify(Object.entries(nids),null,2)
+  window.result.innerText += JSON.stringify(h.tally(),null,2)
+
+
+  // window.result.innerText += JSON.stringify(want.map(row => [row.f.props.name, row.p.props.name, row.t.props.name]),null,2)
+
+</script>
