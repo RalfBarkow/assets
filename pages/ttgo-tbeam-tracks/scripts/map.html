@@ -1,0 +1,141 @@
+<html>
+<head>
+  <meta charset="UTF-8"><meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📍</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+  <div id="warn"></div>
+  <div id="map"></div>
+  <style>
+    body { padding: 0; margin: 0; }
+    html, body, #map { height: 100%; width: 100%; }
+  </style>
+
+  <script type=module>
+    const google = (latlon) => `<a href="https://www.google.com/maps/search/?api=1&query=${latlon}" target=_blank>map</a>`
+    const helium = hotspot => `<a href="${hotspot.link}" target=_blank>${hotspot.name}`
+    const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+    const delay = time => new Promise(res => setTimeout(res,time))
+    const trail = name => `<a href="http://trails.ward.asia.wiki.org/${asSlug(name)}.html" target=_blank>${name}</a>`
+
+    const params = Object.fromEntries(new URLSearchParams(location.search).entries())
+
+    // https://github.com/Leaflet/Leaflet/issues/7255#issuecomment-849638476
+    var map = L.map('map',{ "tap": false })
+    L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}.png', {
+      attribution: '© Esri',
+    }).addTo(map)
+
+    const [raw,markers] = await Promise.all([
+      fetch(`http://home.c2.com:3030/track/${params['track']||'2022-07-19'}`).then(res => res.text()),
+      fetch(`http://ward.eu.wiki.org/assets/pages/leaflet-maps/markers.json`).then(res => res.json())
+    ])
+
+    if (!raw) {
+      window.warn.innerHTML = `<center>No data for ${params['track']||'2022-07-19'} yet</center>`
+      throw new Error("no data")
+    }
+
+    const dups = new Set()
+    const data = raw.trim().split(/\r?\n/)
+      .map(text => JSON.parse(text.trim()))
+      .filter(r => r.decoded?.payload?.latitude && r.decoded?.payload?.longitude)
+      .filter(r => r.hotspots && r.hotspots[0].lat && r.hotspots[0].long)
+      .filter(r => r.hotspots[0].hold_time < 10000)
+      .filter(r => {const dup = dups.has(r.payload); dups.add(r.payload); return !dup})
+
+
+    const log = data
+      .map(r => {
+        const h = r.hotspots[0]
+        const m = r.decoded.payload
+        const where = [m.latitude,m.longitude]
+        const there = [h.lat,h.long]
+        const link = `https://explorer.helium.com/hotspots/${h.id}`
+        return {when:h.reported_at, where, name:h.name, there, link}
+    })
+
+    {
+      let n = Math.max(...log.map(l => l.where[0]))
+      let s = Math.min(...log.map(l => l.where[0]))
+      let e = Math.max(...log.map(l => l.where[1]))
+      let w = Math.min(...log.map(l => l.where[1]))
+      map.fitBounds([[s, w],[n, e]])
+    }
+
+    for (let i=1; i<log.length; i++)
+      log[i].prev = log[i-1]
+
+    log.map(l => {
+      L.circle(l.where,4,{color:'blue'}).addTo(map)
+      L.circle(l.there,4,{color:'red'}).addTo(map)
+        .bindPopup(`<center>${helium(l)}<br>${google(l.there)}</center>`)
+        .on('mouseover',e => pause(l.name))
+        .on('mouseout',e => resume())
+      l.line = L.polyline([l.where,l.there],{color:'red',opacity:0.3})
+      if(l.prev) L.polyline([l.prev.where, l.where],{color:'blue',opacity:0.3}).addTo(map)
+    })
+
+    for (const mark in markers) {
+      const near = nearby(markers[mark])
+      if (near) L.marker(near).addTo(map).bindPopup(trail(mark))
+    }
+
+    function nearby(points) {
+      const abs = Math.abs
+      const dist = (a,b) => abs(a[0]-b[0])*69 + abs(a[1]-b[1])*49
+      const close = []
+      for (const point of points)
+        for (const l of log)
+          if (dist(point, l.where) < .05)
+            close.push([dist(point, l.where), point])
+      if (!close.length) return null
+      close.sort((a,b) => a[0]-b[0])
+      return close[0][1]
+    }
+
+    let run = true
+    const q = []
+    const dwell = params['dwell']
+    while (dwell) {
+      for (const l of log) {
+        if(run) {
+          q.push(l)
+          l.line.addTo(map)
+          if(q.length > dwell) q.shift().line.remove()
+        }
+        await delay(200)
+      }
+    }
+
+    function pause (name) {
+      run = false
+      while (q.length > 0) q.shift().line.remove()
+      for (const l of log) {
+        if (l.name == name) {
+          q.push(l)
+          l.line.addTo(map)
+        }
+      }
+    }
+
+    function resume () {
+      while (q.length > 0) q.shift().line.remove()
+      run = true
+    }
+
+    map.on('click', e => console.log(`${e.latlng.lat.toFixed(7)}, ${e.latlng.lng.toFixed(7)}\n`))
+
+
+  </script>
+</body>
+</html>
