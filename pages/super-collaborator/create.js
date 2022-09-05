@@ -6,7 +6,7 @@ const dup = obj => JSON.parse(JSON.stringify(obj))
 
 
 const schema = await Graph.fetch('./action.schema.json')
-const sample = await Graph.fetch('http://ward.dojo.fed.wiki/assets/pages/daily-haiku-graph/beauty.graph.json')
+const sample = await Graph.fetch('https://wiki.ralfbarkow.ch/assets/pages/daily-haiku-graph/beauty.graph.json')
 
 export function create(result, update) {
   // result.innerHTML = `Organize for Action`
@@ -42,7 +42,7 @@ export function create(result, update) {
       let line = div.dataset.line
       let entries = Object.entries(lineup[line].data.props)
       div.innerHTML = `<hr><p>${entries.map(entry =>
-        `<span>${entry[0]}</span><br><input type=text value="${entry[1]}" size=50 style="width:100%;">`).join("<br>")}</p><button>+</button> <button>⧎</button>`
+        `<span>${entry[0]}</span><br><input type=text value=${entry[1]}" size=50 style="width:100%;">`).join("<br>")}</p><button>+</button> <button>⧎</button>`
     },
     click: event => {
       let target = event.target
