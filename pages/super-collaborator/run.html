@@ -1,32 +1,61 @@
+<html>
 <head>
   <meta charset="UTF-8">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚗️</text></svg>">
   <script src="https://unpkg.com/@hpcc-js/wasm/dist/index.min.js"></script>
   <script> var hpccWasm = window["@hpcc-js/wasm"]; </script>
-
 </head>
-<table>
-  <tr>
-    <td style="width:25%"><div id=beam onclick=dochoose(event)>
-    <td style="width:75%"><div id=target ondrop="drop(event)" ondragover="over(event)" ondragenter="over(event)">waiting
-</table>
+<body>
+
 <style>
-  table {height:100%; width:100%; border-collapse:collapse;}
-  td, th {border:1px solid gray; padding:8px;}
-  div {height: 100%; background-color:white;}
+  html, body, main { width: 100vw; height: 100vh; margin: 0;}
+  main {
+    display: grid;
+    grid-template-areas:
+      "beam   target"
+      "create target"
+      "chat   target";
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 2fr 4fr 1fr;
+  }
+  #beam   {grid-area:beam; background-color:palegreen;}
+  #create {grid-area:create; background-color:bisque;}
+  #target {grid-area:target; overflow:scroll;}
+  #chat   {grid-area:chat; background-color:lightblue;}
+  #beam, #create, #chat {
+    margin:4px;
+    padding:8px;
+    overflow-y: scroll;
+ }
 </style>
+
+<main>
+  <div id="beam" onclick="dochoose(event)"></div>
+  <div id="target" ondrop="drop(event)" ondragover="over(event)" ondragenter="over(event)"></div>
+  <div id="create"></div>
+  <div id="chat">
+    <div id="textOut"></div>
+    <input id="textIn" type="text" onkeydown="event.keyCode == 13 && sendButton.onclick()"/>
+    <input id="sendButton" type="button" value = "Send" />
+  </div>
+</main>
+
+<script src="https://unpkg.com/@croquet/croquet"></script>
 <script type=module>
 
-
-  const uniq = (value, index, self) => self.indexOf(value) === index
   import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
+  import {drop} from './drop.js'
+  import {composite} from './composite.js'
+  import {dotify} from './dotify.js'
+  import {create} from './create.js'
 
+  const croquet = {model:null, view:null}
 
-  const names = ['beauty','diagram','gamma','instantiation','life','modeler','morning','thing']
-  const graphs = await Promise.all(names
-    .map(n => Graph.fetch(`http://ward.dojo.fed.wiki/assets/pages/daily-haiku-graph/${n}.graph.json`)))
-  window.beam.innerHTML = `${names.map((n,i) => `<input type=checkbox value=${i}>${n}`).join("<br>")}`
-
+  const created = {name:'empty', graph:new Graph()}
+  create(window.create, graph => {
+    // Object.assign(created, {name:graph.nodes[0]?.props?.name||'void', graph});
+    // refresh()
+  })
 
   window.over = function (event) {
     event.preventDefault()
@@ -34,128 +63,192 @@
 
   window.drop = async function (event) {
     event.preventDefault();
-    const concepts = await drop(event)
-    composite(concepts.map(c => c.graph))
+    const poems = await drop(event)
+    croquet.view.send(`drop ${poems.map(poem => poem.name).join(', ')}`)
+    croquet.view.newPoems(poems)
+    // display(poems)
   }
 
-  async function drop (event) {
-    let files
-    if (event.dataTransfer.items) {
-      files = [...event.dataTransfer.items]
-        .filter(item => item.kind === 'file')
-        .map(item => item.getAsFile())
+  window.dochoose = refresh
+
+  function refresh() {
+    const checked = [...window.beam.querySelectorAll('input[type=checkbox]:checked')]
+    const beam = croquet.view.beam()
+    const chosen = checked.map(e => beam[e.value])
+    display([...chosen,created])
+  }
+
+  let drawing = false
+  function display(chosen) {
+    if(!drawing){
+      drawing = true
+      const complex = composite(chosen)
+      hpccWasm.graphviz.layout(dotify(complex), "svg", "dot").then(svg => {
+        target.innerHTML = svg;
+        drawing = false
+      })
     } else {
-      files = [...event.dataTransfer.files]
+      console.log('display: skipping', chosen)
     }
-    const want = files.filter(file =>
-      file.name.endsWith('.graph.json') &&
-      file.type === 'application/json')
-    const concepts = []
-    for (const file of want) {
-      const name = file.name.replace('.graph.json','')
-      const graph = await file.text()
-        .then(text => JSON.parse(text))
-        .then(({nodes,rels}) => {return new Graph(nodes, rels)})
-      concepts.push({name, graph})
-    }
-    return concepts
   }
 
 
-  window.dochoose = function (event) {
-    const chosen = [...window.beam.querySelectorAll('input[type=checkbox]:checked')]
-      .map(e => graphs[e.value])
-    composite(chosen)
-  }
+  class BeamModel extends Croquet.Model {
 
-
-  function composite(graphs) {
-    const merged = {nids:[]}
-    const comp = new Graph()
-
-    for (const graph of graphs) {
-      merge(comp,graph,'somewhere')
+    init() {
+      this.views = new Map();
+      this.participants = 0;
+      this.history = []; // { viewId, html } items
+      this.beam = []; //{name, graph}
+      this.lastPostTime = null;
+      this.inactivity_timeout_ms = 60 * 1000 * 20; // constant
+      this.subscribe(this.sessionId, "view-join", this.viewJoin);
+      this.subscribe(this.sessionId, "view-exit", this.viewExit);
+      this.subscribe("input", "newPost", this.newPost);
+      this.subscribe("input", "reset", this.resetHistory);
+      this.subscribe("input", "newPoems", this.newPoems);
+      croquet.model = this
     }
-    hpccWasm.graphviz.layout(dotify(comp), "svg", "dot").then(svg => {
-      target.innerHTML = svg;
-    })
 
-    function merge(comp,incr,source) {
+    static types() {
+      return {
+        "Graph": Graph
+      };
+    }
 
-      function mergeprops(into,from) {
-        const keys = Object.keys(into)
-          .concat(Object.keys(from))
-          .filter(uniq)
-        for (const key of keys) {
-          if (into[key]) {
-            // if (from[key] && into[key] != from[key]) {
-            //   window.result.innerHTML +=
-            //     `<div style="font-size:small; padding:4px; background-color:#fee; border-radius:4px; border:1px solid #aaa;">
-            //       conflict for "${key}" property<br>
-            //       choosing "${into[key]}" over "${from[key]}"</div>`
-            // }
-          }
-          else {
-            if(from[key]) {
-              into[key] = from[key]
-            }
-          }
-        }
+    viewJoin(viewId) {
+      const existing = this.views.get(viewId);
+      if (!existing) {
+        const nickname = this.randomName();
+        this.views.set(viewId, nickname);
       }
-
-      const nids = {}  // incr => comp
-      incr.nodes.forEach((node,id) => {
-        const match = comp.nodes.find(each =>
-          each.type == node.type &&
-          each.props.name == node.props.name)
-        if(match) {
-          // window.result.innerHTML += `Same <b>${match.type}</b> ${match.props.name}<br>`
-          nids[id] = comp.nodes.findIndex(node => node === match)
-          merged.nids.push(nids[id])
-          mergeprops(match.props, node.props)
-        } else {
-          nids[id] = comp.addNode(node.type,node.props)
-        }
-      })
-      incr.rels.forEach(rel => {
-        const match = comp.rels.find(each =>
-          each.type == rel.type &&
-          each.from == nids[rel.from] &&
-          each.to == nids[rel.to]
-        )
-        if(match) {
-          // window.result.innerHTML += `Same
-          //   <b>${comp.nodes[match.from].type}</b> ${comp.nodes[match.from].props.name}
-          //   <b>${match.type}</b> ▷
-          //   ${comp.nodes[match.to].type} ${comp.nodes[match.to].props.name}<br>`
-          mergeprops(match.props, rel.props)
-        } else {
-          rel.props.source = source
-          comp.addRel(rel.type, nids[rel.from], nids[rel.to], rel.props)
-        }
-      })
+      this.participants++;
+      this.publish("viewInfo", "refresh");
     }
 
-    function dotify(graph) {
-      const nodes = graph.nodes.map((node,id) => {
-        const label = `${node.type}\n${node.props['name']}`
-        return `${id} [label="${label}"]`
-      })
-      const edges = graph.rels.map(rel => {
-        return `${rel.from}->${rel.to} [label="${rel.type}" labeltooltip="${rel.props.source}"]`
-      })
-      return [
-        'digraph {',
-        'node [shape=box style=filled fillcolor=gold]',
-        'rankdir=TB',
-        ...merged.nids,
-        'node [fillcolor=lightgreen]',
-        ...nodes,
-        ...edges,
-        '}'].join("\n")
+    viewExit(viewId) {
+      this.participants--;
+      this.views.delete(viewId);
+      this.publish("viewInfo", "refresh");
+    }
+
+    newPost(post) {
+      const postingView = post.viewId;
+      const nick = this.views.get(postingView);
+      const chat = this.escape(post.chat);
+      this.addToHistory({ viewId: postingView, nick, chat });
+      this.lastPostTime = this.now();
+      this.future(this.inactivity_timeout_ms).resetIfInactive();
+    }
+
+    newPoems(poems) {
+      this.addToBeam(poems)
+    }
+
+    addToHistory(item){
+      this.history.push(item);
+      if (this.history.length > 100) this.history.shift();
+      this.publish("history", "refresh");
+    }
+
+    addToBeam(poems) {
+      this.beam.push(...poems)
+      this.publish("beam", "refresh")
+    }
+
+    resetIfInactive() {
+      if (this.lastPostTime !== this.now() - this.inactivity_timeout_ms) return;
+      this.resetHistory("due to inactivity");
+    }
+
+    resetHistory(reason) {
+      this.history = [{ nick:'system', chat: `reset ${reason}` }];
+      if (reason == "at user request") this.beam = []
+      this.lastPostTime = null;
+      this.publish("history", "refresh");
+      this.publish("beam", "refresh")
+    }
+
+    escape(text) { // Clean up text to remove html formatting characters
+      return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    randomName() {
+      return (Math.random()*1000000).toFixed(0)
+    }
+
+  }
+
+  BeamModel.register("BeamModel");
+
+  class BeamView extends Croquet.View {
+
+    constructor(model) {
+      super(model);
+      this.model = model;
+      sendButton.onclick = () => {this.send(textIn.value); textIn.value = "";};
+      this.subscribe("history", "refresh", this.refreshHistory);
+      this.subscribe("viewInfo", "refresh", this.refreshViewInfo);
+      this.subscribe("beam", "refresh", this.refreshBeam);
+      this.refreshHistory();
+      this.refreshViewInfo();
+      this.refreshBeam()
+
+      if (model.participants === 1 &&
+        !model.history.find(item => item.viewId === this.viewId)) {
+        this.publish("input", "reset", "for new user");
+      }
+      croquet.view = this
+    }
+
+    send(text) {
+      if (text === "/reset") {
+        this.publish("input", "reset", "at user request");
+      } else {
+        this.publish("input", "newPost", {viewId: this.viewId, nick:'system', chat:text});
+      }
+    }
+
+    newPoems(poems) {
+      this.publish("input", "newPoems", poems)
+    }
+
+    refreshViewInfo() {
+      console.log('users', this.model.participants)
+    }
+
+    refreshHistory() {
+      textOut.innerHTML = this.model.history
+        .map(item => `${item.nick}: ${item.chat}`).join("<br>");
+      sendButton.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
+    }
+
+    refreshBeam() {
+      const want = [...window.beam.querySelectorAll('input[type=checkbox]:checked')]
+        .map(e => +e.value)
+      const names = this.model.beam.map(poem => poem.name)
+      window.beam.innerHTML = names.map((n,i) =>
+          `<input type=checkbox value=${i} ${want.includes(i)?'checked':''}>${n}`)
+        .join("<br>")
+      window.beam.querySelector('input:last-of-type')
+        .scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
+    }
+
+    beam() {
+      return this.model.beam
     }
   }
-  
+
+  Croquet.Session.join({
+    apiKey: '1MNinyGopbyxFzgx3HupBoCAryFb6yNOIihx6Omx9',
+    appId: 'com.gmail.ward.cunningham.collaborator',
+    name: "unnamed",
+    password: "secret",
+    model: BeamModel,
+    view: BeamView
+  })
+
+
 </script>
-
-
+</body>
+</html>
