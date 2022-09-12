@@ -6,32 +6,43 @@ const dup = obj => JSON.parse(JSON.stringify(obj))
 
 
 const schema = await Graph.fetch('./action.schema.json')
-const sample = await Graph.fetch('https://wiki.ralfbarkow.ch/assets/pages/daily-haiku-graph/beauty.graph.json')
 
-export function create(result, update) {
-  // result.innerHTML = `Organize for Action`
+export function create(pane, creating) {
 
   let s = schema
-  let g = new Graph()
+  let g = null
 
   let stride = {}
   let lineup = []
 
+  pane.innerHTML = `
+    <div></div>
+    <input type="button" value=done onclick=dodone() disabled style="float:right">
+  `
+  const result = pane.querySelector('div')
+  const done = pane.querySelector('input')
+
   stride.new = {
     render: div => {
       let keys = Object.keys(s.tally().nodes)
-      div.innerHTML = `<p>${keys.map(type =>
+      done.disabled = true
+      div.innerHTML = `<p>
+        ${keys.map(type =>
         `<span>${type}</span>`).join("<br>")}</p>`
     },
     click: event => {
       let target = event.target
       if(target.tagName=='SPAN') {
+        if(g) creating.finish(g)
         bold(target)
         let line = event.target.closest("[data-line]").dataset.line
         let name = target.innerText
         let model = s.n(name).map(node => node)[0]
+        g = new Graph()
         let nid = g.addNode(model.type,dup(model.props))
         let props = g.nodes[nid].props
+        done.disabled = false
+        creating.start(g)
         drill(line, stride.fill, {nid,props})
       }
     }
@@ -88,7 +99,7 @@ export function create(result, update) {
       let here = s.n(node.type).map(node => node)[0]
       let i = here.in.map(rid => `<span>${s.nodes[s.rels[rid].from].type} ${s.rels[rid].type} ▷</span> ${name}`)
       let o = here.out.map(rid => `${name} <span>▷ ${s.rels[rid].type} ${s.nodes[s.rels[rid].to].type}</span>`)
-      console.log({nid, i, o})
+      // console.log({nid, i, o})
       div.innerHTML = `<hr><p>${[...o, ...i].join("<br>")}</p>`
     },
     click: event => {
@@ -131,11 +142,17 @@ export function create(result, update) {
     step.render(div)
     result.append(div)
     div.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
-    update(g)
+    if(g) creating.update(g)
     // window.parent.postMessage({action: "resize",height: document.body.offsetHeight}, "*")
   }
 
   drill(-1,stride.new, {})
+
+  window.dodone = function() {
+        creating.finish(g)
+        g = null
+        drill(-1,stride.new, {})
+  }
 
   function bold(target) {
     target.closest('p').querySelectorAll('span').forEach(span =>
