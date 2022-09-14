@@ -75,6 +75,7 @@ export class BeamModel extends Croquet.Model {
       this.beam.splice(index,1)
     }
     this.publish("beam", "refresh")
+    window.beam.querySelectorAll('input').forEach(e => e.checked = false)
   }
 
   addToHistory(item){
@@ -150,6 +151,14 @@ export class BeamView extends Croquet.View {
         .map(poem => poem.name.toLowerCase().replace(/[^a-z0-9]/g,''))
         .filter(uniq).sort().join('-') + '.graph.json'
       return download(poem.graph.stringify(null,2),filename,'application/json')
+    }
+    if (text.startsWith('/match ')) {
+      const query = text.slice(1)
+      const inputs = [...window.beam.querySelectorAll('input[type=checkbox]')]
+      this.model.beam.forEach((poem,i) => {
+        inputs[i].checked = !!poem.graph.search(query).length
+      })
+      return window.dochoose({})
     }
     this.publish("input", "newPost", {viewId: this.viewId, nick:'system', chat:text});
   }
