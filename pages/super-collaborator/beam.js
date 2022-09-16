@@ -1,4 +1,5 @@
-import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
+import {Graph} from './graph.js'
+import * as cypher from './cypher.js'
 import {composite} from './composite.js'
 
 export const croquet = {model:null, view:null}
@@ -141,6 +142,7 @@ export class BeamView extends Croquet.View {
     if (text === "/remove") {
       const indices = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
         .map(e => +e.value)
+      window.target.innerHTML = ''
       return this.publish("input", "remove", indices)
     }
     if (text === "/download") {
@@ -153,10 +155,14 @@ export class BeamView extends Croquet.View {
       return download(poem.graph.stringify(null,2),filename,'application/json')
     }
     if (text.startsWith('/match ')) {
-      const query = text.slice(1)
+      const tree = cypher.parse(text.slice(1))
+      if(!tree[0][0]) {
+        return setTimeout(() => {window.textIn.value = `/${cypher.left}`},100)
+      }
+      const code = cypher.gen(0,tree[0][0],{})
       const inputs = [...window.beam.querySelectorAll('input[type=checkbox]')]
       this.model.beam.forEach((poem,i) => {
-        inputs[i].checked = !!poem.graph.search(query).length
+        inputs[i].checked = !!(cypher.apply(poem.graph,code).length)
       })
       return window.dochoose({})
     }
