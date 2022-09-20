@@ -1,0 +1,265 @@
+{
+  "nodes": [
+    {
+      "type": "Learner",
+      "in": [],
+      "out": [
+        0,
+        5,
+        7,
+        14
+      ],
+      "props": {
+        "name": "Bobbie"
+      }
+    },
+    {
+      "type": "Curiosity",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Horses"
+      }
+    },
+    {
+      "type": "Wonderment",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Taming"
+      }
+    },
+    {
+      "type": "Surprise",
+      "in": [
+        2
+      ],
+      "out": [
+        3
+      ],
+      "props": {
+        "name": "Practices"
+      }
+    },
+    {
+      "type": "Curiosity",
+      "in": [
+        3
+      ],
+      "out": [
+        4
+      ],
+      "props": {
+        "name": "Systems"
+      }
+    },
+    {
+      "type": "Wonderment",
+      "in": [
+        4,
+        5,
+        9,
+        10
+      ],
+      "out": [
+        6
+      ],
+      "props": {
+        "name": "Cultivating Relationship"
+      }
+    },
+    {
+      "type": "Surprise",
+      "in": [
+        6,
+        7
+      ],
+      "out": [
+        8
+      ],
+      "props": {
+        "name": "Friendship"
+      }
+    },
+    {
+      "type": "Curiosity",
+      "in": [
+        8
+      ],
+      "out": [
+        9,
+        11
+      ],
+      "props": {
+        "name": "Friends"
+      }
+    },
+    {
+      "type": "Curiosity",
+      "in": [
+        13,
+        14
+      ],
+      "out": [
+        10
+      ],
+      "props": {
+        "name": "Values"
+      }
+    },
+    {
+      "type": "Wonderment",
+      "in": [
+        11
+      ],
+      "out": [
+        12
+      ],
+      "props": {
+        "name": "System Dynamics"
+      }
+    },
+    {
+      "type": "Surprise",
+      "in": [
+        12
+      ],
+      "out": [
+        13
+      ],
+      "props": {
+        "name": "Connection"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Follows",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Reaches",
+      "from": 1,
+      "to": 2,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Creates",
+      "from": 2,
+      "to": 3,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Inspires",
+      "from": 3,
+      "to": 4,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Reaches",
+      "from": 4,
+      "to": 5,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Explores",
+      "from": 0,
+      "to": 5,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Creates",
+      "from": 5,
+      "to": 6,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Has",
+      "from": 0,
+      "to": 6,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Inspires",
+      "from": 6,
+      "to": 7,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Reaches",
+      "from": 7,
+      "to": 5,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Reaches",
+      "from": 8,
+      "to": 5,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Reaches",
+      "from": 7,
+      "to": 9,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Creates",
+      "from": 9,
+      "to": 10,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Inspires",
+      "from": 10,
+      "to": 8,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    },
+    {
+      "type": "Follows",
+      "from": 0,
+      "to": 8,
+      "props": {
+        "source": "bobbie-learning2"
+      }
+    }
+  ]
+}
