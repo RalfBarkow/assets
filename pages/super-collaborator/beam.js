@@ -23,7 +23,7 @@ export class BeamModel extends Croquet.Model {
     this.subscribe("input", "newPost", this.newPost);
     this.subscribe("input", "reset", this.resetHistory);
     this.subscribe("input", "remove", this.removePoems);
-    this.subscribe("input", "newPoems", this.newPoems);
+    this.subscribe("input", "newPoems", this.addToBeam);
     this.subscribe("input", "updatePoem", this.updatePoem);
     croquet.model = this
   }
@@ -59,13 +59,9 @@ export class BeamModel extends Croquet.Model {
     this.future(this.inactivity_timeout_ms).resetIfInactive();
   }
 
-  newPoems(poems) {
-    this.addToBeam(poems)
-  }
-
   updatePoem(opt) {
     const poem = this.beam[opt.index]
-    const name = opt.graph.nodes[0].props.name || ''
+    const name = opt.graph.nodes[0].props.name || opt.graph.nodes[0].type || ''
     poem.name = name+opt.suffix
     poem.graph = opt.graph
     this.publish("beam", "refresh")
@@ -120,6 +116,8 @@ export class BeamView extends Croquet.View {
   constructor(model) {
     super(model);
     this.model = model;
+    this.recall = []
+    textIn.addEventListener('keydown', (event) => {if(event.keyCode==38) {textIn.value = this.recall.pop()||''}})
     sendButton.onclick = () => {this.send(textIn.value); textIn.value = "";};
     this.subscribe("history", "refresh", this.refreshHistory);
     this.subscribe("viewInfo", "refresh", this.refreshViewInfo);
@@ -136,6 +134,7 @@ export class BeamView extends Croquet.View {
   }
 
   send(text) {
+    if (text.startsWith('/')) this.recall.push(text)
     if (text === "/reset") {
       return this.publish("input", "reset", "at user request");
     }
@@ -150,11 +149,11 @@ export class BeamView extends Croquet.View {
         .map(e => this.beam()[+e.value])
       const poem = composite(poems)
       const filename = poems
-        .map(poem => poem.name.toLowerCase().replace(/[^a-z0-9]/g,''))
+        .map(poem => poem.name.replace(/[^a-zA-Z0-9]/g,''))
         .filter(uniq).sort().join('-') + '.graph.json'
       return download(poem.graph.stringify(null,2),filename,'application/json')
     }
-    if (text.startsWith('/match ')) {
+    if (text.startsWith("/match")) {
       const tree = cypher.parse(text.slice(1))
       if(!tree[0][0]) {
         return setTimeout(() => {window.textIn.value = `/${cypher.left}`},100)
@@ -193,7 +192,8 @@ export class BeamView extends Croquet.View {
       .map(e => +e.value)
     const names = this.model.beam.map(poem => poem.name || poem.graph.nodes[0].type)
     window.beamlist.innerHTML = names.map((n,i) =>
-        `<input type=checkbox value=${i} id=n${i} ${want.includes(i)?'checked':''}>
+        `<font color=gray size=1>${i}</font>
+        <input type=checkbox value=${i} id=n${i} ${want.includes(i)?'checked':''}>
         <label for=n${i}>${n}<sup>${this.model.beam[i].graph.nodes.length}</sup></label>`)
       .join("<br>")
     const last = window.beamlist.querySelector('input:last-of-type')
