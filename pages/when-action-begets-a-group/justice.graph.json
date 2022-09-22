@@ -1,0 +1,69 @@
+{
+  "nodes": [
+    {
+      "type": "Ideal",
+      "in": [
+        0
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Justice",
+        "scope": ""
+      }
+    },
+    {
+      "type": "Action",
+      "in": [
+        1
+      ],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "War",
+        "target": ""
+      }
+    },
+    {
+      "type": "Group",
+      "in": [
+        2
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "members": "",
+        "name": "Survivors"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Serves",
+      "from": 1,
+      "to": 0,
+      "props": {
+        "source": "Justice"
+      }
+    },
+    {
+      "type": "Engages",
+      "from": 2,
+      "to": 1,
+      "props": {
+        "source": "Justice"
+      }
+    },
+    {
+      "type": "Motivates",
+      "from": 0,
+      "to": 2,
+      "props": {
+        "source": "Justice"
+      }
+    }
+  ]
+}
