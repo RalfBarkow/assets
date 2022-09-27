@@ -14,7 +14,7 @@
       }
     },
     {
-      "type": "Ideal",
+      "type": "End",
       "in": [
         0,
         3
