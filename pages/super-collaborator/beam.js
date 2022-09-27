@@ -117,6 +117,7 @@ export class BeamView extends Croquet.View {
     super(model);
     this.model = model;
     this.recall = []
+    this.nextdownload = null
     textIn.addEventListener('keydown', (event) => {if(event.keyCode==38) {textIn.value = this.recall.pop()||''}})
     sendButton.onclick = () => {this.send(textIn.value); textIn.value = "";};
     this.subscribe("history", "refresh", this.refreshHistory);
@@ -125,6 +126,8 @@ export class BeamView extends Croquet.View {
     this.refreshHistory();
     this.refreshViewInfo();
     this.refreshBeam()
+    beam.addEventListener('keydown',this.narrowBeam)
+    beam.addEventListener('keyup',this.narrowBeam)
 
     if (model.participants === 1 &&
       !model.history.find(item => item.viewId === this.viewId)) {
@@ -136,38 +139,70 @@ export class BeamView extends Croquet.View {
   send(text) {
     if (text.startsWith('/')) this.recall.push(text)
     if (text === "/reset") {
-      return this.publish("input", "reset", "at user request");
-    }
+      this.publish("input", "reset", "at user request");
+    } else
     if (text === "/remove") {
       const indices = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
         .map(e => +e.value)
       window.target.innerHTML = ''
-      return this.publish("input", "remove", indices)
-    }
+      this.publish("input", "remove", indices)
+    } else
     if (text === "/download") {
-      const poems = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
-        .map(e => this.beam()[+e.value])
-      const poem = composite(poems)
-      const filename = poems
-        .map(poem => poem.name.replace(/[^a-zA-Z0-9]/g,''))
-        .filter(uniq).sort().join('-') + '.graph.json'
-      return download(poem.graph.stringify(null,2),filename,'application/json')
-    }
+      if (this.nextdownload) {
+        download(...this.nextdownload)
+      } else {
+        const poems = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
+          .map(e => this.beam()[+e.value])
+        const poem = composite(poems)
+        const filename = poems
+          .map(poem => poem.name.replace(/[^a-zA-Z0-9]/g,''))
+          .filter(uniq).sort().join('-') + '.graph.json'
+        download(poem.graph.stringify(null,2),filename,'application/json')
+      }
+    } else
     if (text === "/schema") {
       const poems = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
         .map(e => this.beam()[+e.value])
-      const poem = composite(poems)
-      let rels = poem.graph.rels
-      let nodes = poem.graph.nodes
-      let dot = rels
-        .map(rel => `"${nodes[rel.from].type}" -> "${nodes[rel.to].type}" [label="${rel.type}"]`)
-        .filter(uniq)
-      dot.unshift('node [shape=box style=filled fillcolor=palegreen]')
+      const nodes = []
+      const rels = []
+      const newnid = n => {
+        let nid = nodes.findIndex(node => node.type === n.type)
+        if (nid == -1) {
+          nid = nodes.length
+          nodes.push({type:n.type,in:[],out:[],props:{}})
+        }
+        for (const key of Object.keys(n.props)) {nodes[nid].props[key]=''}
+        return nid
+      }
+      const newrid = (r,from,to) => {
+        let rid = rels.findIndex(rel => rel.type === r.type)
+        if (rid == -1) {
+          rid = rels.length
+          rels.push({type:r.type,from,to,props:{}})
+        }
+        for (const key of Object.keys(r.props)) {rels[rid].props[key]=''}
+        return rid
+      }
+      for (const poem of poems) {
+        for (const rel of poem.graph.rels) {
+          const f = newnid(poem.graph.nodes[rel.from])
+          const t = newnid(poem.graph.nodes[rel.to])
+          const r = newrid(rel,f,t)
+          nodes[f].out.push(r)
+          nodes[t].in.push(r)
+        }
+      }
+      this.nextdownload = [new Graph(nodes,rels).stringify(null,2),'target.schema.json', 'application/json']
+      const tip = props => Object.entries(props).map(e => `${e[0]}: ${e[1]}`).join("\n")
+      const dotn = nodes
+        .map(node => `"${node.type}" [tooltip="${tip(node.props)}"]`)
+      const dotr = rels
+        .map(rel => `"${nodes[rel.from].type}" -> "${nodes[rel.to].type}" [label="${rel.type}" labeltooltip="${tip(rel.props)}"]`)
+      const dot = ['node [shape=box style=filled fillcolor=palegreen]',...dotn, ...dotr]
       hpccWasm.graphviz.layout(`digraph {${dot.join("\n")}}`, "svg", "dot").then(svg => {
         target.innerHTML = svg;
       })
-      return
-    }
+    } else
     if (text.startsWith("/match")) {
       const tree = cypher.parse(text.slice(1))
       if(!tree[0][0]) {
@@ -178,7 +213,7 @@ export class BeamView extends Croquet.View {
       this.model.beam.forEach((poem,i) => {
         inputs[i].checked = !!(cypher.apply(poem.graph,code).length)
       })
-      return window.dochoose({})
+      window.dochoose({})
     }
     this.publish("input", "newPost", {viewId: this.viewId, nick:'system', chat:text});
   }
@@ -203,15 +238,34 @@ export class BeamView extends Croquet.View {
   }
 
   refreshBeam() {
+    this.nextdownload = null
     const want = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
       .map(e => +e.value)
     const names = this.model.beam.map(poem => poem.name || poem.graph.nodes[0].type)
     window.beamlist.innerHTML = names.map((n,i) =>
-        `<input type=checkbox value=${i} id=n${i} ${want.includes(i)?'checked':''}>
-        <label for=n${i}>${n}<sup>${this.model.beam[i].graph.nodes.length}</sup></label>`)
-      .join("<br>")
+        `<div><font color=gray size=1>${i}</font>
+        <input type=checkbox value=${i} id=n${i} ${want.includes(i)?'checked':''}>
+        <label for=n${i}>${n}<sup>${this.model.beam[i].graph.nodes.length}</sup></label></div>`)
+      .join("\n")
     const last = window.beamlist.querySelector('input:last-of-type')
     if(last) last.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
+  }
+
+  narrowBeam(event) {
+    if(event.key === 'Shift') {
+      const items = window.beamlist.querySelectorAll('input[type=checkbox]')
+      const checked = window.beamlist.querySelectorAll('input[type=checkbox]:checked')
+      if (event.type==='keydown' && checked.length) {
+        items.forEach(item => {
+          if(!item.checked && item.nextElementSibling.style.color != 'darkorange')
+            item.parentElement.style.display='none'
+        })
+      } else {
+        items.forEach(item => {
+          item.parentElement.style.display='block'
+        })
+      }
+    }
   }
 
   beam() {
