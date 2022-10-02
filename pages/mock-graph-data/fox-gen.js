@@ -1,5 +1,5 @@
 // read vensim formulas from our first js translation, emit as an equivalent graph
-// usage: deno run allow-read=. fox-gen.js
+// usage: deno run --allow-read=. fox-gen.js
 
 import {Graph} from 'http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/graph.js'
 const graph = new Graph()
