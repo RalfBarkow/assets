@@ -20,7 +20,7 @@
  window.choices.innerHTML = graphs.map((asset,idx) =>
      `<input type=radio name=choice value=${idx}> ${asset.file}`).join("<br>")
  resize()
-
+ 
  window.dotarget = function (event) {
      const chosen = graphs[event.target.value]
      console.log(chosen)
