@@ -6,9 +6,9 @@
 <div id=menu></div>
 <div id=result></div>
 <script type=module>
-  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
   import * as tell from './telling.js'
-  import {Graph} from 'http://ward.dojo.fed.wiki/assets/pages/mock-graph-data/graph.js'
+  import {Graph} from 'https://wiki.ralfbarkow.ch/assets/pages/mock-graph-data/graph.js'
   const wordcount = story => story.reduce((sum,item) => sum + (item.text||'').split(/\s+/).length, 0)
   const uniq = (value, index, self) => self.indexOf(value) === index
 
@@ -89,9 +89,9 @@
   async function exporter (event, selected) {
     const beam = []
     let graph, nid
+    const works = []
+    const linear = new Set()
 
-    let story = []
-    let works = []
 
     for (let want of selected) {
       try {
@@ -99,41 +99,78 @@
         let site = item.site
         let page = await fetch(`//${site}/${frame.asSlug(item.title)}.json`).then(res => res.json())
         let context = tell.sites(page,site)
-        works.push({page,site,context})
+        works.push({page,site,context,story:[]})
       } catch (err) {
         console.log(`Trouble with ${want}\n${err.message}`)
       }
     }
 
     for (let work of works) {
-      const author = new Graph()
-      author.addNode('Work',{name:work.page.title,site:work.site})
-      beam.push({name:work.page.title, graph:author})
       let folds = tell.folded(work.page.story, ['told','more'])
       let more = folds.more.filter(item => item.type != 'frame')
       for (const item of more) {
         if(item.type == 'paragraph') {
           const title = tell.linked([item])[0]
           const site = await tell.find(frame.asSlug(title),work.context)
-          if (site) {
-            const type = `${site[0].toUpperCase()}${0}`
-            author.addRel(type,0,author.addNode('Page',{name:title}))
-            const gateway = new Graph()
-            gateway.addNode('Page',{name:title})
-            beam.push({name:title, graph:gateway})
-            await diagram(gateway,0,frame.asSlug(title),site,work.context,1)
-          } else {
-            author.addRel('X',0,author.addNode('Remote',{name:title}))
-          }
+          console.log('work',{title,site,context:work.context})
+          work.story.push({title,site})
+          linear.add(frame.asSlug(title))
         }
       }
     }
+
+    // // Flat Story (horizontal)
+    // for (let work of works) {
+    //   const author = new Graph()
+    //   author.addNode('Work',{name:work.page.title,site:work.site})
+    //   beam.push({name:work.page.title, graph:author})
+    //   for (const {title,site} of work.story) {
+    //     if (site) {
+    //       const type = `${site[0].toUpperCase()}${0}`
+    //       author.addRel(type,0,author.addNode('Story',{name:title}))
+    //     } else {
+    //       author.addRel('X',0,author.addNode('Remote',{name:title}))
+    //     }
+    //   }
+    // }
+
+
+    // String Story (vertical)
+    for (const work of works) {
+      const author = new Graph()
+      const title = '► '+work.page.title.replaceAll(/(More|Telling) */g,'')
+      let nid = author.addNode('Work',{name:title,site:work.site})
+      beam.push({name:title, graph:author})
+      let nnid
+      for (const {title,site} of work.story) {
+        if (site) {
+          const type = `${site[0].toUpperCase()}${0}`
+          nnid = author.addNode('Story',{name:title})
+          author.addRel(type,nid,nnid)
+          await diagram(author,nnid,frame.asSlug(title),site,work.context,1)
+        } else {
+          nnid = author.addNode('Remote',{name:title})
+          author.addRel('X',nid,nnid)
+        }
+        nid = nnid
+      }
+    }
+
+
+
+    // const gateway = new Graph()
+    // gateway.addNode('Page',{name:title})
+    // beam.push({name:title, graph:gateway})
+    // await diagram(gateway,0,frame.asSlug(title),site,work.context,1)
+
 
     async function diagram(graph,nid,slug0,site0,context,depth) {
       const sitemap0 = tell.sitemaps[site0]
       const info0 = sitemap0.find(info => info.slug == slug0)
       const links = Object.keys(info0.links||{})
+      console.log({nid,site0,slug0,links})
       for (const slug of links) {
+        if(linear.has(slug) || Math.random()>0.33) continue
         const site = await tell.find(slug,context)
         if (site) {
           const sitemap = tell.sitemaps[site]
@@ -141,8 +178,9 @@
           const type = `${site[0].toUpperCase()}${depth}`
           if (info?.title) {
             const nnid = graph.addNode('Page',{name:info.title})
+            console.log({nnid,depth,slug,info})
             graph.addRel(type,nid,nnid)
-            if (depth <= 2) {
+            if (depth < 1) {
               await diagram(graph,nnid,slug,site,context,depth+1)
             }
           } else {
@@ -156,7 +194,7 @@
     }
 
     const jsons = beam.map(item => JSON.stringify(item))
-    frame.download(jsons.join("\n"),'Garden Preview.jsonl','application/json')
+    frame.download(jsons.join("\n"),'Garden Preview.json','application/json')
   }
 
 </script>
