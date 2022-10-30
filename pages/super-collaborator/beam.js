@@ -122,6 +122,7 @@ export class BeamView extends Croquet.View {
   constructor(model) {
     super(model);
     this.model = model;
+    croquet.view = this
     this.recall = []
     this.nextdownload = null
     textIn.addEventListener('keydown', (event) => {if(event.keyCode==38) {textIn.value = this.recall.pop()||''}})
@@ -142,7 +143,6 @@ export class BeamView extends Croquet.View {
     }
     const m = document.cookie.match(/\bface=(\d+)\b/)
     if (m) this.publish('input','newName',{viewId:this.viewId, nickname:emoji[+m[1]]})
-    croquet.view = this
   }
 
   send(text) {
@@ -168,6 +168,11 @@ export class BeamView extends Croquet.View {
           .filter(uniq).sort().join('-') + '.graph.json'
         download(poem.graph.stringify(null,2),filename,'application/json')
       }
+    } else
+    if (text === "/export") {
+      const stream = this.beam().map(item => JSON.stringify(item)).join("\n")
+      const date = new Date().toISOString().split('T')[0]
+      download(stream,`${date}Z.jsonl`,'application/json')
     } else
     if (text === "/schema") {
       const poems = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
@@ -250,6 +255,8 @@ export class BeamView extends Croquet.View {
     this.nextdownload = null
     const want = [...window.beamlist.querySelectorAll('input[type=checkbox]:checked')]
       .map(e => +e.value)
+    console.log('refreshBeam',want)
+    // if (!want.length) window.dochoose({})
     const names = this.model.beam.map(poem => poem.name || poem.graph.nodes[0].type)
     window.beamlist.innerHTML = names.map((n,i) =>
         `<div><font color=gray size=1>${i}</font>

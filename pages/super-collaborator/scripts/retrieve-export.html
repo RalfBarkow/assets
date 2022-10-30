@@ -1,0 +1,30 @@
+<table><tr>
+  <td><div id=exports>working</div>
+  <td><div id=graphs></div>
+</table>
+<style>
+  td {vertical-align:top; padding:4px;}
+</style>
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  const assets = await frame.assets()
+  const exports = assets.filter(asset => asset.file.endsWith('.jsonl'))
+  let items
+  console.log(exports)
+  window.exports.innerHTML = exports.map((asset,i) => 
+    `<span onclick=doshow(${i})>${asset.file.replace(/\.jsonl$/,'')}</span>`).join("<br>\n")
+
+  window.doshow = async i => {
+    // window.graphs.innerHTML = `<pre>${JSON.stringify(exports[i],null,2)}</pre>`
+    window.graphs.innerHTML = ''
+    const text = await fetch(exports[i].url).then(res => res.text())
+    items = text.split(/\n/).map(json => JSON.parse(json))
+    window.graphs.innerHTML = items.map((item,i) =>
+      `<span onclick=doplot(${i})>${item.name}</span>`).join('<br>')
+  }
+
+  window.doplot = i => {
+    console.log(items[i])
+  }
+
+</script>

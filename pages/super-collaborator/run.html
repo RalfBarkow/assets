@@ -53,13 +53,29 @@
       <input id="loginButton" type="button" style="margin-left:6" value = "☺" />
     </div>
   </div>
+  <div id=floater style="position:absolute; border:1px solid; background-color:white; overflow-wrap:break-word; padding:4px; width:200px; height:200px;" data-cid="" hidden>
+    <svg viewBox="0 0 100 100">
+      <polyline
+        id="grid"
+        points="0,0 0,100 100,100 100,0 0,0"
+        stroke="#ccc" fill="none"/>
+      <polyline
+        id="growing"
+        points="100,100"
+        fill="none"
+        stroke="brown"
+        stroke-width=".5"
+        stroke-linejoin="round"/>
+    </svg>
+    <div id=controls></div>
+  </div>
 </main>
 
 <script src="https://unpkg.com/@croquet/croquet"></script>
 <script type=module>
 
   import {Graph} from './graph.js'
-  import {drop} from './drop.js'
+  import {drop,dropl} from './drop.js'
   import {composite} from './composite.js'
   import {dotify} from './dotify.js'
   import * as injector from './create.js'
@@ -67,6 +83,7 @@
   import * as sim from './sim.js'
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+  const params = Object.fromEntries(new URLSearchParams(location.search).entries())
 
   const creating = {
     index: -1,
@@ -92,7 +109,15 @@
     event.preventDefault();
     switch (event.target.closest('div[ondrop]').id) {
       case "beam":
-        croquet.view.newPoems(await drop(event, '.graph.json'))
+        const poems = [
+          ...await dropl(event, '.jsonl'),
+          ...await drop(event, '.graph.json')
+        ]
+        for (const poem of poems) {
+          croquet.view.newPoems([poem])
+          await delay(5)
+          console.log('poem',poem)
+        }
         break
       case "create":
         injector.schema((await drop(event, '.schema.json'))[0].graph)
@@ -107,7 +132,7 @@
     croquet.view.nextdownload = null
     const checked = [...window.beam.querySelectorAll('input[type=checkbox]:checked')]
     const beam = croquet.view.beam()
-    const chosen = checked.map(e => beam[e.value])
+    const chosen = checked.map(e => Object.assign({index:e.value},beam[e.value]))
     display(chosen)
     recommend(chosen)
   }
@@ -139,6 +164,7 @@
     if(!drawing){
       drawing = true
       if (siminterval) clearInterval(siminterval)
+      floater.hidden = true
       const complex = composite(chosen)
       try {
         hpccWasm.graphviz.layout(dotify(complex), "svg", "dot").then(svg => {
@@ -149,10 +175,77 @@
         console.log('display error', err)
         drawing = false
       }
-      await delay(500)
+      await delay(500);
       const nodes = Object.fromEntries([...target.querySelectorAll('.node')]
         .map(node => [node.querySelector('title').textContent,node]))
-      siminterval = sim.start(nodes,complex.graph,100)
+      const neq = (a,b) => a.type == b.type && a.props.name == b.props.name
+      const name = node => `${node.type}:${node.props.name}`
+      for(const cid in nodes){
+        if(complex.graph.nodes[cid].type != 'Variable') break
+        nodes[cid].addEventListener('click',event => {
+          event.preventDefault()
+          event.stopPropagation()
+          const picks = chosen.filter(entry =>
+            entry.graph.nodes.find(node =>
+              neq(node, complex.graph.nodes[cid])))
+          const pick = picks[0]
+          const nid = pick.graph.nodes.findIndex(node => neq(node,complex.graph.nodes[cid]))
+          const g = complex.graph
+          const n = g.nodes[cid]
+          console.log(pick.index, pick.name, cid, nid, name(n))
+          window.props = complex.graph.nodes[cid].props
+          window.save = () => croquet.view.updatePoem(pick.index,pick.graph,"*")
+          floater.style.left = event.clientX+5
+          floater.style.top = event.clientY+5
+          growing.setAttribute('points','100,100')
+          floater.dataset.cid = cid
+          const slide = () => `<input type=range min=0 max=100 value=50 style="width: 100%">`
+          const nslide = (n,p) => n.props.hasOwnProperty(p) ? `${n.props.name} ${p}: <span>${n.props[p]}</span>${slide()}` : ''
+          const rslide = (r,rate) => r.props.hasOwnProperty(rate) ? `${r.type} ${rate}: <span>${r.props[rate]}</span>${slide()}` : ''
+          controls.innerHTML = `<p>
+            ${['wax','wane'].map(p => nslide(n,p)).join('')}
+            ${n.in.map(rid => {const r = g.rels[rid]; return rslide(r,'orate')}).join('')}
+            ${n.out.map(rid => {const r = g.rels[rid]; return rslide(r,'irate')}).join('')}
+          `
+          floater.hidden=false
+        })
+        // nodes[cid].addEventListener('mouseleave',event => {
+        //   floater.hidden=true
+        // })
+      }
+      const tick = (nid,value) => {
+        if(+(floater.dataset.cid) == +nid) {
+          let points = growing.getAttribute('points')
+          let samples = points.split(' ')
+            .map(pair => {
+              let [x,y] = pair.split(',')
+              return [x-1,y].join(',')
+            })
+          if (samples.length >= 100) samples.shift()
+          samples.push([100,100-Math.max(0,Math.min(100,value))].join(','))
+          growing.setAttribute('points', samples.join(' '))
+
+        }
+      }
+
+      siminterval = sim.start(nodes,complex.graph,tick);
+      [...target.querySelectorAll('a')]
+        .filter(n=>n.textContent.match(/☑|☐/))
+        .map(n => {
+          n.addEventListener('click',event => {
+            event.preventDefault()
+            event.stopPropagation()
+            const texts = n.querySelectorAll('text')
+            texts.forEach(text => {
+              if (text.textContent.match(/☐/))
+                text.textContent = text.textContent.replace('☐','☑')
+              else
+                text.textContent = text.textContent.replace('☑','☐')
+            })
+            clearInterval(siminterval)
+            siminterval = sim.start(nodes,complex.graph,tick)
+          })
+        })
     } else {
       console.log('display: skipping', chosen)
     }
@@ -167,14 +260,15 @@
     view: BeamView
   })
 
-  Croquet.Session.join({
+  const session = await Croquet.Session.join({
     apiKey: '1MNinyGopbyxFzgx3HupBoCAryFb6yNOIihx6Omx9',
     appId: 'com.gmail.ward.cunningham.collaborator',
-    name: "unnamed",
+    name: params.name || "unnamed",
     password: "secret",
     model: BeamModel,
     view: BeamView
   })
+  console.log(session)
 
 </script>
 </body>
