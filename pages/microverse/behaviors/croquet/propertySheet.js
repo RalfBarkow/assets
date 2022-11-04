@@ -75,35 +75,22 @@ class PropertySheetActor {
     setObject(target) {
         console.log("setObject");
         this.target = target;
-        this.menuWindow = this.newWindow({x: 1, y: 1.5}, {x: 0.9, y: 0.4});
-        this.behaviorMenu = this.createCard({
-            name: 'behavior menu',
-            behaviorModules: ["BehaviorMenu"],
-            translation: [0, 0, 0.08],
-            color: 0xcccccc,
-            backgroundColor: 0xcccccc,
-            width: this.menuWindow._cardData.width,
-            height: this.menuWindow._cardData.height,
-            type: "object",
-            fullBright: true,
-            parent: this.menuWindow,
-            noSave: true,
-            target: target.id});
+        // this.menuWindow = this.newWindow({x: 1, y: 1.5}, {x: 0.9, y: 0.4});
 
-        this.subscribe(this.behaviorMenu.id, "extentChanged", "menuExtentChanged")
-        this.behaviorMenu.call("BehaviorMenu$BehaviorMenuActor", "show");
-
-        this.cardSpecWindow = this.newWindow({x: 1.7, y: 2.8}, {x:  -0.4, y: 0});
+        this.cardSpecWindow = this.newWindow({x: 1.8, y: 2.8}, {x: -0.55, y: 0});
 
         this.cardSpec = this.createCard({
             className: "TextFieldActor",
             name: 'card spec',
-            translation: [0, 0, 0.025],
+            translation: [-0.05, 0, 0.025],
             parent: this.cardSpecWindow,
             type: "text",
             margins: {left: 8, top: 8, right: 8, bottom: 8},
             textScale: 0.0014,
             backgroundColor: 0xcccccc,
+            scrollBar: true,
+            barColor: 0x888888,
+            knobColor: 0x606060,
             width: 1.7 - 0.04,
             height: 2.8 - 0.04,
             depth: 0.002,
@@ -134,6 +121,39 @@ class PropertySheetActor {
             fullBright: true,
             target: target.id});
 
+        this.behaviorMenuPane = this.createCard({
+            name: "behaivor scroll menu",
+            behaviorModules: ["ScrollArea"],
+            type: "object",
+            translation: [0.85, 0.4, 0.04],
+            width: 1.0 - 0.04,
+            height: 2.0 - 0.04,
+            depth: 0.002,
+            color: 0xcccccc,
+            backgroundColor: 0xcccccc,
+            fullBright: true,
+            parent: this,
+            noSave: true,
+        });
+
+        this.behaviorMenu = this.createCard({
+            name: 'behavior menu',
+            behaviorModules: ["BehaviorMenu"],
+            translation: [0, 0, 0.04],
+            color: 0xcccccc,
+            backgroundColor: 0xcccccc,
+            width: 0.85,
+            height: 2.0,
+            type: "object",
+            fullBright: true,
+            parent: this.behaviorMenuPane,
+            noSave: true,
+            target: target.id});
+
+        this.subscribe(this.behaviorMenu.id, "extentChanged", "menuExtentChanged")
+        this.behaviorMenu.call("BehaviorMenu$BehaviorMenuActor", "show");
+
+        this.behaviorMenuPane.call("ScrollArea$ScrollAreaActor", "setTarget", this.behaviorMenu);
         this.subscribe(this.actionMenu.id, "extentChanged", "actionMenuExtentChanged")
         this.subscribe(this.actionMenu.id, "doAction", "doAction")
         this.actionMenu.call("ActionMenu$ActionMenuActor", "show");
@@ -141,8 +161,12 @@ class PropertySheetActor {
     }
 
     menuExtentChanged(data) {
-        if (this.menuWindow) {
-            this.menuWindow.setCardData({width: data.x + 0.05, height: data.y + 0.05});
+        console.log("menuExtentChanged", data);
+        if (this.behaviorMenu) {
+            this.behaviorMenu.setCardData({
+                width: data.x,
+                height: data.y,
+            });
         }
     }
 
@@ -235,9 +259,15 @@ class PropertySheetActor {
                     console.log(e);
                     errored = true;
                 }
+                if (key === "parent") {
+                    if (typeof value === "string") {
+                        let actor = this.getModel(value);
+                        value = actor;
+                    }
+                }
                 if (key === "rotation" || key === "dataRotation") {
                     if (Array.isArray(value) && value.length === 3) {
-                        value = Worldcore.q_euler(...value);
+                        value = Microverse.q_euler(...value);
                     }
                 }
                 spec[key] = value;
@@ -263,14 +293,13 @@ class PropertySheetPawn {
             this.shape.remove(this.back);
             this.back = null;
         }
-        this.shape.children = [];
 
         let extent = {x: this.actor._cardData.width, y: this.actor._cardData.height};
 
         let frameGeometry = this.roundedCornerGeometry(extent.x, extent.y, 0.04, 0.02);
         let frameMaterial = this.makePlaneMaterial(0.02, 0xcccccc, 0xcccccc, false);
 
-        this.frame = new Worldcore.THREE.Mesh(frameGeometry, frameMaterial);
+        this.frame = new Microverse.THREE.Mesh(frameGeometry, frameMaterial);
         this.shape.add(this.frame);
 
         let backGeometry = this.roundedCornerGeometry(extent.x - 0.02, extent.y - 0.02, 0.0001, 0.02);
@@ -278,17 +307,58 @@ class PropertySheetPawn {
         let frameColor = this.actor._cardData.frameColor || 0x525252;
         let backMaterial = this.makePlaneMaterial(0.02, color, frameColor, true);
 
-        this.back = new Worldcore.THREE.Mesh(backGeometry, backMaterial);
+        this.back = new Microverse.THREE.Mesh(backGeometry, backMaterial);
         this.back.position.set(0, 0, 0.04);
         this.shape.add(this.back);
 
         this.addEventListener("pointerMove", "pointerMove");
+        this.listen("translationSet", "translated");
+        this.listen("rotationSet", "translated");
+
+        this.scrollAreaPawn = [...this.children].find((c) => {
+            return c.actor._behaviorModules && c.actor._behaviorModules.indexOf("ScrollArea") >= 0;
+        });
+
+        this.addEventListener("pointerDown", "pointerDown");
+        this.addEventListener("pointerUp", "pointerUp");
+    }
+
+    translated(_data) {
+        this.scrollAreaPawn.say("updateDisplay");
+    }
+
+    moveMyself(evt) {
+        if (!evt.ray) {return;}
+
+        let {THREE, v3_add, v3_sub} = Microverse;
+
+        let origin = new THREE.Vector3(...evt.ray.origin);
+        let direction = new THREE.Vector3(...evt.ray.direction);
+        let ray = new THREE.Ray(origin, direction);
+
+        let dragPoint = ray.intersectPlane(
+            this._dragPlane,
+            new Microverse.THREE.Vector3()
+        );
+
+        let down = this.downInfo.downPosition;
+        let drag = dragPoint.toArray();
+
+        let diff = v3_sub(drag, down);
+        let newPos = v3_add(this.downInfo.translation, diff);
+
+        this.set({translation: newPos});
     }
 
     pointerMove(evt) {
-        if (!evt.xyz) {return;}
         if (!this.downInfo) {return;}
-        let vec = new Worldcore.THREE.Vector3(...evt.xyz);
+
+        if (!this.downInfo.child) {
+            return this.moveMyself(evt);
+        }
+
+        if (!evt.xyz) {return;}
+        let vec = new Microverse.THREE.Vector3(...evt.xyz);
         let pInv = this.renderObject.matrixWorld.clone().invert();
         vec = vec.applyMatrix4(pInv);
 
@@ -300,6 +370,34 @@ class PropertySheetPawn {
 
         this.downInfo.child.translateTo([origTranslation[0] + deltaX, origTranslation[1] + deltaY, origTranslation[2]]);
         // console.log(this.downInfo, pVec2);
+    }
+
+    pointerDown(evt) {
+        if (!evt.xyz) {return;}
+        let {THREE, q_yaw, v3_rotateY} = Microverse;
+
+        let avatar = this.getMyAvatar();
+        let yaw = q_yaw(avatar.rotation);
+        let normal = v3_rotateY([0, 0, -1], yaw);
+
+        this._dragPlane = new THREE.Plane();
+        this._dragPlane.setFromNormalAndCoplanarPoint(
+            new THREE.Vector3(...normal),
+            new THREE.Vector3(...evt.xyz)
+        );
+
+        this.downInfo = {translation: this.translation, downPosition: evt.xyz};
+        if (avatar) {
+            avatar.addFirstResponder("pointerMove", {}, this);
+        }
+    }
+
+    pointerUp(_evt) {
+        this._dragPlane = null;
+        let avatar = this.getMyAvatar();
+        if (avatar) {
+            avatar.removeFirstResponder("pointerMove", {}, this);
+        }
     }
 }
 
@@ -353,13 +451,11 @@ class PropertySheetWindowPawn {
             this.back = null;
         }
 
-        this.shape.children = [];
-
         let extent = {x: this.actor._cardData.width, y: this.actor._cardData.height};
 
         let frameGeometry = this.roundedCornerGeometry(extent.x, extent.y, 0.0001, 0.02);
         let frameMaterial = this.makePlaneMaterial(0.02, 0x000000, 0x000000, false);
-        this.frame = new Worldcore.THREE.Mesh(frameGeometry, frameMaterial);
+        this.frame = new Microverse.THREE.Mesh(frameGeometry, frameMaterial);
         this.frame.position.set(0, 0, 0.021);
         this.shape.add(this.frame);
 
@@ -367,7 +463,7 @@ class PropertySheetWindowPawn {
         let color = this.actor._cardData.color || 0xcccccc;
         let frameColor = this.actor._cardData.frameColor || 0xcccccc;
         let backMaterial = this.makePlaneMaterial(0.02, color, frameColor, true);
-        this.back = new Worldcore.THREE.Mesh(backGeometry, backMaterial);
+        this.back = new Microverse.THREE.Mesh(backGeometry, backMaterial);
         this.back.position.set(0, 0, 0.022);
         this.shape.add(this.back);
 
@@ -382,7 +478,7 @@ class PropertySheetWindowPawn {
 
     pointerDown(evt) {
         if (!evt.xyz) {return;}
-        let vec = new Worldcore.THREE.Vector3(...evt.xyz);
+        let vec = new Microverse.THREE.Vector3(...evt.xyz);
         let inv = this.renderObject.matrixWorld.clone().invert();
         vec = vec.applyMatrix4(inv);
 
@@ -397,7 +493,7 @@ class PropertySheetWindowPawn {
         if (!edge.x && !edge.y) {return;}
 
         let parent = this._parent;
-        let vec2 = new Worldcore.THREE.Vector3(...evt.xyz);
+        let vec2 = new Microverse.THREE.Vector3(...evt.xyz);
         let pInv = parent.renderObject.matrixWorld.clone().invert();
         vec2 = vec2.applyMatrix4(pInv);
 
@@ -441,7 +537,6 @@ class PropertySheetDismissPawn {
 
         if (this.back) {
             this.shape.remove(this.back);
-            this.shape.children = [];
         }
 
         let backgroundColor = (this.actor._cardData.backgroundColor !== undefined)
@@ -452,21 +547,21 @@ class PropertySheetDismissPawn {
             ? this.actor._cardData.color
             : 0x222222;
 
-        let backGeometry = new Worldcore.THREE.BoxGeometry(0.08, 0.08, 0.00001);
-        let backMaterial = new Worldcore.THREE.MeshStandardMaterial({
+        let backGeometry = new Microverse.THREE.BoxGeometry(0.08, 0.08, 0.00001);
+        let backMaterial = new Microverse.THREE.MeshStandardMaterial({
             color: backgroundColor,
-            side: Worldcore.THREE.DoubleSide
+            side: Microverse.THREE.DoubleSide
         });
 
-        this.back = new Worldcore.THREE.Mesh(backGeometry, backMaterial);
+        this.back = new Microverse.THREE.Mesh(backGeometry, backMaterial);
 
-        let dismissGeometry = new Worldcore.THREE.BoxGeometry(0.07, 0.02, 0.001);
-        let dismissMaterial = new Worldcore.THREE.MeshStandardMaterial({
+        let dismissGeometry = new Microverse.THREE.BoxGeometry(0.07, 0.02, 0.001);
+        let dismissMaterial = new Microverse.THREE.MeshStandardMaterial({
             color: color,
-            side: Worldcore.THREE.DoubleSide
+            side: Microverse.THREE.DoubleSide
         });
 
-        let button = new Worldcore.THREE.Mesh(dismissGeometry, dismissMaterial);
+        let button = new Microverse.THREE.Mesh(dismissGeometry, dismissMaterial);
         button.position.set(0, 0, 0.00001);
 
         this.back.add(button)
@@ -500,6 +595,7 @@ class PropertySheetEditActor {
             depth: 0.05,
             fullBright: true,
             frameColor: 0x888888,
+            scrollBar: true,
         });
     }
 }
@@ -532,7 +628,7 @@ class PropertySheetEditPawn {
             }
         }
 
-        let vec = new Worldcore.THREE.Vector3();
+        let vec = new Microverse.THREE.Vector3();
         vec.setFromMatrixPosition(this.shape.matrixWorld);
         let pose = avatar.dropPose(6);
         pose.translation = [vec.x, vec.y, vec.z];
@@ -556,24 +652,23 @@ class PropertySheetWindowBarPawn {
 
         if (this.back) {
             this.shape.remove(this.back);
-            this.shape.children = [];
         }
 
-        let backGeometry = new Worldcore.THREE.BoxGeometry(0.022, 0.022, 0.00001);
-        let backMaterial = new Worldcore.THREE.MeshStandardMaterial({
+        let backGeometry = new Microverse.THREE.BoxGeometry(0.022, 0.022, 0.00001);
+        let backMaterial = new Microverse.THREE.MeshStandardMaterial({
             color: 0x882222,
-            side: Worldcore.THREE.DoubleSide
+            side: Microverse.THREE.DoubleSide
         });
 
-        this.back = new Worldcore.THREE.Mesh(backGeometry, backMaterial);
+        this.back = new Microverse.THREE.Mesh(backGeometry, backMaterial);
 
-        let dismissGeometry = new Worldcore.THREE.BoxGeometry(0.02, 0.005, 0.001);
-        let dismissMaterial = new Worldcore.THREE.MeshStandardMaterial({
+        let dismissGeometry = new Microverse.THREE.BoxGeometry(0.02, 0.005, 0.001);
+        let dismissMaterial = new Microverse.THREE.MeshStandardMaterial({
             color: 0x000000,
-            side: Worldcore.THREE.DoubleSide
+            side: Microverse.THREE.DoubleSide
         });
 
-        let button = new Worldcore.THREE.Mesh(dismissGeometry, dismissMaterial);
+        let button = new Microverse.THREE.Mesh(dismissGeometry, dismissMaterial);
         button.position.set(0, 0, 0.00001);
 
         this.back.add(button)
@@ -592,6 +687,8 @@ class BehaviorMenuActor {
             this.menu.destroy();
         }
 
+        let editIconLocation = "3rAfsLpz7uSBKuKxcjHvejhWp9mTBWh8hsqN7UnsOjJoGgYGAgFIXV0UGx4XAVwHAVwRAB0DBxcGXBsdXQddNRYkEAseOwEzGSMRMCoWQTUKEwQLBSc5JSsrQF0bHVwRAB0DBxcGXB8bEQAdBBcAARddKwMGHktLKksKNjocPyIiFBMfJRkzIyRKND4zIAZGRUVGCjECAEEFHRM6N10WEwYTXTUnEQYFHTsXOUQaAxUVFgVERR4kNxY8A0QiBAsQX0dDHTslBipENh83HQU";
+
         this.menu = this.createCard({
             name: 'behavior menu',
             behaviorModules: ["Menu"],
@@ -601,7 +698,7 @@ class BehaviorMenuActor {
             noSave: true,
             depth: 0.01,
             cornerRadius: 0.05,
-            menuIcons: {"_": 'edit.svg', "apply": null, "------------": null},
+            menuIcons: {"_": editIconLocation, "apply": null, "------------": null},
         });
 
         this.subscribe(this.menu.id, "itemsUpdated", "itemsUpdated");
@@ -616,14 +713,19 @@ class BehaviorMenuActor {
         let target = this.service("ActorManager").get(this._cardData.target);
         let items = [];
 
-        let behaviorModules = [...this.behaviorManager.modules].filter(([_key, value]) => {
-            return !value.systemModule;
-        });
+        this.targetSystemModules = [];
+        let behaviorModules = [...this.behaviorManager.modules];
 
-        behaviorModules.forEach(([k, _v]) => {
-            let selected = target._behaviorModules && target._behaviorModules.indexOf(k) >= 0;
-            let obj = {label: k, selected};
-            items.push(obj);
+        behaviorModules.forEach(([k, v]) => {
+            if (!v.systemModule) {
+                let selected = target._behaviorModules?.indexOf(k) >= 0;
+                let obj = {label: k, selected};
+                items.push(obj);
+            } else {
+                if (target._behaviorModules?.indexOf(k) >= 0) {
+                    this.targetSystemModules.push({label: k, selected: true});
+                }
+            }
         });
 
         items.push({label: "------------"});
@@ -634,7 +736,18 @@ class BehaviorMenuActor {
     setBehaviors(data) {
         console.log("setBehaviors");
         let target = this.service("ActorManager").get(this._cardData.target);
-        target.setBehaviors(data.selection);
+        let selection = [ ...this.targetSystemModules, ...data.selection];
+        let behaviorModules = [];
+
+        selection.forEach((obj) => {
+            let {label, selected} = obj;
+            if (target.behaviorManager.modules.get(label)) {
+                if (selected) {
+                    behaviorModules.push(label);
+                }
+            }
+        });
+        target.updateBehaviors({behaviorModules});
     }
 
     itemsUpdated() {
@@ -723,4 +836,4 @@ export default {
         }
     ]
 }
-/*globals Worldcore */
+/*globals Microverse */
