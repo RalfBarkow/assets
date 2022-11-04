@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {
+      "type": "Simulator",
+      "in": [],
+      "out": [],
+      "props": {
+        "name": "Fast Clock",
+        "step": 0.125,
+        "msec": 16,
+        "tick": "Start, Stop"
+      }
+    }
+  ],
+  "rels": []
+}

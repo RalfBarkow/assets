@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <meta charset="utf-8">
+  <body>
+    <style>textarea
+      {width: 100%; height:200px; display: block;}</style>
+    <textarea id=input placeholder="paste text or link or drop file"
+      ondrop="drop(event)" ondragover="over(event)" ondragenter="over(event)"></textarea>
+    <div id=trouble></div>
+    <p>
+      <button onclick=dopreview(event)>Preview</button>
+      <button onclick=dodownload(event)>Download</button>
+    </p>
+  </body>
+  <script type=module>
+   import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+   import {Graph} from 'https://wiki.ralfbarkow.ch/assets/home/graph.js'
+   import {dotify} from 'https://wiki.ralfbarkow.ch/home/dotify.js'
+   import {drop} from 'https://wiki.ralfbarkow.ch/assets/home/drop.js'
+
+   window.over = function (event) {
+       event.preventDefault()
+   }
+
+   window.drop = async function (event) {
+       event.preventDefault();
+       const want = files(event).filter(file =>
+           file.name.endsWith('.json') &&
+                                              file.type === 'application/json')
+       input.value = await want[0].text()
+   }
+
+   function files(event) {
+       if (event.dataTransfer.items) {
+           return [...event.dataTransfer.items]
+               .filter(item => item.kind === 'file')
+               .map(item => item.getAsFile())
+       } else {
+           return [...event.dataTransfer.files]
+       }
+   }
+
+   window.dopreview = async event => {
+       trouble.innerText = ''
+       const graph = await convert()
+       const title = "Imported Graph"
+       const story = [
+           {type:'code',text:JSON.stringify(graph.tally())},
+           {type:'graphviz',text:dotify({graph,merged:{nids:[]}})}
+       ]
+       frame.open({title,story},event.shiftKey)
+   }
+
+   window.dodownload = async event => {
+       trouble.innerText = ''
+       const graph = await convert()
+       frame.download(graph.stringify(null,2),'imported.graph.json','application/json')
+   }
+
+   async function convert () {
+       const graph = new Graph()      
+       const context = await frame.context()
+       const code = context.page.story
+                           .filter(item => item.type=='code')
+                           .map(item => item.text)
+                           .join("\n")
+       const wrap = `
+      export async function convert(json,graph) {
+        const nids = {}
+        ${code}
+      }`
+       try {
+           const module = await import(`data:text/javascript;base64,${btoa(wrap)}`)
+           if (!module) return graph
+           const text = input.value.startsWith('https') ?
+                        (await fetch(input.value).then(res => res.text())) :
+                        input.value
+           const json = JSON.parse(text)
+           let convert = module.convert
+           if (convert) {
+               await convert(json,graph)
+           }
+       } catch (e) {
+           console.log('trouble',e)
+           trouble.innerHTML = `<p>${e.name}: ${e.message}</p>`
+       }
+       return graph
+   }
+
+  </script>
+</html>

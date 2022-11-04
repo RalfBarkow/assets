@@ -1,0 +1,77 @@
+{
+  "nodes": [
+    {
+      "type": "Variable",
+      "in": [
+        0
+      ],
+      "out": [
+        1
+      ],
+      "props": {
+        "name": "Prey",
+        "value": 100,
+        "wax": 0.3
+      }
+    },
+    {
+      "type": "Variable",
+      "in": [
+        1
+      ],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Predator",
+        "url": "https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations",
+        "value": 10,
+        "wane": 0.1
+      }
+    },
+    {
+      "type": "Simulator",
+      "in": [],
+      "out": [],
+      "props": {
+        "msec": 500,
+        "name": "Slow Clock",
+        "step": 0.125,
+        "tick": "Start, Stop"
+      }
+    },
+    {
+      "type": "Simulator",
+      "in": [],
+      "out": [],
+      "props": {
+        "msec": 16,
+        "name": "Fast Clock",
+        "step": 0.125,
+        "tick": "Start, Stop"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Decreases",
+      "from": 1,
+      "to": 0,
+      "props": {
+        "irate": 0.1,
+        "orate": 0.1,
+        "source": "Prey*"
+      }
+    },
+    {
+      "type": "Increases",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "irate": 0.002,
+        "orate": 1,
+        "source": "Prey*"
+      }
+    }
+  ]
+}

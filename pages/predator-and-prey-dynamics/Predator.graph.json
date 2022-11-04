@@ -1,0 +1,51 @@
+{
+  "nodes": [
+    {
+      "type": "Variable",
+      "in": [
+        1
+      ],
+      "out": [
+        2
+      ],
+      "props": {
+        "name": "Prey"
+      }
+    },
+    {
+      "type": "Variable",
+      "in": [
+        3
+      ],
+      "out": [
+        0
+      ],
+      "props": {
+        "name": "Predator",
+        "value": 10,
+        "wane": 0.1,
+        "url": "https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations"
+      }
+    }
+  ],
+  "rels": [
+    {
+      "type": "Decreases",
+      "from": 1,
+      "to": 0,
+      "props": {
+        "irate": 0.1,
+        "orate": 0.1
+      }
+    },
+    {
+      "type": "Increases",
+      "from": 0,
+      "to": 1,
+      "props": {
+        "irate": 0.002,
+        "orate": 1
+      }
+    }
+  ]
+}
