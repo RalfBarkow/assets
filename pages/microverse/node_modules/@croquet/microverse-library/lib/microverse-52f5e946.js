@@ -2256,13 +2256,13 @@ class AgoraChatManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODUL
         this.sendMessageToChat('activeInChat', { inChat });
     }
 
-    detach() {
-        super.detach();
-        console.log("AgoraChatMgr: detach");
+    destroy() {
+        console.log("AgoraChatMgr: destroy");
         window.removeEventListener('message', this.messageListener);
         if (this.chatIFrame) this.chatIFrame.remove(); // will cause us to crash out of Agora chat, probably not cleanly
         this.chatIFrame = null;
         this.chatReady = false;
+        super.destroy();
     }
 }
 
@@ -3035,9 +3035,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _frame_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./frame.js */ "./src/frame.js");
 /* harmony import */ var _Pointer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Pointer.js */ "./src/Pointer.js");
 /* harmony import */ var _card_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./card.js */ "./src/card.js");
-/* harmony import */ var _text_text_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./text/text.js */ "./src/text/text.js");
-/* harmony import */ var _worldMenu_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./worldMenu.js */ "./src/worldMenu.js");
-/* harmony import */ var _settingsMenu_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./settingsMenu.js */ "./src/settingsMenu.js");
+/* harmony import */ var _worldMenu_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./worldMenu.js */ "./src/worldMenu.js");
+/* harmony import */ var _settingsMenu_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./settingsMenu.js */ "./src/settingsMenu.js");
 // Copyright 2022 by Croquet Corporation, Inc. All Rights Reserved.
 // https://croquet.io
 // info@croquet.io
@@ -3050,20 +3049,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+// import { TextFieldActor } from "./text/text.js";
 
 
 
-
-// import Swal from "sweetalert2";
 
 const EYE_HEIGHT = 1.676;
-const COLLIDE_THROTTLE = 50;
-const THROTTLE = 15; // 20
 const PORTAL_DISTANCE = 0.4; // tuned to the girth of the avatars
 const COLLISION_RADIUS = 0.8;
 const M4_ROTATIONY_180 = (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.m4_rotationY)(Math.PI);
 let initialPortalLookExternal;
-
 
 class AvatarActor extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.mix)(_card_js__WEBPACK_IMPORTED_MODULE_4__.CardActor).with(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.AM_Player) {
     init(options) {
@@ -3470,11 +3465,14 @@ class AvatarActor extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_
         if (string.startsWith("http://") || string.startsWith("https://")) {
             this.createPortal(translation, rotation, string);
         } else {
-            this.createStickyNote(translation, rotation, string);
+            if (this.behaviorManager.hasBehavior("StickyNote")) {
+                this.createStickyNote(translation, rotation, string);
+            }
         }
     }
 
     addSticky(pe) {
+        if (!this.behaviorManager.hasBehavior("StickyNote")) {return;}
         const tackOffset = 0.1;
         let tackPoint = (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_add)(pe.xyz, (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_scale)(pe.normal, tackOffset));
         let normal = [...pe.normal]; // clear up and down
@@ -3729,7 +3727,7 @@ class RemoteAvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MO
     setOpacity(opacity) {
         if (!this.shape) {return;}
         let handlerModuleName = this.actor._cardData.avatarEventHandler;
-        if (this.has(`${handlerModuleName}$AvatarPawn`, "mapOpacity")) {
+        if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "mapOpacity")) {
             opacity = this.call(`${handlerModuleName}$AvatarPawn`, "mapOpacity", opacity);
         }
         let transparent = opacity !== 1;
@@ -3812,7 +3810,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         this.fadeNearbyInterval = setInterval(() => this.fadeNearby(), 100);
 
         document.getElementById("homeBtn").onclick = () => this.goHome();
-        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_6__.filterDomEventsOn)(document.getElementById("homeBtn"));
+        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_5__.filterDomEventsOn)(document.getElementById("homeBtn"));
 
         document.getElementById("editModeBtn").setAttribute("mobile", this.isMobile);
         document.getElementById("editModeBtn").setAttribute("pressed", false);
@@ -3821,7 +3819,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         editButton.onpointerdown = (evt) => this.setEditMode(evt);
         editButton.onpointerup = (evt) => this.clearEditMode(evt);
 
-        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_6__.setupWorldMenuButton)(this, _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.App, this.sessionId);
+        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_5__.setupWorldMenuButton)(this, _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.App, this.sessionId);
 
         window.myAvatar = this;
 
@@ -3829,16 +3827,20 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         this.fallDistance = EYE_HEIGHT / 12;
         this.maxFall = -15;
 
-        // drop and paste
-        this.service("AssetManager").assetManager.setupHandlersOn(document, (buffer, fileName, type) => {
-            if (type === "pastedtext") {
-                this.pasteText(buffer);
-            } else if (type === "vrse") {
-                this.loadvrse(buffer);
-            } else {
-                this.analyzeAndUploadFile(new Uint8Array(buffer), fileName, type);
-            }
-        });
+        this.service("WalkManager").setupDefaultWalkers();
+
+        if (this.actor.behaviorManager.hasBehavior("FileDragAndDropHandler")) {
+            // drop and paste
+            this.service("AssetManager").assetManager.setupHandlersOn(document, (buffer, fileName, type) => {
+                if (type === "pastedtext") {
+                    this.pasteText(buffer);
+                } else if (type === "vrse") {
+                    this.loadvrse(buffer);
+                } else {
+                    this.analyzeAndUploadFile(new Uint8Array(buffer), fileName, type);
+                }
+            });
+        }
 
         // keep track of being in the primary frame or not.  because of the delay involved
         // in creating the avatar, the frame itself (in frame.js) is bound to have already
@@ -3890,21 +3892,21 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
                     this.portalCameraUpdate(cameraMatrix);
                     break;
                 case "motion-start":
-                    if (this.has(`${handlerModuleName}$AvatarPawn`, "startMotion")) {
+                    if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "startMotion")) {
                         this.call(`${handlerModuleName}$AvatarPawn`, "startMotion", dx, dy);
                     } else {
                         this.startMotion(dx, dy);
                     }
                     break;
                 case "motion-end":
-                    if (this.has(`${handlerModuleName}$AvatarPawn`, "endMotion")) {
+                    if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "endMotion")) {
                         this.call(`${handlerModuleName}$AvatarPawn`, "endMotion", dx, dy);
                     } else {
                         this.endMotion(dx, dy);
                     }
                     break;
                 case "motion-update":
-                    if (this.has(`${handlerModuleName}$AvatarPawn`, "updateMotion")) {
+                    if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "updateMotion")) {
                         this.call(`${handlerModuleName}$AvatarPawn`, "updateMotion", dx, dy);
                     } else {
                         this.updateMotion(dx, dy);
@@ -3935,11 +3937,14 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             // regular avatars
             let actorSpec;
             let avatarSpec;
+            let avatarName;
             if (inWorld && dormantAvatarSpec) {
                 actorSpec = dormantAvatarSpec;
                 actorSpec.inWorld = true;
                 dormantAvatarSpec = null;
                 avatarSpec = actorSpec.cardData;
+                avatarName = actorSpec.name;
+                avatarSpec.name = avatarName;
             } else {
                 actorSpec = { inWorld };
                 const anchor = this.anchorFromURL(window.location, !this.isPrimary);
@@ -3948,7 +3953,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
                     actorSpec.translation = anchor.translation;
                     actorSpec.rotation = anchor.rotation;
                 }
-                let tempCardSpec = this.makeCardSpecFrom(window.settingsMenuConfiguration, this.actor);
+                let tempCardSpec = this.makeCardSpecFrom(window.settingsMenuConfiguration, this.actor, avatarName);
                 avatarSpec = {...tempCardSpec};
             }
 
@@ -4193,6 +4198,8 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             c.innerHTML = `<div id="userCountDisplay"><div id="userCountReadout">0</div></div>`;
             userCountDisplay = c.firstChild;
             document.body.appendChild(userCountDisplay);
+
+            if (this.service("DolbyChatManager") && window.innerWidth >= 600) userCountDisplay.style.left = "40%";
         }
 
         let readout = userCountDisplay.querySelector("#userCountReadout");
@@ -4220,10 +4227,10 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
     }
 
     presentationStarted() {
-        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_6__.updateWorldMenu)(this);
+        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_5__.updateWorldMenu)(this);
     }
     presentationStopped() {
-        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_6__.updateWorldMenu)(this);
+        (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_5__.updateWorldMenu)(this);
     }
 
     modelLoaded() {
@@ -4285,7 +4292,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
     // the camera when walking: based on avatar with 3rd person lookOffset
     walkLook() {
         let handlerModuleName = this.actor._cardData.avatarEventHandler;
-        if (this.has(`${handlerModuleName}$AvatarPawn`, "walkLook")) {
+        if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "walkLook")) {
             return this.call(`${handlerModuleName}$AvatarPawn`, "walkLook");
         }
 
@@ -4486,29 +4493,12 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
                 // unless positionTo() is called the avatar state (should) stays the same.
 
                 let vq = this.updatePose(delta);
+                let walkManager = this.service("WalkManager")
+                vq = walkManager.walk(this, vq, time, delta);
 
-                let handlerModuleName = this.actor._cardData.avatarEventHandler;
-                if (this.has(`${handlerModuleName}$AvatarPawn`, "walk")) {
-                    this.call(`${handlerModuleName}$AvatarPawn`, "walk", time, delta, vq);
-                } else {
-                    if (this.collidePortal(vq)) {return;}
-                    if (!this.checkFloor(vq)) {
-                        // if the new position leads to a position where there is no walkable floor below
-                        // it tries to move the avatar the opposite side of the previous good position.
-                        vq.v = (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_lerp)(this.lastCollideTranslation, vq.v, -1);
-                    } else {
-                        this.lastCollideTranslation = vq.v;
-                    }
-                    if ((this.actor.fall || this.spectator) && time - this.lastUpdateTime > THROTTLE) {
-                        if (time - this.lastCollideTime > COLLIDE_THROTTLE) {
-                            this.lastCollideTime = time;
-                            vq = this.checkFall(vq);
-                            vq = this.walkTerrain(vq);
-                        }
-                        this.lastUpdateTime = time;
-                        this.positionTo(vq.v, vq.q);
-                    }
-                }
+                // the implementation of positionTo checks closeness to the current value so
+                // calling positionTo should not cause a performance problem.
+                this.positionTo(vq.v, vq.q, this.throttle);
                 this.refreshCameraTransform();
 
                 // this part is copied from CardPawn.update()
@@ -4660,18 +4650,6 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         }
 
         return someFloor;
-    }
-
-    checkFall(vq) {
-        if (!this.isFalling) {return vq;}
-        let v = vq.v;
-        v = [v[0], v[1] - this.fallDistance, v[2]];
-        this.isFalling = false;
-        if (v[1] < this.maxFall) {
-            this.goHome();
-            return {v: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_zero)(), q: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_identity)()};
-        }
-        return {v: v, q: vq.q};
     }
 
     collideBVH(collideList, vq) {
@@ -4902,19 +4880,6 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         return false;
     }
 
-    walkTerrain(vq) {
-        let walkLayer = this.service("ThreeRenderManager").threeLayer('walk');
-        if (!walkLayer) return vq;
-
-        let v = vq.v;
-
-        let collideList = walkLayer.filter(obj => obj.collider);
-        if (collideList.length > 0) {
-            return this.collideBVH(collideList, {v, q: vq.q});
-        }
-        return vq;
-    }
-
     keyDown(e) {
         // This is currently invoked as the "last responder", namely only if no card handled it.
         // by writing a new avatarEvents.js that exports a different AvatarEventHandler behavior module
@@ -5053,7 +5018,8 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         }
 
         if (e.ctrlKey || e.altKey) { // should be the first responder case
-            if (pawn) {
+            this.actor.behaviorManager.lookup("Gizmo", "GizmoActor");
+            if (pawn && this.actor.behaviorManager.lookup("Gizmo", "GizmoActor")) {
                 if (pawnIsGizmo) {
                     console.log("Tried to gizmo gizmo");
                     this.publish(this.actor.id, "addOrCycleGizmo", {target: this.gizmoTargetPawn.actor, viewId: this.viewId});
@@ -5077,7 +5043,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
                 this.lookYaw = (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_yaw)(this._rotation);
             }
             let handlerModuleName = this.actor._cardData.avatarEventHandler;
-            if (this.has(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
+            if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
                 this.call(`${handlerModuleName}$AvatarPawn`, "handlingEvent", "pointerDown", this, e);
             }
             if (!pawnIsGizmo) {
@@ -5097,7 +5063,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             this.lookTo(pitch, yaw);
         }
         let handlerModuleName = this.actor._cardData.avatarEventHandler;
-        if (this.has(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
+        if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
             this.call(`${handlerModuleName}$AvatarPawn`, "handlingEvent", "pointerMove", this, e);
         }
     }
@@ -5117,7 +5083,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             }
         }
         let handlerModuleName = this.actor._cardData.avatarEventHandler;
-        if (this.has(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
+        if (this.hasBehavior(`${handlerModuleName}$AvatarPawn`, "handlingEvent")) {
             this.call(`${handlerModuleName}$AvatarPawn`, "handlingEvent", "pointerUp", this, e);
         }
     }
@@ -5154,7 +5120,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             let origOpacity = opacity;
 
             let handlerModuleName = pawn.actor._cardData.avatarEventHandler;
-            if (pawn.has(`${handlerModuleName}$AvatarPawn`, "mapOpacity")) {
+            if (pawn.hasBehavior(`${handlerModuleName}$AvatarPawn`, "mapOpacity")) {
                 opacity = pawn.call(`${handlerModuleName}$AvatarPawn`, "mapOpacity", this, opacity);
             }
 
@@ -5210,7 +5176,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
         delete this.lastOpacity;
     }
 
-    makeCardSpecFrom(configuration, actor) {
+    makeCardSpecFrom(configuration, actor, avatarName) {
         let oldCardData = {...actor._cardData};
         let handlerModuleName = this.actor._cardData.avatarEventHandler;
         let behaviorModules = actor._behaviorModules || [];
@@ -5220,9 +5186,9 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
             "dataLocation", "dataTranslation", "dataScale", "dataRotation", "handedness",
             "modelType", "type", "name", "shadow", "avatarType"].forEach((n) => {delete oldCardData[n];});
 
-        if (!configuration.type && !avatarType) {
+        if (!configuration.type && (!avatarType || avatarType === "wonderland")) {
             let options = {
-                name: this.actor._name,
+                name: avatarName || this.actor._name,
                 dataScale: [0.3, 0.3, 0.3],
                 dataRotation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_euler)(0, Math.PI, 0),
                 dataTranslation: [0, -0.4, 0],
@@ -5269,7 +5235,7 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
 
     showSettingsMenu() {
         let promise = new Promise((resolve, _reject) => {
-            (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_7__.startSettingsMenu)(false, resolve);
+            (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_6__.startSettingsMenu)(false, resolve);
         });
         promise.then(changed => {
             if (changed) {
@@ -5284,19 +5250,23 @@ class AvatarPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0
     }
 
     showShareMenu() {
-        (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_7__.startShareMenu)(this);
+        (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_6__.startShareMenu)(this);
     }
 
     goHome() {
         if (!this.spectator) this.say("goHome");
         else {
             let anchor = this.anchorFromURL(window.location.href);
-            if (!anchor) anchor = {
-                translation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_zero)(),
-                rotation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_identity)(),
+            if (!anchor) {
+                anchor = {
+                    translation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.v3_zero)(),
+                    rotation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_identity)(),
+                }
             }
-            anchor.translation[0] += 0.00001; // defeat the positionTo() optimization
-            this.positionTo(anchor.translation, anchor.rotation);
+            let translation = [...anchor.translation];
+            this.lastCollideTranslation = translation;
+            translation[0] += 0.00001; // defeat the positionTo() optimization
+            this.positionTo(translation, anchor.rotation);
         }
     }
 
@@ -5389,7 +5359,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "CardActor": () => (/* binding */ CardActor),
 /* harmony export */   "CardPawn": () => (/* binding */ CardPawn),
 /* harmony export */   "MicroverseAppManager": () => (/* binding */ MicroverseAppManager),
-/* harmony export */   "VideoManager": () => (/* binding */ VideoManager),
 /* harmony export */   "intrinsicProperties": () => (/* binding */ intrinsicProperties)
 /* harmony export */ });
 /* harmony import */ var _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @croquet/worldcore-kernel */ "./node_modules/@croquet/worldcore-kernel/index.js");
@@ -6183,22 +6152,23 @@ class CardPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
         // (that is before returning from this method) to have apps like multiblaster function
 
         if (textureType === "video") {
-            this.video = document.createElement('video');
+            let muted = this.actor._cardData.muted !== undefined ? this.actor._cardData.muted : true;
+            let loop = this.actor._cardData.loop !== undefined ? this.actor._cardData.loop : false;
+            this.video = document.createElement("video");
             this.video.autoplay = true;
-            this.video.muted = true;
-            this.video.loop = true;
+            this.video.muted = muted;
+            this.video.loop = loop;
+            this.video.controls = false;
             this.video.width = textureWidth;
             this.video.height = textureHeight;
 
             this.getBuffer(textureLocation).then((buffer) => {
                 let objectURL = URL.createObjectURL(new Blob([buffer], {type: "video/mp4"}));
                 this.video.src = objectURL;
+                this.videoLoaded = true;
                 this.objectURL = objectURL;
                 // need to be revoked when destroyed
             });
-            this.video.loop = true;
-            let videoService = this.service("VideoManager");
-            videoService.add(this.video);
             this.texture = new _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE.VideoTexture(this.video);
             texturePromise = Promise.resolve({
                 width: this.video.width,
@@ -6250,7 +6220,7 @@ class CardPawn extends (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
 
         if (dataLocation) {
             return this.getBuffer(dataLocation).then((buffer) => {
-                 assetManager.setCache(dataLocation, buffer, this.id);
+                assetManager.setCache(dataLocation, buffer, this.id);
                 return assetManager.load(buffer, "svg", _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE, loadOptions);
             }).then((obj) => {
                 (0,_assetManager_js__WEBPACK_IMPORTED_MODULE_3__.normalizeSVG)(obj, depth, shadow, _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE);
@@ -6983,29 +6953,6 @@ class MicroverseAppManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_M
 
 MicroverseAppManager.register("MicroverseAppManager");
 
-class VideoManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.ViewService {
-    constructor(name) {
-        super(name || "VideoManager");
-        this.videos = [];
-        this.handler = () => this.videoStart();
-        document.addEventListener("click", this.handler);
-    }
-
-    add(video) {
-        if (this.videos.indexOf(video) < 0) {
-            this.videos.push(video);
-        }
-    }
-
-    videoStart() {
-        this.videos.forEach((v)=>v.play());
-        if (this.handler) {
-            document.removeEventListener('click', this.handler);
-            delete this.handler;
-        }
-    }
-}
-
 function arrayDispose() {
     if (Array.isArray(this)) {
         this.forEach((e) => e.dispose());
@@ -7213,23 +7160,54 @@ const AM_Code = superclass => class extends superclass {
         return this.scriptSubscribe(scope, eventName, listener);
     }
 
-    has(behaviorName, name) {
-        let moduleName;
-        let split = behaviorName.split("$");
-        if (split.length > 1) {
-            moduleName = split[0];
+    has(moduleName, maybeMethod) {
+        return this.hasBehavior(moduleName, maybeMethod);
+    }
+
+    hasBehavior(moduleName, maybeMethod) {
+        // either
+        // moduleName = "A" and no maybeMethod: if the named module is installed to this
+        // moduleName = "A$B" and no maybeMethod: if the named module installed to this and it has B
+        // moduleName = "A$B" with maybeMethod: if the named module installed to this and it has B,
+        //                                      and B has method maybeMethod
+
+        return this.checkBehavior(this, true, moduleName, maybeMethod);
+    }
+
+    checkBehavior(obj, isActor, moduleName, maybeMethod) {
+        let module;
+        let behaviorName;
+
+        if (moduleName.indexOf("$") > 0) {
+            let split = moduleName.split("$");
+            module = split[0];
             behaviorName = split[1];
+        } else {
+            module = moduleName;
+            behaviorName = null;
         }
 
-        if (!moduleName && this[isProxy]) {
-            moduleName = this._behavior.module.externalName;
+        if (!module && obj[isProxy]) {
+            module = obj._behavior.module.externalName;
         }
 
-        if (!this._behaviorModules) {return false;}
-        if (!this._behaviorModules.includes(moduleName)) {return false;}
-        let behavior = this.behaviorManager.lookup(moduleName, behaviorName);
+        let who = obj;
+        if (!isActor) {
+            who = who.actor;
+        }
+
+        let behaviorModules = who._behaviorModules;
+        let behaviorManager = who.behaviorManager;
+
+        if (!behaviorModules) {return false;}
+        if (!behaviorModules.includes(module)) {return false;}
+
+        if (!behaviorName) {return false;}
+
+        let behavior = behaviorManager.lookup(module, behaviorName);
         if (!behavior) {return false;}
-        return !!behavior.$behavior[name];
+        if (!maybeMethod) {return true;}
+        return !!behavior.$behavior[maybeMethod];
     }
 
     // setup() of a behavior, and typically a subscribe call in it, gets called multiple times
@@ -7477,23 +7455,12 @@ const PM_Code = superclass => class extends superclass {
         return this.scriptSubscribe(scope, subscription, listener);
     }
 
-    has(behaviorName, name) {
-        let moduleName;
-        let split = behaviorName.split("$");
-        if (split.length > 1) {
-            moduleName = split[0];
-            behaviorName = split[1];
-        }
+    has(moduleName, maybeMethod) {
+        return this.hasBehavior(moduleName, maybeMethod);
+    }
 
-        if (!moduleName && this[isProxy]) {
-            moduleName = this.actor._behavior.module.externalName;
-        }
-
-        if (!this.actor._behaviorModules) {return false;}
-        if (!this.actor._behaviorModules.includes(moduleName)) {return false;}
-        let behavior = this.actor.behaviorManager.lookup(moduleName, behaviorName);
-        if (!behavior) {return false;}
-        return !!behavior.$behavior[name];
+    hasBehavior(moduleName, maybeMethod) {
+        return this.actor.checkBehavior(this, false, moduleName, maybeMethod);
     }
 
     // setup() of a behavior, and typically a subscribe call in it, gets called multiple times
@@ -7794,6 +7761,18 @@ class BehaviorModelManager extends ModelService {
         return null;
     }
 
+    hasBehavior(externalName, behaviorName) {
+        if (!externalName) {return false;}
+        let module = this.modules.get(externalName);
+        if (!module) {return false;}
+        if (!behaviorName) {return true;}
+        let b = module.actorBehaviors.get(behaviorName);
+        if (b) {return true;}
+        b = module.pawnBehaviors.get(behaviorName);
+        if (b) {return true;}
+        return false;
+    }
+
     loadStart(key) {
         // last one wins
         this.key = key;
@@ -8065,6 +8044,7 @@ class BehaviorViewManager extends ViewService {
             this.callback(false);
         }
         this.setURL(null);
+        super.destroy();
     }
 
     setURL(url, optCallback) {
@@ -8460,8 +8440,8 @@ function createHelpMenu() {
     let help = `
     <div id="helpDialog" class="dialogPanel no-select">
     <button id="close-button" type="button" class="btn btn-danger btn-x topright">x</button>
-        <div id="help-title" class="panel-title">Help</div>
         <div id="share-container" class="content-container">
+            <div id="help-title" class="panel-title">Help</div>
             <div id="table-wrapper">
                 <div id="table-scroll" id="scrollbar">
                     <table class="help-table">
@@ -8489,7 +8469,7 @@ function createHelpMenu() {
                     <tr class="help-row">
                         <td>
                             <p class="table-head">Manipulate</p>
-                            <p class="table-desc">Ctrl + click on an object to open and cycle through the "gizmo" tools. The gray sphere is a button to open the property sheet tool.</p>
+                            <p class="table-desc">Ctrl + click on an object to open and cycle through the "gizmo" tools. The icon of a multi-pane tool is a button to open the property sheet tool.</p>
                         </td>
                         <td class="icon-column">
                             <div class="icons">
@@ -8603,16 +8583,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _text_text_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./text/text.js */ "./src/text/text.js");
 /* harmony import */ var _card_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./card.js */ "./src/card.js");
 /* harmony import */ var _avatar_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./avatar.js */ "./src/avatar.js");
-/* harmony import */ var _frame_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./frame.js */ "./src/frame.js");
-/* harmony import */ var _code_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./code.js */ "./src/code.js");
-/* harmony import */ var _portal_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./portal.js */ "./src/portal.js");
-/* harmony import */ var _worldSaver_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./worldSaver.js */ "./src/worldSaver.js");
-/* harmony import */ var _settingsMenu_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./settingsMenu.js */ "./src/settingsMenu.js");
-/* harmony import */ var _apps_multiblaster_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../apps/multiblaster.js */ "./apps/multiblaster.js");
-/* harmony import */ var jszip__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! jszip */ "./node_modules/jszip/dist/jszip.min.js");
-/* harmony import */ var jszip__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(jszip__WEBPACK_IMPORTED_MODULE_13__);
-/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var _wcAssetManager_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./wcAssetManager.js */ "./src/wcAssetManager.js");
+/* harmony import */ var _walkManager_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./walkManager.js */ "./src/walkManager.js");
+/* harmony import */ var _frame_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./frame.js */ "./src/frame.js");
+/* harmony import */ var _code_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./code.js */ "./src/code.js");
+/* harmony import */ var _portal_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./portal.js */ "./src/portal.js");
+/* harmony import */ var _worldSaver_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./worldSaver.js */ "./src/worldSaver.js");
+/* harmony import */ var _settingsMenu_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./settingsMenu.js */ "./src/settingsMenu.js");
+/* harmony import */ var _apps_multiblaster_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../apps/multiblaster.js */ "./apps/multiblaster.js");
+/* harmony import */ var jszip__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! jszip */ "./node_modules/jszip/dist/jszip.min.js");
+/* harmony import */ var jszip__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(jszip__WEBPACK_IMPORTED_MODULE_14__);
+/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
+/* harmony import */ var _wcAssetManager_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./wcAssetManager.js */ "./src/wcAssetManager.js");
 // Copyright 2022 by Croquet Corporation, Inc. All Rights Reserved.
 // https://croquet.io
 // info@croquet.io
@@ -8620,6 +8601,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+/* import { DolbyChatManager } from "./dolbyChat.js"; */
 
 
 
@@ -8647,7 +8630,7 @@ const defaultAvatarNames = [
 
 const defaultSystemBehaviorDirectory = "behaviors/croquet";
 const defaultSystemBehaviorModules = [
-    "avatarEvents.js", "billboard.js", "elected.js", "menu.js", "pdfview.js", "propertySheet.js", "physics.js", "rapier.js", "scrollableArea.js", "singleUser.js", "stickyNote.js", "halfBodyAvatar.js", "gizmo.js"
+    "avatarEvents.js", "billboard.js", "elected.js", "menu.js", "pdfview.js", "physics.js", "rapier.js", "scrollableArea.js", "singleUser.js", "stickyNote.js", "halfBodyAvatar.js", "gizmo.js", "propertySheet.js", "dragAndDrop.js"
 ];
 
 let AA = true;
@@ -8690,8 +8673,8 @@ async function getAntialias() {
 console.log('%cTHREE.REVISION:', 'color: #f00', _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE.REVISION);
 
 function loadLoaders() {
-    window.JSZip = (jszip__WEBPACK_IMPORTED_MODULE_13___default());
-    window.fflate = fflate__WEBPACK_IMPORTED_MODULE_15__;
+    window.JSZip = (jszip__WEBPACK_IMPORTED_MODULE_14___default());
+    window.fflate = fflate__WEBPACK_IMPORTED_MODULE_16__;
     window.THREE = _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE;
     return Promise.resolve(_ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.THREE);
 }
@@ -8717,7 +8700,7 @@ function basenames() {
 }
 
 function loadInitialBehaviors(paths, directory) {
-    let library = _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library || new _code_js__WEBPACK_IMPORTED_MODULE_8__.CodeLibrary();
+    let library = _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library || new _code_js__WEBPACK_IMPORTED_MODULE_9__.CodeLibrary();
     _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library = library;
     if (!paths || !directory) {return;}
     let {baseurl, _pathname} = basenames();
@@ -8749,7 +8732,7 @@ function loadInitialBehaviors(paths, directory) {
             let dot = path.lastIndexOf(".");
             let fileName = path.slice(0, dot);
 
-            (0,_code_js__WEBPACK_IMPORTED_MODULE_8__.checkModule)(module); // may throw an error
+            (0,_code_js__WEBPACK_IMPORTED_MODULE_9__.checkModule)(module); // may throw an error
             library.add(module.default, fileName, isSystem);
         });
         return true;
@@ -8795,7 +8778,7 @@ class MyPlayerManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE
         let index = this.avatarCount % _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.AvatarNames.length;
         this.avatarCount++;
         let avatarSpec = _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.AvatarNames[index];
-        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "MyPlayerManager", this.avatarCount);
+        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "MyPlayerManager", this.avatarCount);
         let options = {...playerOptions, ...{noSave: true, type: "3d", singleSided: true}};
 
         if (typeof avatarSpec === "string") {
@@ -8805,10 +8788,11 @@ class MyPlayerManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE
                 dataRotation: (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.q_euler)(0, Math.PI, 0),
                 dataTranslation: [0, -0.4, 0],
                 dataLocation: `./assets/avatars/${avatarSpec}.zip`,
+                avatarType: "wonderland",
                 type: "initial", // this is "initial" here to not show the avatar that may be changed
             }};
         } else {
-            options = {...options, ...avatarSpec, avatarType: "custom"};
+            options = {...options , avatarType: "custom", ...avatarSpec};
         }
         return _avatar_js__WEBPACK_IMPORTED_MODULE_6__.AvatarActor.create(options);
     }
@@ -8943,11 +8927,11 @@ class MyPlayerManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE
         // all followers carrying the same token follow them.  note that followers may
         // enter before or after the presenter.
         if (!this.presentationMode) {
-            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "continuePresenting", presenter.id, presenterToken);
+            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "continuePresenting", presenter.id, presenterToken);
             presenter.presenterToken = presenterToken; // we keep this for as long as we're presenting
             this.startPresentation(presenter.playerId, presenterToken);
         } else {
-            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "continuePresenting rejected due to presentation in progress");
+            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "continuePresenting rejected due to presentation in progress");
         }
     }
 
@@ -8959,23 +8943,23 @@ class MyPlayerManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE
         // conceivable - albeit unlikely - that the current presentation will end in
         // time for the expected presenter to take over.
         if (this.presentationMode && this.presenter.presenterToken === presenterToken) {
-            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "continueFollowing", this.presenter.id, presenterToken);
+            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "continueFollowing", this.presenter.id, presenterToken);
             this.followers.add(follower.playerId);
             follower.presentationStarted();
             this.publish("playerManager", "playerCountChanged");
         } else {
             follower.presenterToken = presenterToken;
-            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "continueFollowing: expected presenter not presenting", presenterToken);
+            console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "continueFollowing: expected presenter not presenting", presenterToken);
         }
     }
 
     playerEnteredWorld(player) {
-        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "playerEnteredWorld", player);
+        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "playerEnteredWorld", player);
         this.publish("playerManager", "playerCountChanged");
     }
 
     playerLeftWorld(player) {
-        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.frameName)(), "playerLeftWorld", player);
+        console.log((0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.frameName)(), "playerLeftWorld", player);
         if (player.playerId === this.presentationMode) {
             this.stopPresentation();
         }
@@ -9003,7 +8987,7 @@ class MyModelRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
         return [
             MyPlayerManager,
             _card_js__WEBPACK_IMPORTED_MODULE_5__.MicroverseAppManager,
-            _code_js__WEBPACK_IMPORTED_MODULE_8__.BehaviorModelManager,
+            _code_js__WEBPACK_IMPORTED_MODULE_9__.BehaviorModelManager,
             _text_text_js__WEBPACK_IMPORTED_MODULE_4__.FontModelManager,
             _physics_js__WEBPACK_IMPORTED_MODULE_2__.PhysicsManager,
         ];
@@ -9012,9 +8996,9 @@ class MyModelRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
     init(options, persistentData) {
         super.init(options);
         let appManager = this.service("MicroverseAppManager");
-        appManager.add(_apps_multiblaster_js__WEBPACK_IMPORTED_MODULE_12__.MultiBlaster);
+        appManager.add(_apps_multiblaster_js__WEBPACK_IMPORTED_MODULE_13__.MultiBlaster);
         appManager.add(_text_text_js__WEBPACK_IMPORTED_MODULE_4__.TextFieldActor);
-        appManager.add(_portal_js__WEBPACK_IMPORTED_MODULE_9__.PortalActor);
+        appManager.add(_portal_js__WEBPACK_IMPORTED_MODULE_10__.PortalActor);
 
         this.ensurePersistenceProps();
         this.subscribe(this.sessionId, "triggerPersist", "triggerPersist");
@@ -9053,7 +9037,7 @@ class MyModelRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
             delete this.loadingPersistentDataErrored;
             this.loadingPersistentData = true;
 
-            let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_10__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
+            let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_11__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
             let json = saver.parse(JSON.stringify(data));
 
             //maybe we need to delete all DefaultUserBehaviors at this point.
@@ -9091,7 +9075,7 @@ class MyModelRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
 
     saveData() {
         let name = this.sessionName || "Unknown";
-        let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_10__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
+        let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_11__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
         let json = saver.save(this);
         let string = saver.stringify(json);
         return {name, version: "1", data: JSON.parse(string)};
@@ -9213,7 +9197,7 @@ class MyModelRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__
 
     loadFromFile({ _name, version, data }, asScene, pose) {
         try {
-            let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_10__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
+            let saver = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_11__.WorldSaver(_card_js__WEBPACK_IMPORTED_MODULE_5__.CardActor);
             let json = saver.parse(data);
 
             let nameMap = this.loadBehaviorModules(json.behaviorModules, version);
@@ -9258,12 +9242,12 @@ class MyViewRoot extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.
         const services = [
             _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.InputManager,
             {service: _ThreeRender_js__WEBPACK_IMPORTED_MODULE_1__.ThreeRenderManager, options:{useBVH: true, antialias: AA}},
-            _wcAssetManager_js__WEBPACK_IMPORTED_MODULE_14__.AssetManager,
+            _wcAssetManager_js__WEBPACK_IMPORTED_MODULE_15__.AssetManager,
             _text_text_js__WEBPACK_IMPORTED_MODULE_4__.KeyFocusManager,
             _text_text_js__WEBPACK_IMPORTED_MODULE_4__.FontViewManager,
             _text_text_js__WEBPACK_IMPORTED_MODULE_4__.SyncedStateManager,
-            _card_js__WEBPACK_IMPORTED_MODULE_5__.VideoManager,
-            _code_js__WEBPACK_IMPORTED_MODULE_8__.BehaviorViewManager,
+            _code_js__WEBPACK_IMPORTED_MODULE_9__.BehaviorViewManager,
+            _walkManager_js__WEBPACK_IMPORTED_MODULE_7__.WalkManager,
         ];
         if (window.settingsMenuConfiguration?.voice) services.push(_agoraChat_js__WEBPACK_IMPORTED_MODULE_3__.AgoraChatManager);
         return services;
@@ -9348,9 +9332,11 @@ function startWorld(appParameters, world) {
 
     return loadLoaders()
         .then(() => {
-            return loadInitialBehaviors(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules, _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorDirectory);
+            return loadInitialBehaviors(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules,
+                                        _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorDirectory);
         }).then(() => {
-            return loadInitialBehaviors(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.UserBehaviorModules, _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.UserBehaviorDirectory);
+            return loadInitialBehaviors(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.UserBehaviorModules,
+                                        _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.UserBehaviorDirectory);
         }).then(() => {
             return (0,_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.StartWorldcore)(sessionParameters);
         }).then((session) => {
@@ -9416,7 +9402,7 @@ function startMicroverse() {
         });
     };
 
-    (0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.sendToShell)("hud", {joystick: false, fullscreen: false});
+    (0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.sendToShell)("hud", {joystick: false, fullscreen: false});
     setButtons("none");
 
     const configPromise = new Promise(resolve => resolveConfiguration = resolve)
@@ -9424,13 +9410,13 @@ function startMicroverse() {
             window.settingsMenuConfiguration = { ...localConfig };
             return !localConfig.showSettings || localConfig.userHasSet
                 ? false // as if user has run dialog with no changes
-                : new Promise(resolve => (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_11__.startSettingsMenu)(true, resolve));
+                : new Promise(resolve => (0,_settingsMenu_js__WEBPACK_IMPORTED_MODULE_12__.startSettingsMenu)(true, resolve));
         });
-    (0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.sendToShell)("send-configuration");
+    (0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.sendToShell)("send-configuration");
 
     return configPromise.then(changed => {
-        if (changed) (0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.sendToShell)("update-configuration", { localConfig: window.settingsMenuConfiguration });
-        (0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.sendToShell)("hud", {joystick: true, fullscreen: true});
+        if (changed) (0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.sendToShell)("update-configuration", { localConfig: window.settingsMenuConfiguration });
+        (0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.sendToShell)("hud", {joystick: true, fullscreen: true});
         setButtons("flex");
         return getAntialias();
     }).then((aa) => {
@@ -9449,19 +9435,25 @@ async function launchMicroverse() {
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.ModelRoot.evaluate(() => worldModule.init(_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants));
         if (!_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules) {
             _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorDirectory = defaultSystemBehaviorDirectory;
-            _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules = defaultSystemBehaviorModules;
+            if (!_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.ExcludedSystemBehaviorModules) {
+                _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules = defaultSystemBehaviorModules;
+            } else {
+                _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules = defaultSystemBehaviorModules.filter((n) => {
+                    return !_croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.ExcludedSystemBehaviorModules.includes(n);
+                });
+            }
         }
     } else {
         const response = await fetch(basename);
         if (!response.ok) throw Error(`world not found: ${basename}`);
         const text = await response.text();
-        const json = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_10__.WorldSaver().parse(text);
+        const json = new _worldSaver_js__WEBPACK_IMPORTED_MODULE_11__.WorldSaver().parse(text);
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.AvatarNames = defaultAvatarNames;
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorDirectory = defaultSystemBehaviorDirectory;
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.SystemBehaviorModules = defaultSystemBehaviorModules;
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.BehaviorModules = json.data.behaviormodules;
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.DefaultCards = json.data.cards;
-        _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library = new _code_js__WEBPACK_IMPORTED_MODULE_8__.CodeLibrary();
+        _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library = new _code_js__WEBPACK_IMPORTED_MODULE_9__.CodeLibrary();
         _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.Constants.Library.addModules(json.data.behaviorModules);
     }
 
@@ -9508,7 +9500,7 @@ const shellListener = (command, data) => {
         }
     }
 };
-(0,_frame_js__WEBPACK_IMPORTED_MODULE_7__.addShellListener)(shellListener);
+(0,_frame_js__WEBPACK_IMPORTED_MODULE_8__.addShellListener)(shellListener);
 
 
 /***/ }),
@@ -9546,7 +9538,7 @@ class PhysicsWorld extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0_
         }
 
         const gravity = options.gravity || [0.0, -9.8, 0.0];
-        const timeStep = options.timeStep || 50; // In ms
+        const timeStep = options.timeStep || 5; // Gets Converted to Miliseconds (Hz) 5 Approx 200 Hz
 
         const g = new Physics.Vector3(...gravity);
         this.world = new Physics.World(g);
@@ -10135,12 +10127,12 @@ function createSettingsMenu(useEnter) {
     <div id="join-container" class="content-container">
         <!--
         <div id="dialogTitle">
-            <div id="titleHolder" class="settingColumn">
+            <div id="titleHolder">
                 <img id="titleLogo" src="assets/images/microverse-logo.png" />
             </div>
         </div>
         -->
-        <div id="joinPrompt" class="settingColumn">
+        <div id="joinPrompt">
             <div id="joinPromptTitle">Settings</div>
             <div id="joinPromptBlurb" class="promptBlurb">Specify a nickname, and choose an avatar either
                 by selecting from those on display or pasting a valid Ready Player Me URL.
@@ -10148,21 +10140,21 @@ function createSettingsMenu(useEnter) {
         </div>
         <div id="settings-title" class="panel-title">Settings</div>
         <div class="settings-container">
-            <div id="nameInput" class="stringInputHolder settingColumn">
+            <div id="nameInput" class="stringInputHolder">
                 <div id="namePrompt" class="namePrompt">Nickname<span>*</span></div>
-                <div id="nameField" class="nameField allowSelect" contenteditable="true"></div>
+                <div id="nameField" class="nameField allow-select" contenteditable="true"></div>
                 <div id="nameExplanation">Enter 1-12 characters (ASCII only).</div>
                 <div id="nameFilterWarning"><br /></div>
             </div>
             <div class="namePrompt">Select Avatar</div>
-            <div id="dialogAvatarSelections" class="settingColumn">
+            <div id="dialogAvatarSelections">
                 <div id="avatarList"></div>
             </div>
-            <div id="avatarURL" class="stringInputHolder settingColumn">
+            <div id="avatarURL" class="stringInputHolder">
                 <div id="avatarURLPrompt" class="namePrompt">Or, Enter an Avatar URL</div>
-                <div id="avatarURLField" class="nameField avatarNameField allowSelect" contenteditable="true"></div>
+                <div id="avatarURLField" class="nameField avatarNameField allow-select" contenteditable="true"></div>
             </div>
-            <div id="handednessRow" class="settingsColumn">
+            <div id="handednessRow">
                 <div id="handednessLabel">Hand:</div>
                 <div class="btn-group" id="handedness">
                     <label class="btn btn-radio-button">
@@ -10173,10 +10165,10 @@ function createSettingsMenu(useEnter) {
                     </label>
                 </div>
             </div>
-            <div id="dialogEnterButton" class="dialogButtonsHolder settingColumn disabled">
+            <div id="dialogEnterButton" class="dialogButtonsHolder disabled">
                 <div id="enterButton">Enter</div>
             </div>
-            <div id="dialogAcceptCancelButtons" class="dialogButtonsHolder settingColumn twoItems">
+            <div id="dialogAcceptCancelButtons" class="dialogButtonsHolder twoItems">
                 <button id="cancel-button" type="button" class="btn btn-danger cancel-button">Cancel</button>
                 <button type="button" id="acceptButton" class="btn btn-success">Apply</button>
             </div>
@@ -10202,17 +10194,14 @@ function createSettingsMenu(useEnter) {
     let dialogAcceptCancelButtons = settingsMenu.querySelector("#dialogAcceptCancelButtons");
 
     let nameField = settingsMenu.querySelector('#nameField');
-    nameField.addEventListener('keydown', evt => nameFieldKeydown(evt));
+    nameField.addEventListener('keydown', (evt) => nameFieldKeydown(evt));
     nameField.addEventListener('input', (evt) => nameFieldChanged(evt));
-    nameField.addEventListener('paste', (evt) => {
-        evt.stopPropagation();
-    });
+    nameField.addEventListener('paste', (evt) => evt.stopPropagation());
 
     let avatarURLField = settingsMenu.querySelector('#avatarURLField');
     avatarURLField.addEventListener('input', (evt) => avatarURLFieldChanged(evt));
-    avatarURLField.addEventListener('paste', (evt) => {
-        evt.stopPropagation();
-    });
+    avatarURLField.addEventListener('paste', (evt) => evt.stopPropagation());
+    avatarURLField.addEventListener('keydown', (evt) => evt.stopPropagation());
 
     enterButton.onclick = () => dialogCloseEnter();
     acceptButton.onclick = () => accept();
@@ -10272,7 +10261,8 @@ function fillFromPrevious() {
     if (oldHandedness) {
         if (oldHandedness === "Left") {
             const handedness = settingsMenu.querySelector('#handedness');
-            handedness.value = oldHandedness;
+            const l = handedness.querySelector("#left");
+            l.checked = true;
         }
     }
     updateButtonState();
@@ -10354,11 +10344,6 @@ function accept() {
     //     avatar.setSettings(configuration);
     // }
     closeDialog(true);
-    (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_0__.closeAllDialogs)();
-}
-
-function cancel() {
-    closeDialog(false);
     (0,_worldMenu_js__WEBPACK_IMPORTED_MODULE_0__.closeAllDialogs)();
 }
 
@@ -10475,16 +10460,19 @@ function createShareMenu(avatar) {
     <div id="shareDialog" class="dialogPanel no-select">
         <button id="close-button" type="button" class="btn btn-danger btn-x topright">x</button>
         <div id="share-container" class="content-container">
-            <div id="share-title" class="panel-title settingsColumn">Share Session<br></div>
+            <div id="share-title" class="panel-title">Share Session<br></div>
             <div class="promptBlurb">Scan QR code or click to open a new browser tab<br> in the same session.</div>
-            <div id="share-qr" class="settingsColumn"></div>
+            <div id="share-qr"></div>
 
-            <div class="share-settings-label settingsColumn">Copy Share Link</div>
-            <div id="copy-link" class="copy-link allow-select settingsColumn">generated link</div>
-            <button id="copy-button" type="button" class="btn btn-outline-success">Copy</button>
-
-            <div class="share-settings-label settingsColumn">Save world VRSE file</div>
-            <button id="save-button" type="button" class="btn btn-outline-success">Download</button>
+            <div class="share-settings-label">Copy Share Link</div>
+            <div class="share-menu-row">
+                <div id="copy-link" class="copy-link allow-select">generated link</div>
+                <button id="copy-button" type="button" class="btn btn-outline-success">Copy</button>
+            </div>
+            <div class="share-menu-row">
+                <div class="share-settings-label">Save world as VRSE file</div>
+                <button id="save-button" type="button" class="btn btn-outline-success">Download</button>
+            </div>
         </div>
     </div>`.trim();
 
@@ -14149,6 +14137,89 @@ class Wrap {
         currentLine.push(word);
         pushLine();
         return [lines, words];
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/walkManager.js":
+/*!****************************!*\
+  !*** ./src/walkManager.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "WalkManager": () => (/* binding */ WalkManager)
+/* harmony export */ });
+/* harmony import */ var _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @croquet/worldcore-kernel */ "./node_modules/@croquet/worldcore-kernel/index.js");
+
+
+class WalkManager extends _croquet_worldcore_kernel__WEBPACK_IMPORTED_MODULE_0__.ViewService {
+    constructor(name) {
+        super(name || "WalkManager");
+        this.walkers = [];
+    }
+
+    setupDefaultWalkers() {
+        [
+            ["BuiltinWalker", "WalkerPawn", "checkPortal"],
+            ["BuiltinWalker", "WalkerPawn", "backoutFromFall"],
+            ["BuiltinWalker", "WalkerPawn", "bvh"]
+        ].forEach((spec) => this.append(spec));
+    }
+
+    append(walkerSpec) {
+        // [ModuleName, BehaviorName, methodName]
+
+        if (walkerSpec.length !== 3) {
+            throw new Error(`walker spec should be in the form of "[ModuleName, BehaviorName, methodName]"`);
+        }
+        this.walkers.push(walkerSpec);
+    }
+
+    insertBefore(walkerSpec, prevSpec) {
+        if (!prevSpec) {
+            return this.append(walkerSpec);
+        }
+
+        let index = this.findIndex(prevSpec);
+        if (index >= 0) {
+            if (walkerSpec.length !== 3) {
+                throw new Error(`walker spec should be in the form of "[ModuleName, BehaviorName, methodName]"`);
+            }
+            this.walkers.splice(index, 0, walkerSpec);
+        }
+    }
+
+    remove(walkerSpec) {
+        let index = this.findIndex(walkerSpec);
+        if (index >= 0) {
+            this.walkers.splice(index, 1);
+        }
+    }
+
+    findIndex(walkerSpec) {
+        return this.walkers.findIndex((a) => a[0] == `${walkerSpec[0]}$${walkerSpec[1]}` && a[2] === walkerSpec[2]);
+    }
+
+    removeAll() {
+        this.walkers = [];
+    }
+
+    walk(avatar, vq, time, delta) {
+        for (let i = 0; i < this.walkers.length; i++) {
+            let walker = this.walkers[i];
+            let behavior = avatar.actor.behaviorManager.lookup(walker[0], walker[1]);
+            let [newVq, isFinal] = behavior.invoke(avatar, walker[2], vq, time, delta);
+            if (isFinal) {
+                return newVq;
+            }
+            vq = newVq;
+        }
+        return vq;
     }
 }
 
