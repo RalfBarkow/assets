@@ -1,6 +1,6 @@
 
 // import {count,trouble} from './print-stats.js'
-import {asSlug} from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+import {asSlug} from 'http://http.wiki.ralfbarkow.ch/assets/v1/frame.js'
 const words = text => text.split(/\W+/).length
 
 function resolve(page, text) {

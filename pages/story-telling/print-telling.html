@@ -3,7 +3,7 @@
 <div id=result></div>
 <script type=module>
 
-  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import * as frame from 'http://http.wiki.ralfbarkow.ch/assets/v1/frame.js'
   import {render} from './render.js'
   window.choices.innerHTML = (await frame.context()).page.story
     .filter(item => item.type == 'reference')
