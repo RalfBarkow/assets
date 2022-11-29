@@ -65,7 +65,7 @@
       titles.map(title =>
         [frame.asSlug(title), {
           title,
-          story:code.items(title,div=>norm.item),
+          story:code.items(title,norm.item),
           journal:[{type:'create',date:Date.now()}]
         }]
       ))
@@ -81,12 +81,13 @@
     const txt = []
     const dotxt = div=>div.innerText
     for(let title of code.titles()) {
-      txt.push('title',title)
+      txt.push(`============== ${title} ==============`)
       const items = code.items(title,dotxt)
       items.shift()
       for(let item of items){
-        let lines = item.split(/\.\s+/g)
-        txt.push('item',...lines)
+        // let lines = item.split(/\.\s+/g)
+        let lines = [...item.matchAll(/.*?[\.,;?]\s*/g)].map(e=>e[0].trim())
+        txt.push('----------------------------------------',...lines)
       }
     }
     const file = asset.file.replace(/\.html$/,'.txt')
