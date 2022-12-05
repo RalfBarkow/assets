@@ -1,0 +1,109 @@
+<p>
+  <button onclick=dosurvey(event)>survey</button>
+  <button onclick=doprint(event)>download</button>
+</p>
+<div id=report></div>
+<style>
+  body { font-family: verdana, helvetica, sans; font-size: smaller; }
+  td { border: 1px solid gray; padding: 4px; text-align:center;  }
+  table { border-collapse: collapse; }
+</style>
+
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const tick = value => {window.report.innerText += ' .'; return value}
+
+  const cols = []
+  let maps = null
+  let graphs = null
+
+  const page = (await frame.context()).page
+  const sites = page.story
+    .filter(item => item.type=='reference')
+    .map(item => item.site)
+  const assets = (await frame.assets())
+    .filter(asset =>
+      asset.dir == "pages/deep-in-the-garden/graphs" &&
+      asset.file.endsWith('.graph.json'))
+  window.report.innerText = `ready with ${sites.length} references, ${assets.length} graph assets`
+
+  window.dosurvey = async event => {
+    const format = (row,col) => cols[col].garden[row].length
+    await loader()
+    survey()
+    window.report.innerHTML = `
+      <table>
+      ${[0,1,2,3,4,5,6,7,8].map(row =>
+        `<tr><td>${row}${[0,1,2].map(col =>
+          `<td>${format(row,col)}`).join('')}`).join('')}
+      </table>`
+  }
+
+  async function loader() {
+    window.report.innerText = ''
+    maps = await Promise.all(
+      sites.map(site => fetch(`//${site}/system/sitemap.json`)
+        .then(res => tick(res.json()))))
+    graphs = await Promise.all(
+      assets.map(asset => fetch(asset.url)
+        .then(res => tick(res.text()))
+        .then(text => JSON.parse(text))
+        .then(json => new Graph(json.nodes, json.rels))
+      ))
+    sites.forEach((site,i) => {
+      const map = maps[i]
+      const garden = [
+        graphs[i].nodes
+        .filter(node => node.type=='Story')
+        .map(node => frame.asSlug(node.props.name))]
+      cols.push({site,map,garden})
+    })
+  }
+
+  function survey() {
+    for (let depth=1; depth<=8; depth++) {
+      cols.forEach(col => {
+        const have = col.garden.flat()
+        const here = col.garden.slice(-1)[0]
+        const need = here
+          .map(slug => {
+            const info = col.map.find(info => info.slug == slug)
+            if(info?.links) {return Object.keys(info.links)}
+            else return []})
+          .flat()
+          .filter(slug => !have.includes(slug))
+          .filter(uniq)
+        col.garden.push(need)
+      })
+    }
+  }
+
+  window.doprint = event => {
+    const format = (row,col) => {
+      const {garden, map} = cols[col]
+      const slugs = garden[row]
+      const titles = slugs.map(slug => {
+        const info = map.find(info => info.slug == slug)
+        return info?.title||slug
+      })
+      return titles.join('<br>')
+    }
+    const html = `
+      <style>
+        body { font-family: verdana, helvetica, sans; font-size: smaller; }
+        td { border: 1px solid gray; padding: 4px; text-align:left; vertical-align:top; }
+        table { border-collapse: collapse; }
+      </style>
+      <table>
+      ${[0,1,2,3,4,5,6,7,8].map(row => 
+        `<tr><td colspan=3>${row}
+         <tr>${[0,1,2].map(col =>
+          `<td>${format(row,col)}`).join('')}`).join('')}
+      </table>
+    `
+    frame.download(html,'DeepGarden.html','text/html')
+  }
+
+</script>

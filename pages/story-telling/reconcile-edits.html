@@ -1,18 +1,25 @@
 <details open>
-  <summary id=working>waiting</summary>
+  <summary id=working>choose file</summary>
   <p id=choices onchange=dochoose(event)></p>
+</details>
+<details open=false>
+  <summary>color key</summary>
+  <p id=colors></p>
 </details>
 <div id=buttons></div>
 <div id=results></div>
 <script type=module>
   import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
   import * as norm from 'http://ward.dojo.fed.wiki/assets/pages/story-telling/norm.js'
+  const scripts = `http://ward.dojo.fed.wiki/assets/pages/story-telling`
+
   const td = text => (text?.slice(0,24)) ||
     '<span style="background-color:pink">item.text undefined</span>'
   const context = await frame.context()
   let edits = []
   let score = {}
   let allitems = []
+  let file = ''
 
   const showscore = () => {
     window.working.innerText = Object.entries(score)
@@ -28,21 +35,56 @@
     .join('<br>')
   let titles = []
 
+  let colors = {} 
+  const usecolor = (color,explain) => {
+    colors[color] ||= {count:0, explain}
+    colors[color].count += 1
+  }
+  const showcolors = () => {
+    const escape = text => text.replaceAll(/&/g,'&amp;').replaceAll(/</g,'&lt;')
+    window.colors.innerHTML = Object.entries(colors)
+      .sort((a,b) => a[1].explain > b[1].explain ? 1 : -1)
+      .map(([color,value]) => 
+        `▫︎ <span style="background-color:${color}; width:100%">
+          &nbsp; ${value.count} × ${escape(value.explain)} &nbsp; </span>`)
+      .join("<br>")
+  }
+  window.docolordata = async event => {
+    const title = `Data ${file.replace(/\.html$/,'')}`
+    const now = {date:Date.now(),colors,score}
+    const old = await fetch(`/${frame.asSlug(title)}.json`).then(res => res.ok ? res.json() : null)
+    const hist = old ? [now, ...JSON.parse(old.story[2].text)] : [now]
+    const story = [
+      {type:'paragraph',text:`Updated ${new Date().toLocaleDateString()}.`},
+      {type:'frame',text:`${scripts}/plot.html\nHEIGHT 450`},
+      {type:'code',text:JSON.stringify(hist,null,2)}
+    ]
+    frame.open({title,story},event.shiftKey)
+  }
+
   window.dochoose = async event => {
     const asset = htmlfiles[event.target.value]
+    file = asset.file
     window.results.innerText = ''
     window.buttons.innerText = ''
+    window.colors.innerText = ''
     edits = []
     score = {}
+    colors = {}
     await tscan(asset.url)
     showscore()
     score.items = 0
     score.blanks = 0
     allitems = []
     await iscan()
-    window.buttons.innerHTML = `
-      <button onclick=doescan(event)>reconcile</button>
-    `
+    showcolors()
+    // window.buttons.innerHTML = `
+    //   <button onclick=doescan(event)>reconcile</button>
+    // `
+    await escan()
+    showcolors()
+    window.colors.innerHTML += ` &nbsp; <button onclick=docolordata(event)>preview</button>`
+
   }
 
   async function tscan(htmlurl) {
@@ -75,6 +117,7 @@
         .innerHTML = items
           .map(item => {
             const alert = trouble(item.elem)
+            if(alert) usecolor(...alert)
             item.alert = alert
             const color = alert ? `style="background-color:${alert[0]}"` : ''
             const click = `onclick="doiclick(event)" data-index="${allitems.length}"`
@@ -107,16 +150,17 @@
   function trouble(elem) {
     let html = elem.innerHTML
     html = html.replace(/^<span.*?>/,'').replace(/<\/span>$/,'')
-    if(html.match(/<a/)) return ['#fa4','<a']
-    if(html.match(/<span class/)) return ['#fac','<span class']
-    if(html.match(/&(nbsp|amp);/)) return ['#fcc','&nbsp; or &amp;']
-    if(html.match(/<.*?>/)) return ['#ee9','<tag>']
+    if(html.match(/<a/)) return ['#fa4','read anchor, <a']
+    if(html.match(/<span class/)) return ['#fac','read special <span class']
+    if(html.match(/&(nbsp|amp);/)) return ['#fcc','read &nbsp; or &amp;']
+    if(html.match(/<.*?>/)) return ['#ea9','read some other <tag>']
     return null
   }
 
-  window.doescan = event => {
-    escan()
-  }
+  // window.doescan = async event => {
+  //   await escan()
+  //   showcolors()
+  // }
 
   async function escan() {
     const site = norm.div.querySelector('a')
@@ -138,39 +182,51 @@
         reporting.previousElementSibling.style.backgroundColor = '#f88'
         continue
       }
-      console.log({res})
       const page = await res.json()
       const {type,date} = page.journal.slice(-1)[0]
       const revision = `${type} ${new Date(date).toLocaleString()}`
       const story = page.story
-      console.log({title,items,story})
       reporting
         .querySelectorAll('span')
         .forEach((span,i) => {
           const index = +span.dataset.index
           const item = allitems[index]
+          if(item.alert) return
           const written = story[i]
-          if (!item.alert && item.text.trim() != written.text.replaceAll(/\[\[|\]\]/g,'').trim()) {
-            span.style.backgroundColor = '#cfc'
+          const changed = mismatch(written.text,item.text)
+          if (changed) {
+            const alert = miscolor(changed)
+            usecolor(...alert)
+            span.style.backgroundColor = alert[0]
             span.setAttribute('onclick','doeclick(event)')
             item.written = written
-            item.revision = revision
+            item.changed = changed
             item.site = site
+            item.revision = revision
           }
         })
     }
   }
 
   window.doeclick = async event => {
-    console.log('eclick',event)
     const index = +event.target.dataset.index
     const item = allitems[index]
-    const {site,written,revision} = item
+    const {site,written,revision,changed} = item
     const story = [
       {type:'reference',site,title:item.title.name,text:revision},
+      {type:'pagefold',text:'recommended'},
+      revise(written,misfix(changed)),
       {type:'pagefold',text:'written'},
-      {type:'paragraph',text:written.text,id:written.id},
-      {type:'pagefold',text:'text'},
+      {type:'paragraph',text:written.text},
+      {type:'pagefold',text:'change'},
+      {type:'code',text:`${changed.repl[0].length} => ${changed.repl[1].length}`},
+      {type:'code',text:changed.repl[0]},
+      {type:'code',text:changed.repl[1]},
+      {type:'frame',text:`${scripts}/check.html\nHEIGHT 10`},
+      {type:'html',text:'<p>'+written.text.replace(
+        `${changed.skip} ${changed.repl[0]}`,
+        `${changed.skip} <mark>${changed.repl[1]}</mark>${changed.repl[0].length == 0 ? ' ' : ''}`)},
+      {type:'pagefold',text:'edited'},
       {type:'paragraph',text:item.text},
       {type:'pagefold',text:'html'},
       {type:'paragraph',text:item.html},
@@ -179,7 +235,62 @@
     if(item.alert)
       story.push({type:'paragraph',text:`trouble with "${item.alert[1]}"`})
     await frame.open({title:`For ${item.title.name}`,story},event.shiftKey)
+  }
 
+  const deeptrim = text => text.trim().replaceAll(/  +/g,' ')
+  const clean = text => text.replaceAll(/\[\[|\]\]/g,'')
+
+  function mismatch(written, edited) {
+    if (clean(deeptrim(written)) == deeptrim(edited)) return null
+    let w = written.trim().split(/ +/)
+    let e = edited.trim().split(/ +/)
+    const left = e.findIndex((c,i)=>c!=w[i])
+    if (left<0) return null
+    const skip = w.slice(0,left).join(' ')
+    w = w.reverse()
+    e = e.reverse()
+    const right = e.findIndex((c,i)=>c!=w[i])
+    if (right<0) return null
+    return {
+      skip,
+      repl:[
+        w.slice(right).reverse().slice(left).join(' '),
+        e.slice(right).reverse().slice(left).join(' ')
+      ]
+    }
+  }
+
+  function miscolor(changed) {
+    const w = changed.repl[0].length
+    const e = changed.repl[1].length
+    if(w==0 || e==0) return ['#ddf',"replace at/with nothing"]
+    if(w<25 && e<25) return ['#cfc',"replace short -> short"]
+    if(w<25) return ['#cfa',"replace short -> long"]
+    if(e<25) return ['#afc',"replace long -> short"]
+    return ['#add',"replace long -> long"]
+  }
+
+  function misfix(changed) {
+    const copy = JSON.parse(JSON.stringify(changed))
+    const w = copy.repl[0]
+    const e = copy.repl[1]
+    const regex = /\[\[(.*?)\]\]/g
+    let m
+    while (m = regex.exec(w)) {
+      copy.repl[1] = e.replace(m[1],m[0])
+    }
+    return copy
+  }
+
+  function revise(written, changed) {
+    // const text = deeptrim(written.text)
+    const text = written.text
+    const [remove,replace] = changed.repl
+    const skip = changed.skip
+    const space = remove.length == 0 ? ' ' : ''
+    const item = JSON.parse(JSON.stringify(written))
+    item.text = text.replace(`${skip} ${remove}`, `${skip} ${replace}${space}`)
+    return item
   }
 
   // async function scan(htmlurl) {
