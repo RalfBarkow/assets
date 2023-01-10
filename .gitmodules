@@ -4,3 +4,6 @@
 [submodule "caffeine"]
 	path = caffeine
 	url = https://github.com/ccrraaiigg/caffeine.git
+[submodule "Dynaverse/Snap"]
+	path = Dynaverse/Snap
+	url = https://github.com/neolay/Snap.git
