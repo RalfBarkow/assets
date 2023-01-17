@@ -1,0 +1,167 @@
+<p>
+  <button onclick=dorefresh(event)>refresh</button> after editing book pages<br>
+  <button onclick=dopreview(event)>preview</button> to see validaton summary<br>
+  <button onclick=dodownload(event)>download</button> super collaborator details
+</p>
+<div id=report></div>
+<style>
+  button {width:80px;}
+</style>
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import * as index from 'http://code.fed.wiki/assets/v1/index.js'
+  import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const report = msg => window.report.innerHTML += msg + "<br>"
+  
+  let site
+  let stories
+
+
+  // B U T T O N S
+
+  window.dorefresh  = async event => {
+    window.report.innerText = ''
+    report(`refreshed at ${new Date().toLocaleTimeString()}`)
+    site = await index.site(`book.reimage.fed.wiki`)
+    report(`${site.sitemap.length} pages in book sitemap`)
+    const context = await frame.context()
+    stories = index.links(index.folds(context.page.story).stories)
+    report(`${stories.length} stories linked from here`)
+  }
+
+  dorefresh(null)
+
+  window.dopreview = async event => {
+    const preview = [{type:'paragraph',text:`Link checked for stories and garden.`}]
+    const works = await getworks()
+    const blocks = allslugs(works)
+    console.log({sitemap:site.sitemap})
+    console.log({blocks})
+    works.forEach(work => {
+      preview.push({type:'markdown',text:`# ${work.author}`})
+      preview.push({type:'paragraph',text:`${work.titles.length} titles in [[${work.author}]]`})
+      const missing = work.titles
+        .filter(title => !site.info(title))
+        .map(title => `- [[${title}]]`)
+        .join("\n")
+      if(missing)
+        preview.push({type:'markdown',text:`missing story titles:\n${missing}`})
+    })
+    const gates = allgates(works)
+    console.log({gates})
+    const present = gates
+      .map(gate => site.info(gate))
+      .filter(info => info)
+      .map(info => `- [[${info.title}]]`)
+    const absent = gates
+      .filter(gate => !site.info(gate))
+      .map(gate => `- [[${gate}]]`)
+    preview.push({type:'markdown',text:`# Garden Gateways`})
+    preview.push({type:'paragraph',text:`${gates.length} gateway titles`})
+    preview.push({type:'paragraph',text:`${present.length} gateway pages present in book:`})
+    preview.push({type:'markdown',text:present.join("\n")})
+    preview.push({type:'paragraph',text:`${absent.length} gateway pages absent from book:`})
+    preview.push({type:'markdown',text:absent.join("\n")})
+    const title = 'Book Validation Report'
+    frame.open({title,story:preview},event.shiftKey)
+  }
+
+  window.dodownload = async event => {
+    const beam = []
+    const nids = {}
+
+    const works = await getworks()
+    const blocks = works
+      .map(work => work.titles
+        .map(title => frame.asSlug(title)))
+      .flat()
+      .sort()
+      .filter(uniq)
+    console.log({sitemap:site.sitemap})
+    console.log({blocks})
+    works.forEach(work => {
+      const graph = new Graph()
+      let here = graph.addNode('Work',{name:work.author})
+      let initial = work.author[0].toUpperCase()
+      beam.push({name:work.author, graph})
+      work.titles.forEach(title => {
+        const type = site.info(title) ? 'Story' : 'Slug'
+        const next = graph.addNode(type,{name:title})
+        graph.addRel(`${initial}0`,here,next)
+        clickto(blocks,1,1,title,graph,next)
+        here = next
+      })
+    })
+
+    const gates = allgates(works)
+    console.log({gates})
+    const gateways = gates
+      .map(gate => site.info(gate))
+      .filter(info => info)
+    gateways.forEach(info => {
+      const name = info.title
+      const graph = new Graph()
+      let here = graph.addNode('Garden',{name})
+      beam.push({name, graph})
+      clickto(blocks,1,3,name,graph,here)
+    })
+
+    const jsons = beam.map(poem => JSON.stringify(poem))
+    frame.download(jsons.join("\n"),'Book-Story-Garden.jsonl','application/json')
+  }
+
+
+  // A G G R E G A T I O N S
+
+  async function getworks() {
+    const pages = await Promise.all(stories.map(title => site.page(title)))
+    return pages.map(page => ({
+      author:page.title,
+      titles:page.story
+        .filter(item => item.type=='reference')
+        .map(item => item.title)
+    }))
+  }
+
+  function allslugs(works) {
+    return works
+      .map(work => work.titles
+        .map(title => frame.asSlug(title)))
+      .flat()
+      .sort()
+      .filter(uniq)
+  }
+
+  function allgates(works) {
+    const blocks = allslugs(works)
+    const gates = []
+    works.forEach(work =>
+      work.titles.forEach(title =>
+        gates.push(...Object.keys(site.info(title)?.links||{}))))
+    return gates
+      .filter(gate => !blocks.includes(gate))
+      .sort()
+      .filter(uniq)
+  }
+
+  function clickto(blocks,level,limit,title,graph,here) {
+    const info = site.info(title)
+    if(!info) return
+    const links = Object.keys(info.links||{})
+      .filter(link => !blocks.includes(link))
+    links.forEach(link => {
+      const info = site.info(link)
+      const type = info ? 'Garden' : 'Slug'
+      const name = info?.title || link
+      const next = graph.addNode(type,{name})
+      graph.addRel(`B${level}`,here,next)
+      if (level < limit) {
+        clickto (blocks,level+1,limit,link,graph,next)
+      }
+    })
+
+
+  }
+
+</script>

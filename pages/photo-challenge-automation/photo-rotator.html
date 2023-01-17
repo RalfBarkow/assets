@@ -1,0 +1,54 @@
+<table>
+  <tr><td><td>
+  <tr><td><td>
+  <tr><td><td>
+</table>
+
+<style>
+  table {width: 100%; table-layout: fixed;}
+  img {width: 100%}
+</style>
+
+<script type=module>
+
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import * as index from 'http://code.fed.wiki/assets/v1/index.js'
+
+  const any = a => a[Math.floor(Math.random() * a.length)]
+
+  const domain = `photos.ward.dojo.fed.wiki`
+  const assets = `http://${domain}/assets`
+  const site = await index.site(domain)
+  // const images = await fetch(`${assets}/data/photo-index.json`).then(res => res.json())
+  const titles = site.sitemap
+    .filter(info => info.slug.endsWith('-photos'))
+    .map(info => info.title)
+  const pages = await site.pages(titles)
+  const images = pages
+    .map(page => page.story)
+    .flat()
+    .filter(item => item.type == 'image')
+    .map(item => `http://${domain}${item.url}`)
+
+  // document.querySelector('table').addEventListener('click', event => {
+  //   const title = event.target.getAttribute('title')
+  //   const message = {action:"doInternalLink", title, keepLineup: event.shiftKey}
+  //   window.parent.postMessage(message, "*")
+  // })
+
+  let tds = [...document.querySelectorAll('td')]
+  let i=0
+  while(i<6) show()
+  setInterval(show,2000)
+
+  function show() {
+    const have = tds.map(td => td.querySelector('img')?.getAttribute('src'))
+    const want = images.filter(image => !have.includes(image))
+    let src = any(want)
+    tds[i++%6].innerHTML = `<img src="${src}" title="tbd">`
+  //   let img = new Image()
+  //   // img.addEventListener('load', () => tds[i++%6].innerHTML = `<img src="${src}" title="tbd">`)
+  //   img.src = src
+  }
+
+</script>
