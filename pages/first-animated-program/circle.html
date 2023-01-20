@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <p id=report style="font-size:x-large;"></p>
+  <canvas id="canvas" width="360" height="360"></canvas>
+  <script type=module>
+    const frame = () => new Promise(done => requestAnimationFrame(done))
+    const rnd = () => Math.random()*2-1 // -1 to 1
+    const ctx = window.canvas.getContext("2d");
+    let red = 0
+    for (let i=0; i<1000000; i++){
+      const x = rnd()
+      const y = rnd()
+      if(x*x + y*y <= 1*1) {
+        ctx.fillStyle = "red"
+        red += 1
+      }
+      else {
+        ctx.fillStyle = "yellow"
+      }
+      ctx.fillRect((x+1)*180, (y+1)*180, 1, 1);
+      if(0 == i%1000) {
+        window.report.innerText = red/i*4 // A = 𝝅r²
+        await frame()
+      }
+    }
+  </script>
+</html>
