@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8"></head>
+  <body>
+    <script type="module">
+      import {load} from "https://croquet.io/webshowcase/v1.js";
+      load({
+          title: "Ohio Showcase", 
+          showcase: "gallery", 
+          avatars: 'wonderland',
+          cards: [
+              // each item in cards array has a 'place' to specify the location in the art gallery
+              // 'type' is either "image", "pdf", or "video"
+              // 'path' specifies the location of the asset, either as full URL or as path relative to this html file
+              {place: 1, type: "pdf", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/Ohio_billofrights_launch.pdf"},
+              {place: 2, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/spinner.png", urlLink: "https://wheeldecide.com/?c1=Protection&c2=Civil%20Rights&c3=Government&c4=Power&c5=Disruption&c6=Petitions&c7=Assembly&c8=Defend&c9=Militia&c10=Warrant&c11=Arrest&c12=Criminal&c13=Fairness&c14=Peaceful&c15=Punishment&c16=Lawsuits&c17=Elections&c18=Slavery&c19=Jeopardy&c20=Suffrage&t=Scrambler%20DIG%20Spinner&time=5&remove=1"},
+              {place: 3, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/bill_of_rights.png", urlLink: "https://www.ushistory.org/documents/amendments.htm"},
+              {place: 4, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/wikipedia_bor.png", urlLink: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/United_States_Bill_of_Rights-1.pdf"},
+              {place: 5, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/khan_video_bor.png", urlLink: "https://youtu.be/ZQj0b949rDY"},
+              {place: 6, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/1963.png", urlLink: "https://www.history.com/topics/black-history/march-on-washington"},
+              {place: 7, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/japanese-american-internment.jpg", urlLink: "https://www.trumanlibrary.gov/education/presidential-inquiries/japanese-american-internment"},
+              {place: 8, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/prison_system.jpg", urlLink: "https://www.law.cornell.edu/wex/prisoners%27_rights"},
+              {place: 9, type: "image", path: "http://thompson.becoming.ustawi.wiki/assets/pages/wsd-bill-of-rights/freedom.png", urlLink: "https://youtu.be/3YHVC1DcHmo"},
+          ],
+          voiceChat: true,
+          appId: "com.me.ralf.barkow.webshowcase",
+          apiKey: "1EluL1AJur4C9uCarlklHIdDKCGO0AExnEHKJCuEe",
+      });
+    </script>
+  </body>
+</html>
