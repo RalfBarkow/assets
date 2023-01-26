@@ -1,6 +1,6 @@
 // find img tags in html plugins
 
-import * as index from 'https://wiki.ralfbarkow.ch/assets/v1/index.js'
+import * as index from 'http://code.fed.wiki/assets/v1/index.js'
 
 export function probe(page) {
   return {img:index.tags(page.story,'img')}
