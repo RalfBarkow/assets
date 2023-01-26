@@ -1,27 +1,27 @@
 <button onclick=dolaunch(event)>launch</button> <span id=site></span>
 
 <script type=module>
-  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
-  import * as index from 'http://code.fed.wiki/assets/v1/index.js'
+  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import * as index from 'https://wiki.ralfbarkow.ch/assets/v1/index.js'
 
   const params = Object.fromEntries(new URLSearchParams(location.search).entries())
   const module = params['probe'] || `ImageTagSurvey`
   const title = module.replaceAll(/([a-z])([A-Z])/g,'$1 $2')
   console.log({module,title})
-  const home = `http://code.fed.wiki/assets/pages/site-survey-factory`
+  const home = `https://wiki.ralfbarkow.ch/assets/pages/site-survey-factory`
 
   const update = {
     text:`${home}/update.html?probe=${module}\nHEIGHT 0`
   }
   const factory = {
-    site: "code.fed.wiki",
+    site: "wiki.ralfbarkow.ch",
     slug:"site-survey-factory",
     title:"Site Survey Factory",
     text: "Create and maintain a site survey by selecting and repeatedly applying one of several probes."
   }
 
   const neighbors = await frame.neighbors()
-  const domain = neighbors[0]
+  const domain = neighbors[2]
   console.log({neighbors,domain})
 
   window.site.innerHTML = `${title}: ${domain}`
