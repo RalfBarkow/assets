@@ -6,7 +6,7 @@
 <p id=result></p>
 
 <script type=module>
-  import * as frame from 'https://wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
   const context = await frame.context()
   const codes = context.page.story.filter(item => item.type == 'code')
   const cards = codes.map(item => eval(`({${item.text}})`))
