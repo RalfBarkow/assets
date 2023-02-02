@@ -39,7 +39,9 @@
    const delay = time => new Promise(res => setTimeout(res,time));
    const norm = mean => mean*(Math.random() + Math.random());
 
-   // replace generateGrid generateGrid by drawOutline
+   let destination = [8.5,7.06217782649107]; // Item Clicked on Generate a Rectangular Grid page
+
+   // replace generateGrid by drawOutline
    const drawOutline = (destination, trajectory, penOuterDiameter, filteringPen) => {
        const width = destination.width;
        const height = destination.height;
