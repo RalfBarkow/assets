@@ -1,6 +1,6 @@
 [submodule "SqueakJS"]
 	path = SqueakJS
-	url = https://github.com/codefrau/SqueakJS.git
+	url = git@github.com:RalfBarkow/SqueakJS.git
 [submodule "caffeine"]
 	path = caffeine
 	url = https://github.com/ccrraaiigg/caffeine.git
