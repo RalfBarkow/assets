@@ -4,9 +4,11 @@
   import * as index from 'http://code.fed.wiki/assets/v1/index.js'
   
   const context = await frame.context()
-  const community = index.folds(context.page.story)
-    .community.map(ref => ref.site)
-  const defns = context.page.story
+  const folds = index.folds(context.page.story)
+  const community = folds.community
+    .filter(item => item.type == 'reference')
+    .map(item => item.site)
+  const defns = folds.initiators
     .filter(item => item.type == 'markdown')
     .map(item => item.text)
     .filter(text => text.startsWith('INSTITUTION'))
@@ -36,7 +38,7 @@
     const story = [
       {type:'paragraph',text:'Constructed diagram. See [[Eco Geo Situation]]'},
       {type:'graphviz',text},
-      {type:'frame',text:explore,situated,community}
+      {type:'frame',text:`${explore}\nHEIGHT 200`,situated,community}
     ]
     frame.open({title,story},event.shiftKey)
   }

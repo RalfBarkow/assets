@@ -3,24 +3,41 @@
 <script type=module>
   import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
   import * as index from 'http://code.fed.wiki/assets/v1/index.js'
+  import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
 
   const uniq = (value, index, self) => self.indexOf(value) === index
 
   const context = await frame.context()
-  const {situated,community} = context.page.story.find(item => item.type == 'frame')
+  const {situated,community} = context.page.story
+    .find(item => item.type == 'frame' && item.community)
   console.log({situated,community})
+
+  const {probe,format} = await import(
+    `http://code.fed.wiki/assets/pages/site-survey-factory/probes/InstitutionSurvey.js`)
+  const sites = await Promise.all(community
+    .map(domain => index.site(domain))
+  )
 
   const surveys = await Promise.all(community
     .map(domain => fetch(`//${domain}/institution-survey.json`)
       .then(res => res.json())
       .then(page => page.story
-        .find(item => item.type == 'frame').survey
-        .filter(info => info.insts.length)))
-  )
+        .find(item => item.type == 'frame').survey)))
   console.log({surveys})
 
+  const deltas = await Promise.all(sites
+    .map((site,i) => index.update(site,surveys[i],probe))
+  )
+  console.log({deltas})
+
+  const shortsurveys = surveys
+    .map(survey => survey
+      .filter(info => info.insts.length))
+
+  console.log({shortsurveys})
+
   const defn = node => {
-    for(const survey of surveys)
+    for(const survey of shortsurveys)
       for(const info of survey)
         for(const inst of info.insts)
           if(inst.node == node)
@@ -29,7 +46,7 @@
   const pierson = defn("Marc Pierson")
   console.log({pierson})
 
-  const know = surveys
+  const know = shortsurveys
     .map(survey => survey
       .map(info => info.insts
         .map(inst => inst.node)))
@@ -51,13 +68,79 @@
   console.log({need})
 
   window.choices.innerHTML = need
-    .map((node,i) => `
-      <input type="checkbox" id="c${i}" name="c${i}" ${seen.includes(node) ? 'checked' : ''}>
-      <label for="c${i}">${node}</label>
-    `).join('<br>')
+    .map(node => `
+      <input type="checkbox" id="${node}" ${seen.includes(node) ? 'checked' : ''}>
+      <label for="${node}">${node}</label>`)
+    .join('<br>')
 
+
+  window.docontinue = async event => {
+    const chosen = [...window.choices.querySelectorAll('input[type="checkbox"]:checked')]
+      .map(elem => elem.id)
+    console.log({chosen})
+
+    const dot = []
+    for (const name of [...situated, ...chosen]) {
+      const inst = defn(name)
+      for (const rel of inst.rels) {
+        const stmt = [inst.node,...rel]
+          .map(node => `"${node.replace(/ +/g,'\n')}"`)
+          .join('->')
+        dot.push(stmt)
+      }
+    }
+
+    const template = await fetch('./template.dot').then(res => res.text())
+    const text = template.replace('<<Institutions>>',dot.join("\n"))
+    const title = 'More Institutions'
+    const story = [
+      {type:'paragraph',text:'Constructed diagram. See [[Eco Geo Situation]]'},
+      {type:'graphviz',text}
+    ]
+    frame.open({title,story},event.shiftKey)
+
+  }
+
+  window.dodownload = async event => {
+    const template = await fetch('./template.dot')
+      .then(res => res.text())
+      .then(text => text.split(/\n/))
+    const physical = template
+      .find(line => line.startsWith('Homestead'))
+      .split(/ *-> */)
+    const political = template
+      .find(line => line.startsWith('Individual'))
+      .split(/ *-> */)
+    console.log({physical,political})
+
+    const kind = name =>
+      physical.includes(name) ? 'Physical' :
+      political.includes(name) ? 'Political' :
+      'Institution'
+
+    const beam = []
+    for (const node of know) {
+      const inst = defn(node)
+      const graph = new Graph()
+      const nids = {}
+      nids[node] = graph.addNode(kind(node),{name:node})
+      for(const rel of inst.rels) {
+        const other = rel[0]
+        if(!(other in nids)) {
+          nids[other] = graph.addNode(kind(other),{name:other})
+        }
+        graph.addRel('Relates',nids[node],nids[other],{})
+      }
+      beam.push({name:node,graph})
+    }
+    const jsonl = beam
+      .map(poem => JSON.stringify(poem))
+      .join("\n")
+    frame.download(jsonl,'SituatedInstitutions.jsonl','application/jsonl')
+  }
 
   window.buttons.innerHTML = `
-    <button onclick=docontinue(event)>continue</button> adding selected institutions
+    <button onclick=docontinue(event)>continue</button> adding selected institutions<br>
+    <button onclick=dodownload(event)>download</button> as graphs in jsonl format
   `
 </script>
