@@ -1,0 +1,86 @@
+{
+  "things": {
+    "Service A": {
+      "dot": [
+        265,
+        230
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Service B": {
+      "dot": [
+        420,
+        243
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Service C": {
+      "dot": [
+        393,
+        364
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Service A Agent": {
+      "dot": [
+        313,
+        198
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Service B Agent": {
+      "dot": [
+        474,
+        219
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Service C Agent": {
+      "dot": [
+        442,
+        337
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Infinite Tracing": {
+      "dot": [
+        399,
+        82
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "New Relic API": {
+      "dot": [
+        635,
+        185
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    },
+    "Customer": {
+      "dot": [
+        109,
+        204
+      ],
+      "description": "",
+      "type": "any",
+      "scale": "1"
+    }
+  },
+  "date": 1600295350000
+}

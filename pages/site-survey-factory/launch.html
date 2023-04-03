@@ -1,9 +1,9 @@
 <button onclick=dolaunch(event)>launch</button> <span id=site></span>
 
 <script type=module>
-  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
-  import * as index from 'http://code.fed.wiki/assets/v1/index.js'
-  const home = `http://code.fed.wiki/assets/pages/site-survey-factory`
+  import * as frame from 'http://dreyeck.wiki.ralfbarkow.ch/assets/v1/frame.js'
+  import * as index from 'http://dreyeck.wiki.ralfbarkow.ch/assets/v1/index.js'
+  const home = `http://dreyeck.wiki.ralfbarkow.ch/assets/pages/site-survey-factory`
 
   const params = Object.fromEntries(new URLSearchParams(location.search).entries())
   const module = params['probe'] || `ImageTagSurvey`
@@ -21,7 +21,7 @@
     text:`${home}/update.html?probe=${module}&version=${version}&domain=${domain}\nHEIGHT 0`
   }
   const factory = {
-    site: "code.fed.wiki",
+    site: "dreyeck.wiki.ralfbarkow.ch",
     slug: "site-survey-factory",
     title: "Site Survey Factory",
     text: "Create and maintain a site survey by selecting and repeatedly applying a probe."

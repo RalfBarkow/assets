@@ -1,0 +1,68 @@
+<head>
+  <meta charset="UTF-8">
+  <script src="https://unpkg.com/@hpcc-js/wasm@1.20.1/dist/index.min.js"></script>
+  <script> var hpccWasm = window["@hpcc-js/wasm"]; </script>
+</head>
+<div id=diagram></div>
+
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import * as index from 'http://code.fed.wiki/assets/v1/index.js'
+  const quote = name => `"${name.replaceAll(/ /g,'\n')}"`
+  let onWiki = true
+
+  const dot = ['digraph { rankdir=LR']  
+  let {site:domain, page} = await frame.context()
+  console.log({domain}, {page})
+  domain ? console.log(true) : console.log(false)
+  if(!domain){
+    onWiki = false
+    domain = location.hostname
+  }
+  const site = await index.site(domain)
+  if(!onWiki) page = await site.page("Welcome Visitors")
+  console.log(`new page: ${page}`)
+  console.log({site})
+
+  dot.push(`${quote(page.title)} [style=filled fillcolor=lightyellow penwidth=3 color=black fontname="Helvetica-bold"]`)
+  dot.push(`node [style=filled fillcolor=lightblue]`)
+  const links = index.links(page.story)
+  console.log({links})
+  links.forEach(element => {
+    dot.push(`${quote(page.title)} -> ${quote(element)}`)
+  });
+  backlinks(page.title)
+
+  dot.push('}')
+  hpccWasm.graphviz.layout(dot.join("\n"), "svg", "dot").then(svg => {
+    diagram.innerHTML = svg.replaceAll(/(width|height)=".*?"/g,'');
+    diagram.addEventListener('click', event => goto(event.target))
+  })
+
+  window.parent.postMessage({
+    action: "resize",
+    height: document.body.offsetHeight
+  }, "*")
+
+  function goto(div) {
+    const origin = window.location.origin
+    const title = div.parentElement.querySelector('title').textContent
+    const slug = frame.asSlug(title)
+    if (onWiki){
+      frame.link(slug)
+    }
+    else{
+      const loc = `${origin}/view/${slug}/`
+      window.location.assign(loc)
+    }
+  }
+
+  function backlinks(title) {
+    const want = frame.asSlug(title)
+    const parents = site.sitemap.filter(info => Object.keys(info.links||{}).includes(want))
+    parents.forEach(parent =>
+      dot.push(`${quote(parent.title)} -> ${quote(title)}`))
+  }
+
+
+</script>

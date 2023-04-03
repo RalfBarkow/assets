@@ -1,0 +1,175 @@
+
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAlmVYSWZNTQAqAAAACAAFARIAAwAAAAEAAQAAARoABQAAAAEAAABKARsABQAAAAEAAABSASgAAwAAAAEAAgAAh2kABAAAAAEAAABaAAAAAAAAAJAAAAABAAAAkAAAAAEAA5KGAAcAAAASAAAAhKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAABBU0NJSQAAAFNjcmVlbnNob3Ql0cL1AAACe0lEQVQ4y2NgQAINDQ1MIDo+Pt4uLStncnltQ39pVd2E1Mzs3oKCAk1kNVhBbu4kdhAdk5zee/je+//7brz8f+ju+/9bztz5H+DlGguSCw0NZcOqOZSBgRnGdnOyW9c6c+n/Scs3f5u8Yuu32r5Z/81lGZpAcv///2cEUozo+mHOYssuLt+14cSN/8cffv575sXv/2ee//p/9MGnv0t3n/wfF584DUkP3BBGqKkMmfnFm088/vb/+tf/P8+/+f//3Ku/YHzx7f9/1778/73r8pP/0ZGR7dCwYGFAZigzMHiuPnQRrBlo67+zL//ADQCxz778/ffKx///Jyxa9w+oXAEeoGkzZ7KCOCnZeTNPPfvx//L7/z+RNcMNAXrn6qf/P3dfffrfw940C6QnLS2NFe6hxu5J5869/vf/wtv/f7AaABS7/OH/L2B4/A8KC58KN2DVqlXg0C+qalgPUnTp3f9fuAwAeuHnwTtv//v7+1bDDUhLg3jB1cYoe+/1F/+vfv7/48yLXxgGnAbGBjAgfy3fe/o/ULkdNE0wI0chd2331CdAZ4Kc+gPk5zNI+Nrn/99BXswtq96DlB4gwMGBARwTwgwM5m3TF/0FOffqx/9/gBjk7P9XPv3/DYreyvb+x0BlEhDbEQkPaogD2BBVBgbNjMKKW5OWbfm/eOfJv4t3nvjTs2DN//jUzH1AaT70VIsCEhoaOEB0eGR0y6bTt/9vPHnjy5az974t2XXyv5MuTyhYTUICB87M1NCwH+yK8LjEyYfuvPt/4vHX/6ef/fy/+fSt/14OlukoKRAHAAdoQECAATBDVQR4OVf6e7pW+Xt7lmdkFChgy84AhwfDU0a/DEEAAAAASUVORK5CYII=" />
+
+  </head>
+  <body>
+    <style>
+      img, div, svg {
+        position:absolute;
+        top:0;
+        left:0;
+      }
+      p {margin-left: 10px;}
+    </style>
+    <img id="draw" width=100% height=100%
+      src="http://simnet.ward.asia.wiki.org/assets/pages/diagrams-as-base-model/data/infinite-tracing/head vs tail based sampling.svg">
+    <div  id="viz"></div>
+    <div><p><a href=?sample=head>head</a><br><a href=?sample=tail>tail</a></p></div>
+    <script>
+
+      let head = !!location.search.match(/\bsample=head\b/)
+
+      draw.src = `http://simnet.ward.asia.wiki.org/assets/pages/diagrams-as-base-model/data/infinite-tracing/${head ? 'head' : 'tail'} based sampling.svg`
+
+      let dat = fetch('http://simnet.ward.asia.wiki.org/assets/pages/diagrams-as-base-model/data/infinite-tracing/head vs tail based sampling.json' )
+        .then(res=>res.json())
+
+      let img = new Promise((resolve, reject) => {
+        draw.addEventListener("load", () => resolve([draw.naturalWidth, draw.naturalHeight]));
+        draw.addEventListener("error", err => reject(err));
+      })
+
+
+
+
+      show()
+
+      async function show() {
+        let [extent, meta] = await Promise.all([img, dat])
+        let {width, height} = draw.getBoundingClientRect()
+        draw.setAttribute('width',width)
+        draw.setAttribute('height',height)
+
+        const dot = thing => meta.things[thing].dot
+        const sleep = ms => new Promise(r => setTimeout(r, ms))
+        const normal = mean => mean * (Math.random() + Math.random())
+        const pcnt = fraction => Math.random()*100 < fraction
+        const tally = event => tallies[event] = (tallies[event]||0) + 1
+
+        const x = d3.scaleLinear().domain([0, extent[0]]).range([0, width])
+        const y = d3.scaleLinear().domain([0, extent[1]]).range([0, height])
+
+
+        let flight = []
+        let nextid = 1
+        let stop = Date.now()+60000
+        let tallies = {}
+
+        var svg = d3.select('#viz')
+          .append('svg')
+            .attr('width',width)
+            .attr('height',height)
+            .style('border',"2px solid #ddd")
+
+        function sample_head() {
+          for (let more of flight.filter(d => Date.now() > d.done)) {
+            let remote = more.route.splice(1,1)[0]
+            if (remote) {
+              // call remote service
+              let wait = Date.now()+normal(3000)
+              more.done = wait+normal(1000)
+              let error = pcnt(10)
+              flight.push({span:nextid++, trace:more.trace, route:[remote], done:wait, want:more.want, error})
+              if (error) tally('error')
+            } else if (more.want && more.route[0].to.match(/ [ABC]$/)) {
+
+              // push to api
+              let route = [{fm:more.route[0].to+' Agent', to:'New Relic API'}]
+              flight.push({span:nextid++, trace:more.trace, done:Date.now()+normal(6000), route, want:true, error:more.error})
+              tally('api')
+              if (more.error) tally('useful')
+            }
+          }
+          return flight.filter(d => Date.now() < d.done)
+        }
+
+        function sample_tail() {
+          for (let more of flight.filter(d => Date.now() > d.done)) {
+            let remote = more.route.splice(1,1)[0]
+            if (remote) {
+              // call remote service
+              let wait = Date.now()+normal(3000)
+              more.done = wait+normal(1000)
+              let error = pcnt(10)
+              flight.push({span:nextid++, trace:more.trace, route:[remote], done:wait, want:more.want, error})
+              if (error) tally('error')
+            } else if (more.route[0].to.match(/ [ABC]$/)) {
+              // push to MTB
+              let agent = more.route[0].to+' Agent'
+              let route = [{fm: agent, to:'Infinite Tracing'}]
+              flight.push({span:nextid++, trace:more.trace, done:Date.now()+8000, route, want:false, error:more.error})
+            } else if (more.route[0].to == 'Infinite Tracing') {
+              // does this complete a trace we want?
+              let segs = flight.filter(d => d.route[0].to == 'Infinite Tracing' && d.trace == more.trace)
+              let want = segs.reduce((s, e) => s || e.error, false)
+              segs.map(e => e.want = want)
+              if (segs.length == 3 && want) {
+                // yes, we want the trace, send all segs on together
+                for (let seg of segs) {
+                  let route = [{fm:'Infinite Tracing', to:'New Relic API'}]
+                  flight.push({span:nextid++, trace:more.trace, done:Date.now()+6000, route, want:true, error:seg.error})
+                  tally('api')
+                  if (seg.error) tally('useful')
+                }
+              }
+            }
+          }
+          return flight.filter(d => Date.now() < d.done)
+        }
+
+        while(true) {
+          let trace
+
+          if (Date.now() < stop) {
+            trace = nextid++
+            let route = [
+              {fm:'Customer', to:'Service A'},
+              {fm:'Service A', to:'Service B'},
+              {fm:'Service A', to:'Service C'}]
+            let want = pcnt(head?10:0)
+            flight.push({span:nextid++, trace, route, done:Date.now()+normal(3000), want, error:false})
+            tally('customer')
+            if (want) tally('want')
+          }
+
+          flight = head ? sample_head() : sample_tail()
+
+          let spans = svg.selectAll('circle')
+            .data(flight, d => d.span)
+
+          spans.enter()
+            .append('circle')
+              .call(place,'fm')
+              .attr('r',9)
+              .attr('fill', d => d.error ? 'red' : 'blue')
+              .attr('fill-opacity',0.5)
+              .attr('stroke','black')
+            .transition()
+              .duration(1000)
+              .call(place,'to')
+
+          spans.exit()
+            .remove()
+
+          spans
+            .attr('stroke-width', d => d.want ? 3 : 0)
+
+          if (!flight.length) break
+          await sleep(400)
+        }
+        console.dir(tallies)
+
+        function place(selection, at) {
+          selection
+            .attr('cx', d => x(dot(d.route[0][at])[0])+normal(50)-50)
+            .attr('cy', d => x(dot(d.route[0][at])[1])+normal(50)-50)
+        }
+      }
+
+    </script>
+  </body>
+</html>
