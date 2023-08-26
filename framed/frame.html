@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" >
+    <head>
+        <title>Framed</title>
+    </head>
+    <body>
+        <pre>
+"use strict";
+let $parent = window.parent.jQuery;
+let $item = $parent('.item.frame')
+  .filter((i, div) => {
+    return $parent('iframe', div)
+      .get(0).contentWindow === window;
+  }).first();
+$item.css({border: '2pt solid green'});
+</pre>
+    </body>
+    <script>
+     "use strict";
+     let $parent = window.parent.jQuery;
+     let $item = $parent('.item.frame').filter((i, div) => {
+         return $parent('iframe', div).get(0).contentWindow === window;
+     }).first();
+     $item.css({border: '2pt solid green'});
+    </script>
+</html>
