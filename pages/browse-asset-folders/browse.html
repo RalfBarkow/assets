@@ -1,0 +1,70 @@
+<meta charset="utf-8">
+<div id=result>waiting</div>
+<style>
+  /*  https://stackoverflow.com/questions/47848326/indent-all-children */
+  body { font-family:sans-serif; font-size:smaller}
+  details > *:not(summary) { margin-left:1em; }
+  span { color:gray; }
+</style>
+
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  const context = await frame.context()
+  const index = await fetch(`${context.origin}/plugin/assets/index`).then(res => res.json())
+
+  // We represent the file hierarchy as strings mapped to arrays of index items or,
+  // in the case of subdirectories, arrays which remain empty but use their object
+  // properties to enumerate branches. We further overload empty arrays with subtotals
+  // distinguished from the usual keys by wrapping the word sum as a Symbol.
+
+  const subtotal = Symbol('sum')
+  const megabytes = size => `${size.toLocaleString()} ${size>10**9 ? '🔴' : size>10**6 ? '🟡' : ''}`
+
+  const tree = {"":[]}
+  fill(tree,index)
+  total(tree)
+  window.result.innerHTML = outline(tree)
+  console.log(tree)
+
+  function fill(root,index) {
+    for (const item of index) {
+      const full = item.file.split('/')
+      const path = full.slice(0,-1)
+      item.name = full.slice(-1)[0]
+      let here = root
+      for (const dir of path) {
+        if(!(dir in here)) here[dir] = []
+        here = here[dir]
+      }
+      here.push(item)
+    }
+  }
+
+  function total(here) {
+    return Object.entries(here)
+      .reduce((sum, [dir,items]) =>
+        sum + (items[subtotal] = items.length
+          ? items.reduce((sum, item) => sum + item.size, 0)
+          : total(items)), 0)
+  }
+
+  function outline(here) {
+    return Object.entries(here)
+      .map(([dir,items]) => `
+        <details>
+          <summary>${dir}/
+            <span>${megabytes(items[subtotal])}</span>
+          </summary>
+        ${items.length
+          ? items
+              .map(item => `
+                <li>${item.name}
+                <span>${megabytes(item.size)}</span>`)
+              .join("")
+          : `${outline(items)}</div>`}
+        </details>
+      `)
+      .join("\n")
+  }
+
+</script>
