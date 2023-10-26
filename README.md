@@ -1,0 +1,1 @@
+## Installation```Metacello new	repository: 'github://RalfBarkow/assets:main/src';	baseline: 'Assets';	load```
