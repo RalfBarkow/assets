@@ -7,3 +7,9 @@
 [submodule "Dynaverse/Snap"]
 	path = Dynaverse/Snap
 	url = https://github.com/neolay/Snap.git
+[submodule "Dynaverse/dynaverse"]
+	path = Dynaverse/dynaverse
+	url = https://github.com/neolay/dynaverse.git
+[submodule "Dynaverse/microverse"]
+	path = Dynaverse/microverse
+	url = https://github.com/neolay/microverse.git
