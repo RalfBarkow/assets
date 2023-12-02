@@ -18,25 +18,84 @@
   const count = sitemaps.reduce((count,map) => count+map.length,0)
   window.result.innerHTML += `<br>${count} pages`
 
+  const property = / (Category|Zone|Landscape|Family): ([\w\d]+)/g
   const haves = sitemaps
-    .map(sitemap => sitemap.filter(info => info.synopsis.includes(' Category: ')))
+    .map(sitemap => sitemap.filter(info => info.synopsis.match(property)))
     .flat()
   window.result.innerHTML += `
-    <br>${haves.length} categorized
-    <p><button onclick=dopreview(event)>preview</button></p>`
+    <br>${haves.length} annotated
+    <p>
+      <button onclick=dopreview(event)>preview</button>
+      <button onclick=dodiagram(event)>diagram</button>
+    </p>`
 
   window.dopreview = event => {
-    const title = "Project Weave Diagram"
+    const title = "Project Weave Preview"
     const text = haves
       .map(info => {
-        const category = info.synopsis.match(/ Category: (\w+)/)[1]
-        const link = `https://${info.site}/${info.slug}.html`
+        const synopsis = info.synopsis
+        const have = [...synopsis.matchAll(property)]
+        const props = have
+          .map(m => {
+            const key = m[1]
+            const value = m[2]
+            return `&nbsp ${key}: ${value}`
+          })
+          .join("<br>")
         return `
-          <br><img width=16 src=https://${info.site}/favicon.png>
-          ${category}:
-          [${link} ${info.title}]`
+          <img width=16 src=https://${info.site}/favicon.png>
+          [https://${info.site}/${info.slug}.html ${info.title}]
+          <br>
+          ${props}`
       })
-      .join("\n")
+      .join("<hr>")
+    const story = [
+      {type:'paragraph',text:`Update with [[${context.title}]]`},
+      {type:'html',text}
+    ]
+    frame.open({title,story},event.shiftKey)
+  }
+
+  window.dodiagram = event => {
+    const title = "Project Weave Diagram"
+    const table = [
+      [[],[],[],[]],
+      [[],[],[],[]],
+      [[],[],[],[]],
+    ]
+    haves.forEach(info => {
+      const synopsis = info.synopsis
+      const props = {}
+      const have = [...synopsis.matchAll(property)]
+      have.forEach(m => {
+        const key = m[1]
+        const value = m[2]
+        props[key]=value
+      })
+      if (('Zone' in props) && ('Landscape' in props)) {
+        const zone = +props['Zone'][0]
+        const landscape = +props['Landscape'][0]
+        const row = table[landscape-1]
+        const cell = row[zone-1]
+        cell.push(`
+          <a href=https://${info.site}/${info.slug}.html title="${info.title}">
+            <img width=16 src=https://${info.site}/favicon.png>
+          </a>
+        `)
+      }
+    })
+    const text = `
+      <table>
+      ${table
+        .map(row => `<tr>
+          ${row.map(cell => `
+            <td width=25%> ${cell.join(" ")}
+          `
+        ).join("")}
+        `
+      ).join("")}
+      </table>
+    `
     const story = [
       {type:'paragraph',text:`Update with [[${context.title}]]`},
       {type:'html',text}
