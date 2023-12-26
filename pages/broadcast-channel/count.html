@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!-- saved from url=(0047)https://nrn.github.io/cross-tab-test/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div id="display">7</div>
+<button id="button">+</button>
+
+<script>
+  let count = 0
+  let chan = new BroadcastChannel('asdf')
+  chan.addEventListener('message', function (evt) {
+    if (evt.data.type === 'hello') {
+      chan.postMessage({type:'count', data:count})
+    } else if (evt.data.type === 'count') {
+      count = evt.data.data
+      update()
+    }
+  })
+  chan.postMessage({type: 'hello'})
+  function update () {
+    document.getElementById('display').innerHTML = count
+  }
+  document.getElementById('button').addEventListener('click', function () {
+    count += 1
+    chan.postMessage({type:'count', data:count})
+    update()
+  })
+</script>
+</body></html>
