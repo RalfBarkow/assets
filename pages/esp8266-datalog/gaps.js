@@ -1,16 +1,16 @@
-<pre id=result>working</pre>
-<script type=module>
+// Find and report gaps in sensor logs
+// Usage: deno run --allow-net gaps.js
+
   const path = `plugin/datalog/esp8266-datalog/day`
   const site = `http://found.ward.bay.wiki.org/${path}`
-  // const days = [12,13,14,15,16,17,18,19,20]
-  const offsets = [9,8,7,6,5,4,3,2,1,0]
+  const offsets = [1,0]
+  const report = {}
   const logs = offset =>
     fetch(`${site}/${offset}`)
       .then(res => res.text())
       .then(text => text.trim().split(/\n/))
   const data = (await Promise.all(offsets.map(logs))).flat()
   let now = JSON.parse(data.shift()).clock
-  window.result.innerText = `begin ${new Date(now).toLocaleString()}\n`
   const keys = result => result
     .map(obj => Object.keys(obj))
     .flat()
@@ -18,7 +18,7 @@
     const sample = JSON.parse(text)
     if(!keys(sample.result).length) continue
     const dt = sample.clock-now
-    if(dt>20000) window.result.innerText += `${(dt/1000).toFixed(0)} seconds, ${new Date(now).toLocaleString()}\n`
+    if(dt>20000) report[now]=dt
     now = sample.clock
   }
-</script>
+  console.log(report)
