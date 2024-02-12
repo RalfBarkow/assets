@@ -15,7 +15,7 @@ const quote = title => `"${title.replace(/ +/g,'\\n')}"`
 
 let done = Date.now() + 10000
 
-let all = [await getfrom('field-guide-to-the-federation',['fed.wiki.org'])]
+let all = [await getfrom('a',['wiki.ralfbarkow.ch'])]
 let reference = (await context()).page.story.find(item => item.type == 'reference')
 if(reference) {
   all = [await getfrom(reference.slug,[reference.site])]
