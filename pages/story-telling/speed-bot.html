@@ -28,6 +28,8 @@ let dot = []
 let hue = 0.5001
 let color = {} // site => hsv
 addcolor(pick)
+let indices = []
+load(indices)
 
 function addcolor(pick) {
   let title = pick.page.title
@@ -36,6 +38,10 @@ function addcolor(pick) {
   color[site] ||= hsv(hue += 0.111)
   dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
 }
+
+ function load(indices) {
+     console.log("LOG: load(indicies) reached")
+ }
 
 window.doview = function (event) {
   let [site,title] = event.target.innerText.split(' — ')
