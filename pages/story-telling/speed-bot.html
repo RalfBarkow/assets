@@ -28,8 +28,7 @@ let dot = []
 let hue = 0.5001
 let color = {} // site => hsv
 addcolor(pick)
-let indices = []
-load(indices)
+populateIndexEntries(seen)
 
 function addcolor(pick) {
   let title = pick.page.title
@@ -39,8 +38,10 @@ function addcolor(pick) {
   dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
 }
 
- function load(indices) {
-     console.log("LOG: load(indicies) reached")
+ function populateIndexEntries(seen) {
+     console.log("LOG: populateIndexEntries(seen) reached")
+     let indexEntries = seen
+     console.log(indexEntries)
  }
 
 window.doview = function (event) {
@@ -71,6 +72,7 @@ try {
     if (links.length) {
       let link = any(links)
       seen.add(link)
+      populateIndexEntries(seen)
       let next = await getfrom(asSlug(link),pick.sites)
       if (next && next.page) {
         addcolor(next)
