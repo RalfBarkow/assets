@@ -1,0 +1,38 @@
+Source,Relation,Target
+Peaceful Cooperation,Generalization,Competitive Peaceful Cooperation
+Peaceful Cooperation,Generalization,Cooperative Peaceful Cooperation
+Whole System Strategizing,Result,Cooperative Peaceful Cooperation
+Whole System Strategizing,Result,Whole Community Action Agreement Set
+Community Group,Agent,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Community Group,Exhibition,Peaceful Cooperation of Community Group
+Competitive Peaceful Cooperation,Consumption,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Ecological Social Institutional System ( E I P ),Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Ecological Social Institutional System ( E I P ),Exhibition,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Conflict Set,Consumption,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Opportunity Set,Consumption,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+7 Generation Pov,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Government Group,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Civil Association Group,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Business Group,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Conversation Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Centre Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Modeling Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Ecological Recursion Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Political Social Recursion Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Institutional Network Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Story Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Conversation Set,Aggregation,Syntegration
+Whole In Parts Conversation Set,Aggregation,Six Contexts Conversation
+Whole In Parts Conversation Set,Aggregation,Me, We, Now Conversation
+Whole In Parts Conversation Set,Instrument,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Whole In Parts Conversation Set,Aggregation,Bohmian Dialogue
+Whole In Parts Conversation Set,Aggregation,Quaker Meeting
+Ecological Social Institutional System ( E I P ),Exhibition,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Conflict Set,Aggregation,Sustainability Of Soil
+Conflict Set,Aggregation,Sustainability Of Water
+Conflict Set,Aggregation,Sustainability Of Material
+Conflict Set,Consumption,Whole System Strategizing of Ecological Social Institutional System ( E I P )
+Conflict Set,Aggregation,Sustainability Of Animals
+Conflict Set,Aggregation,Sustainability Of Plants
+Conflict Set,Aggregation,Sustainability Of Energy
+Ecological Social Institutional System ( E I P ),Exhibition,Whole System Strategizing of Ecological Social Institutional System ( E I P )
