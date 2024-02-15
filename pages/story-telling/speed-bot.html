@@ -39,7 +39,7 @@ function addcolor(pick) {
 }
 
  function populateIndexEntries(seen) {
-     console.log("LOG: populateIndexEntries(seen) reached")
+     console.log("populateIndexEntries(seen) reached")
      let indexEntries = seen
      let select = document.getElementById('indexEntries')
      indexEntries.forEach(entry => {
@@ -51,14 +51,16 @@ function addcolor(pick) {
  }
 
  function setStartEntry() {
-     let select = document.getElementById('indexEntries');
-     let selectedEntry = select.value;
+     const select = document.getElementById('indexEntries');
+     const selectedEntry = select.value;
+     console.log('Selected Entry:', selectedEntry);
 
      // Find the selected entry in the `seen` Set
      for (let entry of seen) {
          if (entry === selectedEntry) {
              // Update the start entry and display it
              window.startat.innerText = entry;
+             console.log('Start Entry:', entry);
              break;
          }
      }
@@ -78,18 +80,32 @@ function addcolor(pick) {
 }
 
 window.dostart = async function (event) {
-done = Date.now() + 10000
-window.result.innerText = ''
-all = [all[0]]
-pick = all[0]
-seen = new Set([pick.page.title])
-dot = []
-hue = 0.5001
-color = {} // site => hsv
-addcolor(pick)
+     done = Date.now() + 10000
+     window.result.innerText = ''
 
-try {
-  while (Date.now() < done) {
+     // all = [all[0]]
+     // pick = all[0]
+
+     // Check if a start entry is selected
+     const selectedStartEntry = document.getElementById('indexEntries').value;
+     if (selectedStartEntry) {
+         // Set the start entry based on the selected entry
+         pick = all.find(entry => entry.page.title === selectedStartEntry);
+     } else {
+         // Use the default start entry
+         pick = all[0];
+     }
+
+     seen = new Set([pick.page.title])
+     dot = []
+     hue = 0.5001
+     color = {} // site => hsv
+     addcolor(pick)
+
+     console.log('Start: pick.page', pick.page); 
+
+     try {
+         while (Date.now() < done) {
     let remain = Math.ceil((done - Date.now())/1000)
     let links = visit(pick.page).filter(title => !seen.has(title))
     if (links.length) {
