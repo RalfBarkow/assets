@@ -1,11 +1,11 @@
 <head>
     <meta charset="UTF-8">
-    <script src="https://unpkg.com/@hpcc-js/wasm/dist/index.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@1.20.1/dist/index.min.js"></script>
     <script> var hpccWasm = window["@hpcc-js/wasm"]; </script>
 </head>
-<body id="body">
+<body>
   <div id="chart"></div>
-  <div id="readout" style="position:absolute; top:0; display:none">paused</div>
+
 <script type=module>
 
 
@@ -15,20 +15,13 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 const prob = (pcnt) => Math.random()*100 < pcnt
 const norm = (mean) => (Math.random()-Math.random()+1)*mean
 const choose = (list) => {for (let one of list) if (prob(50)) return one; return null}
-const quote = (title) => `"${title.replace(/ +/g,'\\n')}"`
+const quote = (title) => `"${title.replace(/ +/g,'\n')}"`
 
 let origin = 'wiki.ralfbarkow.ch'
 let hash = location.hash || 'welcome-visitors'
 
 let model = {}
 let recent = []
-let run = true
-
-body.onclick = () => {
-  run = !run
-  console.log('run', run)
-  readout.style.display = run ? 'none' : ''
-}
 
 ramble()
 
@@ -40,8 +33,7 @@ async function ramble() {
       monkey(),
       delay(1000)
     ])
-    while (!run) {await delay(100)}
-  }  
+  }
 }
 
 
