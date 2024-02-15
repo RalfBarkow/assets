@@ -41,6 +41,12 @@ function addcolor(pick) {
  function populateIndexEntries(seen) {
      console.log("LOG: populateIndexEntries(seen) reached")
      let indexEntries = seen
+     let select = document.getElementById('indexEntries')
+     indexEntries.forEach(entry => {
+         let option = document.createElement('option')
+         option.text = entry
+         select.add(option)
+     })
      console.log(indexEntries)
  }
 
@@ -79,7 +85,7 @@ try {
         dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`)
         all.push(next)
         window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
-        pick = next 
+        pick = next
       } else {
         window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
         // pick = any(all) // can't find page for link
