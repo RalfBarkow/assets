@@ -50,8 +50,25 @@ function addcolor(pick) {
      console.log(indexEntries)
  }
 
-window.doview = function (event) {
-  let [site,title] = event.target.innerText.split(' — ')
+ function setStartEntry() {
+     let select = document.getElementById('indexEntries');
+     let selectedEntry = select.value;
+
+     // Find the selected entry in the `seen` Set
+     for (let entry of seen) {
+         if (entry === selectedEntry) {
+             // Update the start entry and display it
+             window.startat.innerText = entry;
+             break;
+         }
+     }
+ }
+
+ // Attach the setStartEntry function to the change event of the select element
+ document.getElementById('indexEntries').addEventListener('change', setStartEntry);
+
+ window.doview = function (event) {
+     let [site,title] = event.target.innerText.split(' — ')
   window.parent.postMessage({
     action:"doInternalLink",
     title,
