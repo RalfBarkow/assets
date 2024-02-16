@@ -42,6 +42,10 @@ function addcolor(pick) {
      console.log("populateIndexEntries(seen) reached")
      let indexEntries = seen
      let select = document.getElementById('indexEntries')
+
+     // Clear existing options
+     select.innerHTML = '';
+
      indexEntries.forEach(entry => {
          let option = document.createElement('option')
          option.text = entry
@@ -102,7 +106,7 @@ window.dostart = async function (event) {
      color = {} // site => hsv
      addcolor(pick)
 
-     console.log('Start: pick.page', pick.page); 
+     console.log('Start: pick.page', pick.page);
 
      try {
          while (Date.now() < done) {
