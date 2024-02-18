@@ -66,20 +66,24 @@
       })
   }
 
-  function choose() {
-    const at = lineup.length-1
-    const options = links(lineup[at])
-      .filter(link => link.site && !link.history)
-    if (options.length) {
-      const choice = options[Math.floor(Math.random()*options.length)]
-      click(at,choice.site,choice.slug)}
-    else {
-      lineup.pop()
-      choose()}
-  }
+ function choose() {
+     const at = lineup.length - 1;
+     const options = links(lineup[at])
+         .filter(link => link.site && !link.history)
 
-  function click(at,site,slug) {
-    const page = {site,slug,history:[]}
+     if (options.length) {
+         // Visit all available links simultaneously
+         for (const choice of options) {
+             click(at, choice.site, choice.slug)
+         }
+     } else {
+         lineup.pop()
+         choose()
+     }
+ }
+
+ function click(at,site,slug) {
+     const page = {site,slug,history:[]}
     lineup.splice(at+1,Infinity,page)
     lineup[at].history.push(page)
     history.push(page)
