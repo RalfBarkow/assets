@@ -83,7 +83,11 @@ function addcolor(pick) {
   }, "*")
 }
 
-window.dostart = async function (event) {
+ function filterParagraphs(page) {
+     return page.story.filter(item => item.type === 'paragraph');
+ }
+
+ window.dostart = async function (event) {
      done = Date.now() + 10000
      window.result.innerText = ''
 
@@ -110,8 +114,8 @@ window.dostart = async function (event) {
 
      try {
          while (Date.now() < done) {
-    let remain = Math.ceil((done - Date.now())/1000);
-             let paragraphs = pick.page.story.filter(item => item.type === 'paragraph');
+             let remain = Math.ceil((done - Date.now())/1000);
+             let paragraphs = filterParagraphs(pick.page);
              console.log('Paragraphs: ', paragraphs);
              for (let paragraph of paragraphs) {
                  let links = visit(pick.page).filter(title => !seen.has(title))
