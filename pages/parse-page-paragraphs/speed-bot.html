@@ -40,11 +40,17 @@
         Ward introduced "dot" and "quote nine years ago.
         See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
       */
-     dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
+     dot.push(introducePageTitlesToGraphviz(title, site, sites, color));
      /*
         Ward is introducing page titles to Graphviz.
         This is where he associates a color to be used where ever he mentions that title.
       */
+ }
+
+ function introducePageTitlesToGraphviz(title, site, sites, color) {
+
+     // Construct the DOT node string with the extracted color
+     return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
  }
 
  function populateIndexEntries(seen) {
