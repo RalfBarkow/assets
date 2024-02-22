@@ -149,17 +149,17 @@
      }
 
      window.result.innerHTML += "\n\n"+Object.entries(sitemaps).map(([site,infos]) => `${infos.length} — ${site}`).join("\n")
-     let text = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
+     let dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
      let story = [
          {type:'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.`},
-         {type:'graphviz', text}
+         {type:'graphviz', text:dotText}
      ]
 
-     openSpeedBotJourney(story, text, event.shiftKey);
+     openSpeedBotJourney(story, event.shiftKey);
 
  }
 
- function openSpeedBotJourney(story, text, shiftKey) {
+ function openSpeedBotJourney(story, shiftKey) {
      open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
  }
 
