@@ -6,37 +6,37 @@
 <pre id="result"></pre>
 <script type="module">
 
-import {visit,getfrom,sitemaps} from './telling.js'
-import {open, context} from 'http://code.fed.wiki/assets/v1/frame.js'
+ import {visit,getfrom,sitemaps} from './telling.js'
+ import {open, context} from 'http://code.fed.wiki/assets/v1/frame.js'
 
-const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
-const any = list => list[Math.floor(Math.random()*list.length)]
-const hsv = hue => `"${(hue%1).toFixed(3)} 0.2 1.0"`
-const quote = title => `"${title.replace(/ +/g,'\\n')}"`
+ const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+ const any = list => list[Math.floor(Math.random()*list.length)]
+ const hsv = hue => `"${(hue%1).toFixed(3)} 0.2 1.0"`
+ const quote = title => `"${title.replace(/ +/g,'\\n')}"`
 
-let done = Date.now() + 10000
+ let done = Date.now() + 10000
 
-let all = [await getfrom('a',['wiki.ralfbarkow.ch'])]
-let reference = (await context()).page.story.find(item => item.type == 'reference')
-if(reference) {
-  all = [await getfrom(reference.slug,[reference.site])]
-}
-window.startat.innerText = all[0].page.title
-let pick = all[0]
-let seen = new Set([pick.page.title])
-let dot = []
-let hue = 0.5001
-let color = {} // site => hsv
-addcolor(pick)
-populateIndexEntries(seen)
+ let all = [await getfrom('a',['wiki.ralfbarkow.ch'])]
+ let reference = (await context()).page.story.find(item => item.type == 'reference')
+ if(reference) {
+     all = [await getfrom(reference.slug,[reference.site])]
+ }
+ window.startat.innerText = all[0].page.title
+ let pick = all[0]
+ let seen = new Set([pick.page.title])
+ let dot = []
+ let hue = 0.5001
+ let color = {} // site => hsv
+ addcolor(pick)
+ populateIndexEntries(seen)
 
-function addcolor(pick) {
-  let title = pick.page.title
-  let site = pick.site
-  let sites = pick.sites
-  color[site] ||= hsv(hue += 0.111)
-  dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
-}
+ function addcolor(pick) {
+     let title = pick.page.title
+     let site = pick.site
+     let sites = pick.sites
+     color[site] ||= hsv(hue += 0.111)
+     dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
+ }
 
  function populateIndexEntries(seen) {
      console.log("populateIndexEntries(seen) reached")
@@ -75,13 +75,13 @@ function addcolor(pick) {
 
  window.doview = function (event) {
      let [site,title] = event.target.innerText.split(' — ')
-  window.parent.postMessage({
-    action:"doInternalLink",
-    title,
-    site,
-    keepLineup: event.shiftKey
-  }, "*")
-}
+     window.parent.postMessage({
+         action:"doInternalLink",
+         title,
+         site,
+         keepLineup: event.shiftKey
+     }, "*")
+ }
 
  function filterParagraphs(page) {
      return page.story.filter(item => item.type === 'paragraph');
@@ -142,21 +142,25 @@ function addcolor(pick) {
              }
          }
      }
-catch(err) {
-  window.result.innerHTML += `
+     catch(err) {
+         window.result.innerHTML += `
   ${err.message}
   ${err.stack}`
-}
+     }
 
-window.result.innerHTML += "\n\n"+Object.entries(sitemaps).map(([site,infos]) => `${infos.length} — ${site}`).join("\n")
-let text = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
-let story = [
-  {type:'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.`},
-  {type:'graphviz', text}
-]
+     window.result.innerHTML += "\n\n"+Object.entries(sitemaps).map(([site,infos]) => `${infos.length} — ${site}`).join("\n")
+     let text = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
+     let story = [
+         {type:'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.`},
+         {type:'graphviz', text}
+     ]
 
-open({title:"Speed Bot Journey",story},event.shiftKey,Object.keys(color))
+     openSpeedBotJourney(story, text, event.shiftKey);
 
-}
+ }
+
+ function openSpeedBotJourney(story, text, shiftKey) {
+     open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
+ }
 
 </script></body></html>
