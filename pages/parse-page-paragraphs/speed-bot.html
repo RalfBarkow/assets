@@ -27,30 +27,30 @@
  let dot = []
  let hue = 0.5001
  let color = {} // site => hsv
- addcolor(pick)
+ addPageTitleToGraphviz(pick)
  populateIndexEntries(seen)
 
- function addcolor(pick) {
+ function addPageTitleToGraphviz(pick) {
      let title = pick.page.title
      let site = pick.site
      let sites = pick.sites
      color[site] ||= hsv(hue += 0.111)
 
-     /*
-        Ward introduced "dot" and "quote nine years ago.
-        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-      */
-     dot.push(introducePageTitlesToGraphviz(title, site, sites, color));
+     dot.push(generateDotNode(title, site, sites, color));
      /*
         Ward is introducing page titles to Graphviz.
         This is where he associates a color to be used where ever he mentions that title.
       */
  }
 
- function introducePageTitlesToGraphviz(title, site, sites, color) {
+ function generateDotNode(title, site, sites, color) {
 
      // Construct the DOT node string with the extracted color
      return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
+     /*
+        Ward introduced "dot" and "quote nine years ago.
+        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
  }
 
  function populateIndexEntries(seen) {
@@ -120,10 +120,10 @@
      }
 
      seen = new Set([pick.page.title])
-     dot = []
-     hue = 0.5001
-     color = {} // site => hsv
-     addcolor(pick)
+     //dot = []
+     //hue = 0.5001
+     //color = {} // site => hsv
+     addPageTitleToGraphviz(pick)
 
      console.log('Start: pick.page', pick.page);
 
@@ -140,7 +140,7 @@
                      populateIndexEntries(seen)
                      let next = await getfrom(asSlug(link),pick.sites)
                      if (next && next.page) {
-                         addcolor(next)
+                         addPageTitleToGraphviz(next)
 
                          /*
                             Ward is creating relations, arrows, between titles already introduced.
