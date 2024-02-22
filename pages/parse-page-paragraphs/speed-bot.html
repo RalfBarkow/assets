@@ -106,9 +106,6 @@
      done = Date.now() + 10000
      window.result.innerText = ''
 
-     // all = [all[0]]
-     // pick = all[0]
-
      // Check if a start entry is selected
      const selectedStartEntry = document.getElementById('indexEntries').value;
      if (selectedStartEntry) {
@@ -120,11 +117,7 @@
      }
 
      seen = new Set([pick.page.title])
-     //dot = []
-     //hue = 0.5001
-     //color = {} // site => hsv
      addPageTitleToGraphviz(pick)
-
      console.log('Start: pick.page', pick.page);
 
      try {
