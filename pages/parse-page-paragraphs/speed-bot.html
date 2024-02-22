@@ -110,8 +110,11 @@ window.dostart = async function (event) {
 
      try {
          while (Date.now() < done) {
-    let remain = Math.ceil((done - Date.now())/1000)
-    let links = visit(pick.page).filter(title => !seen.has(title))
+    let remain = Math.ceil((done - Date.now())/1000);
+             let paragraphs = pick.page.story.filter(item => item.type === 'paragraph');
+             console.log('Paragraphs: ', paragraphs);
+             for (let paragraph of paragraphs) {
+                 let links = visit(pick.page).filter(title => !seen.has(title))
     if (links.length) {
       let link = any(links)
       seen.add(link)
@@ -134,7 +137,7 @@ window.dostart = async function (event) {
       pick = any(all) // can't find new link on page
     }
   }
-}
+}}
 catch(err) {
   window.result.innerHTML += `
   ${err.message}
