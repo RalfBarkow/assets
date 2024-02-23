@@ -36,20 +36,31 @@
      let sites = pick.sites
      color[site] ||= hsv(hue += 0.111)
 
-     dot.push(generateDotNode(title, site, sites, color));
+     dot.push(addTitleDot(title, site, sites, color));
      /*
         Ward is introducing page titles to Graphviz.
         This is where he associates a color to be used where ever he mentions that title.
       */
  }
 
- function generateDotNode(title, site, sites, color) {
+ function addTitleDot(title, site, sites, color) {
 
      // Construct the DOT node string with the extracted color
      return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
      /*
         Ward introduced "dot" and "quote nine years ago.
         See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
+ }
+
+ function joinTitlesDot(pick, next){
+     return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
+     /*
+        Here Ward is emitting the literal string, " -> ", with quoted titles on either side.
+        He prefers small words for variable names when the variable has been defined in close proximity.
+        The words "dot" and "quote" are an exception.
+        He has been using both words with specific meaning for many years.
+        He wrote about this here: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
       */
  }
 
@@ -135,17 +146,8 @@
                      if (next && next.page) {
                          addPageTitleToGraphviz(next)
 
-                         /*
-                            Ward is creating relations, arrows, between titles already introduced.
-                          */
-                         dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`)
-                         /*
-                            Here he is emitting the literal string, " -> ", with quoted titles on either side.
-                            He prefers small words for variable names when the variable has been defined in close proximity.
-                            The words "dot" and "quote" are an exception.
-                            He has been using both words with specific meaning for many years.
-                            He wrote about this here: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-                         */
+                         // Create relations, arrows, between titles already introduced
+                         dot.push(joinTitlesDot(pick, next))
 
                          all.push(next)
                          window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
