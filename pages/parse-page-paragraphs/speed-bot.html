@@ -1,5 +1,6 @@
 <p>
-  <select id="indexEntries"></select> <!-- Select control -->
+  <select id="indexEntries"></select>
+  <select id="paragraphEntries"></select>
   <button onclick=dostart(event)>start</button>
   <span id=startat></span>
 </p>
@@ -80,6 +81,35 @@
      console.log(indexEntries)
  }
 
+ function filterParagraphs(page) {
+     let _paragraphs = page.story.filter(item => item.type === 'paragraph');
+     populateParagraphEntries(_paragraphs)
+     return _paragraphs;
+ }
+
+ function populateParagraphEntries(paragraphs) {
+     console.log("populateParagraphEntries(paragraphs) reached")
+     let select = document.getElementById('paragraphEntries')
+
+     // Clear existing options
+     select.innerHTML = '';
+
+     paragraphs.forEach(entry => {
+         let optgroup = document.createElement('optgroup');
+         optgroup.label = entry.id;
+
+         let option = document.createElement('option')
+         option.value = entry.id;
+         option.text = entry.text
+
+         //select.add(option)
+         optgroup.appendChild(option);
+         select.appendChild(optgroup);
+     })
+     console.log(paragraphs)
+ }
+
+
  function setStartEntry() {
      const select = document.getElementById('indexEntries');
      const selectedEntry = select.value;
@@ -98,6 +128,8 @@
 
  // Attach the setStartEntry function to the change event of the select element
  document.getElementById('indexEntries').addEventListener('change', setStartEntry);
+ document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
+
 
  window.doview = function (event) {
      let [site,title] = event.target.innerText.split(' — ')
@@ -107,10 +139,6 @@
          site,
          keepLineup: event.shiftKey
      }, "*")
- }
-
- function filterParagraphs(page) {
-     return page.story.filter(item => item.type === 'paragraph');
  }
 
  window.dostart = async function (event) {
