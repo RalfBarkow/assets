@@ -6,37 +6,52 @@
 <pre id="result"></pre>
 <script type="module">
 
-import {visit,getfrom,sitemaps} from './telling.js'
-import {open, context} from 'http://code.fed.wiki/assets/v1/frame.js'
+ import {visit,getfrom,sitemaps} from './telling.js'
+ import {open, context} from 'http://code.fed.wiki/assets/v1/frame.js'
 
-const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
-const any = list => list[Math.floor(Math.random()*list.length)]
-const hsv = hue => `"${(hue%1).toFixed(3)} 0.2 1.0"`
-const quote = title => `"${title.replace(/ +/g,'\\n')}"`
+ const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+ const any = list => list[Math.floor(Math.random()*list.length)]
+ const hsv = hue => `"${(hue%1).toFixed(3)} 0.2 1.0"`
+ const quote = title => `"${title.replace(/ +/g,'\\n')}"`
 
-let done = Date.now() + 10000
+ let done = Date.now() + 10000
 
-let all = [await getfrom('a',['wiki.ralfbarkow.ch'])]
-let reference = (await context()).page.story.find(item => item.type == 'reference')
-if(reference) {
-  all = [await getfrom(reference.slug,[reference.site])]
-}
-window.startat.innerText = all[0].page.title
-let pick = all[0]
-let seen = new Set([pick.page.title])
-let dot = []
-let hue = 0.5001
-let color = {} // site => hsv
-addcolor(pick)
-populateIndexEntries(seen)
+ let all = [await getfrom('a',['wiki.ralfbarkow.ch'])]
+ let reference = (await context()).page.story.find(item => item.type == 'reference')
+ if(reference) {
+     all = [await getfrom(reference.slug,[reference.site])]
+ }
+ window.startat.innerText = all[0].page.title
+ let pick = all[0]
+ let seen = new Set([pick.page.title])
+ let dot = []
+ let hue = 0.5001
+ let color = {} // site => hsv
+ addPageTitleToGraphviz(pick)
+ populateIndexEntries(seen)
 
-function addcolor(pick) {
-  let title = pick.page.title
-  let site = pick.site
-  let sites = pick.sites
-  color[site] ||= hsv(hue += 0.111)
-  dot.push(`${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`)
-}
+ function addPageTitleToGraphviz(pick) {
+     let title = pick.page.title
+     let site = pick.site
+     let sites = pick.sites
+     color[site] ||= hsv(hue += 0.111)
+
+     dot.push(generateDotNode(title, site, sites, color));
+     /*
+        Ward is introducing page titles to Graphviz.
+        This is where he associates a color to be used where ever he mentions that title.
+      */
+ }
+
+ function generateDotNode(title, site, sites, color) {
+
+     // Construct the DOT node string with the extracted color
+     return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
+     /*
+        Ward introduced "dot" and "quote nine years ago.
+        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
+ }
 
  function populateIndexEntries(seen) {
      console.log("populateIndexEntries(seen) reached")
@@ -75,20 +90,21 @@ function addcolor(pick) {
 
  window.doview = function (event) {
      let [site,title] = event.target.innerText.split(' — ')
-  window.parent.postMessage({
-    action:"doInternalLink",
-    title,
-    site,
-    keepLineup: event.shiftKey
-  }, "*")
-}
+     window.parent.postMessage({
+         action:"doInternalLink",
+         title,
+         site,
+         keepLineup: event.shiftKey
+     }, "*")
+ }
 
-window.dostart = async function (event) {
+ function filterParagraphs(page) {
+     return page.story.filter(item => item.type === 'paragraph');
+ }
+
+ window.dostart = async function (event) {
      done = Date.now() + 10000
      window.result.innerText = ''
-
-     // all = [all[0]]
-     // pick = all[0]
 
      // Check if a start entry is selected
      const selectedStartEntry = document.getElementById('indexEntries').value;
@@ -101,55 +117,70 @@ window.dostart = async function (event) {
      }
 
      seen = new Set([pick.page.title])
-     dot = []
-     hue = 0.5001
-     color = {} // site => hsv
-     addcolor(pick)
-
+     addPageTitleToGraphviz(pick)
      console.log('Start: pick.page', pick.page);
 
      try {
          while (Date.now() < done) {
-    let remain = Math.ceil((done - Date.now())/1000)
-    let links = visit(pick.page).filter(title => !seen.has(title))
-    if (links.length) {
-      let link = any(links)
-      seen.add(link)
-      populateIndexEntries(seen)
-      let next = await getfrom(asSlug(link),pick.sites)
-      if (next && next.page) {
-        addcolor(next)
-        dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`)
-        all.push(next)
-        window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
-        pick = next
-      } else {
-        window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
-        // pick = any(all) // can't find page for link
-      }
-    } else {
-      all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
-      if (!all.length) break
-      window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
-      pick = any(all) // can't find new link on page
-    }
-  }
-}
-catch(err) {
-  window.result.innerHTML += `
+             let remain = Math.ceil((done - Date.now())/1000);
+             let paragraphs = filterParagraphs(pick.page);
+             console.log('Paragraphs: ', paragraphs);
+             for (let paragraph of paragraphs) {
+                 let links = visit(pick.page).filter(title => !seen.has(title))
+                 if (links.length) {
+                     let link = any(links)
+                     seen.add(link)
+                     populateIndexEntries(seen)
+                     let next = await getfrom(asSlug(link),pick.sites)
+                     if (next && next.page) {
+                         addPageTitleToGraphviz(next)
+
+                         /*
+                            Ward is creating relations, arrows, between titles already introduced.
+                          */
+                         dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`)
+                         /*
+                            Here he is emitting the literal string, " -> ", with quoted titles on either side.
+                            He prefers small words for variable names when the variable has been defined in close proximity.
+                            The words "dot" and "quote" are an exception.
+                            He has been using both words with specific meaning for many years.
+                            He wrote about this here: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+                         */
+
+                         all.push(next)
+                         window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
+                         pick = next
+                     } else {
+                         window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
+                     }
+                 } else {
+                     all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
+                     if (!all.length) break
+                     window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
+                     pick = any(all) // can't find new link on page
+                 }
+             }
+         }
+     }
+     catch(err) {
+         window.result.innerHTML += `
   ${err.message}
   ${err.stack}`
-}
+     }
 
-window.result.innerHTML += "\n\n"+Object.entries(sitemaps).map(([site,infos]) => `${infos.length} — ${site}`).join("\n")
-let text = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
-let story = [
-  {type:'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.`},
-  {type:'graphviz', text}
-]
+     window.result.innerHTML += "\n\n"+Object.entries(sitemaps).map(([site,infos]) => `${infos.length} — ${site}`).join("\n")
+     let dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
+     let story = [
+         {type:'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.`},
+         {type:'graphviz', text:dotText}
+     ]
 
-open({title:"Speed Bot Journey",story},event.shiftKey,Object.keys(color))
+     openSpeedBotJourney(story, event.shiftKey);
 
-}
+ }
+
+ function openSpeedBotJourney(story, shiftKey) {
+     open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
+ }
 
 </script></body></html>
