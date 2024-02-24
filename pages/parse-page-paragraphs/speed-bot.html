@@ -54,23 +54,28 @@
          fillcolor: color[site]
      };
 
-     // Add the node to the graph
-     const node = graph.addNode(title, nodeProperties);
-
-     // Check if the node was successfully added
-     if (node) {
-         console.log(`Node "${title}" added to the graph with ID ${node.id}`);
+     // Check if the node already exists in the graph
+     const existingNode = graph.nodes.find(node => node.type === title);
+     if (existingNode) {
+         console.log(`Node with title '${title}' already exists in the graph.`);
      } else {
-         console.error(`Failed to add node "${title}" to the graph`);
+         // Add the node to the graph
+         const node = graph.addNode(title, nodeProperties);
+
+         // Check if the node was successfully added
+         if (node) {
+             console.log(`Node "${title}" added to the graph with ID ${node.id}`);
+         } else {
+             console.error(`Failed to add node "${title}" to the graph`);
+         }
      }
 
-     // Return the node ID (optional)
-     // return node ? node.id : null;
+     console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
 
      // Construct the DOT node string with the extracted color
      return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
      /*
-        Ward introduced "dot" and "quote nine years ago.
+        Ward introduced "dot" and "quote" nine years ago.
         See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
       */
  }
@@ -87,7 +92,6 @@
  }
 
  function populateIndexEntries(seen) {
-     console.log("populateIndexEntries(seen) reached")
      let indexEntries = seen
      let select = document.getElementById('indexEntries')
 
@@ -99,7 +103,6 @@
          option.text = entry
          select.add(option)
      })
-     console.log(indexEntries)
  }
 
  function filterParagraphs(page) {
@@ -109,7 +112,6 @@
  }
 
  function populateParagraphEntries(paragraphs) {
-     console.log("populateParagraphEntries(paragraphs) reached")
      let select = document.getElementById('paragraphEntries')
 
      // Clear existing options
@@ -127,7 +129,6 @@
          optgroup.appendChild(option);
          select.appendChild(optgroup);
      })
-     console.log(paragraphs)
  }
 
 
@@ -184,7 +185,6 @@
          while (Date.now() < done) {
              let remain = Math.ceil((done - Date.now())/1000);
              let paragraphs = filterParagraphs(pick.page);
-             console.log('Paragraphs: ', paragraphs);
              for (let paragraph of paragraphs) {
                  let links = visit(pick.page).filter(title => !seen.has(title))
                  if (links.length) {
