@@ -9,7 +9,9 @@
 
  import {visit,getfrom,sitemaps} from './telling.js'
  import {open, context} from 'http://code.fed.wiki/assets/v1/frame.js'
+ import {Graph} from 'https://wardcunningham.github.io/graph/graph.js';
 
+ const graph = new Graph();
  const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
  const any = list => list[Math.floor(Math.random()*list.length)]
  const hsv = hue => `"${(hue%1).toFixed(3)} 0.2 1.0"`
@@ -45,6 +47,25 @@
  }
 
  function addTitleDot(title, site, sites, color) {
+     console.log("addTitleDot reached")
+
+     const nodeProperties = {
+         tooltip: `${site}\n\n${sites.join("\n")}`,
+         fillcolor: color[site]
+     };
+
+     // Add the node to the graph
+     const node = graph.addNode(title, nodeProperties);
+
+     // Check if the node was successfully added
+     if (node) {
+         console.log(`Node "${title}" added to the graph with ID ${node.id}`);
+     } else {
+         console.error(`Failed to add node "${title}" to the graph`);
+     }
+
+     // Return the node ID (optional)
+     // return node ? node.id : null;
 
      // Construct the DOT node string with the extracted color
      return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
