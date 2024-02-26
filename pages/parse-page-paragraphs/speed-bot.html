@@ -107,17 +107,32 @@
 
  function filterParagraphs(page) {
      let _paragraphs = page.story.filter(item => item.type === 'paragraph');
-     populateParagraphEntries(_paragraphs)
+     populateParagraphEntries(_paragraphs, page.title)
      return _paragraphs;
  }
 
- function populateParagraphEntries(paragraphs) {
+ function populateParagraphEntries(paragraphs, title) {
      let select = document.getElementById('paragraphEntries')
 
      // Clear existing options
      select.innerHTML = '';
 
      paragraphs.forEach(entry => {
+         // Check if the relation already exists
+         const existingRel =
+             graph.rels.find(rel => rel.type === 'fromIdToTitle' && rel.from === entry.id && rel.to === title);
+         if (existingRel !== undefined) {
+             // Relation already exists
+             console.log(`Relation between paragraph ${entry.id} and title ${title} already exists.`);
+         } else {
+             // Relation does not exist, so add it
+             graph.addNode(entry.id, { text: entry.text });
+             graph.addRel('fromIdToTitle', entry.id, title, {});
+             console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
+         }
+         console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+
+         // Create an option for the paragraph entry in the dropdown list
          let optgroup = document.createElement('optgroup');
          optgroup.label = entry.id;
 
