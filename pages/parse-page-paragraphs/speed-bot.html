@@ -149,9 +149,17 @@
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
      //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
-     return JSON.stringify(graph) + '\n';
+     broadcast(JSON.stringify(graph) + '\n');
  }
 
+ function broadcast(graph) {
+     // Post a message to the parent window
+     window.parent.postMessage({
+         action: "publishSourceData",
+         name: "graph",
+         sourceData: { graph }
+     }, "*"); // "*" indicates that the message can be received from any origin
+ }
 
  function setStartEntry() {
      const select = document.getElementById('indexEntries');
