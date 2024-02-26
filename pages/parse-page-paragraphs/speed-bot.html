@@ -62,9 +62,6 @@
          // Add the node to the graph
          const nodeId = graph.addNode(title, nodeProperties);
 
-         // Save nodeId
-         const start = graph.addRel('Start', nodeId, nodeId, title, {});
-
          // Check if the node was successfully added
          if (nodeId) {
              console.log(`Node "${title}" added to the graph with ID ${nodeId}`);
