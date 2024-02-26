@@ -79,7 +79,19 @@
      }
  }
 
+ function addNextPageRelation(currentPageId, nextPageId) {
+     // Add the relation to the graph's relations array
+     const relation = {
+         type: 'leadsTo', // or 'nextPage', or any descriptive type
+         from: currentPageId, // ID of the current page
+         to: nextPageId // ID of the next page
+     };
+     //graph.relations.push(relation); // Store the relation in the graph object
+     console.log(`Relation added: ${relation.from} -> ${relation.to}`);
+ }
+
  function joinTitlesDot(pick, next){
+     addNextPageRelation(pick, next);
      return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
      /*
         Here Ward is emitting the literal string, " -> ", with quoted titles on either side.
@@ -123,14 +135,14 @@
      paragraphs.forEach(entry => {
          // Check if the relation already exists
          const existingRel =
-             graph.rels.find(rel => rel.type === 'fromIdToTitle' && rel.from === entry.id && rel.to === title);
+             graph.rels.find(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
          if (existingRel !== undefined) {
              // Relation already exists
              console.log(`Relation between paragraph ${entry.id} and title ${title} already exists.`);
          } else {
              // Relation does not exist, so add it
              const paraId = graph.addNode(entry.id, { text: entry.text });
-             graph.addRel('fromIdToTitle', paraId, pageId, entry.id, title, {});
+             graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
              console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
          }
          serializeGraphAsJSONL(graph)
