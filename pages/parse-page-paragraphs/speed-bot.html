@@ -61,9 +61,7 @@
      } else {
          // Add the node to the graph
          const nodeId = graph.addNode(title, nodeProperties);
-         console.log("nodeId: ", nodeId)
 
-         //FIXME AddNode returns the id. You have to save it.
          // Save nodeId
          const start = graph.addRel('Start', nodeId, nodeId, title, {});
 
@@ -130,8 +128,9 @@
              console.log(`Relation between paragraph ${entry.id} and title ${title} already exists.`);
          } else {
              // Relation does not exist, so add it
-             graph.addNode(entry.id, { text: entry.text });
-             graph.addRel('fromIdToTitle', entry.id, title, {});
+             const para = graph.addNode(entry.id, { text: entry.text });
+             //FIXME addNode returns the id. You have to save it.
+             graph.addRel('fromIdToTitle', para, para, entry.id, title, {});
              console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
          }
          serializeGraphAsJSONL(graph)
@@ -152,7 +151,7 @@
 
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
-     console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
      broadcast(JSON.stringify(graph) + '\n');
  }
 
