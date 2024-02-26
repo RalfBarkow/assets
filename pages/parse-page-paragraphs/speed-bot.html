@@ -116,6 +116,10 @@
      // Clear existing options
      select.innerHTML = '';
 
+     // Get the id of a node named title
+     const pageId = graph.nodes.findIndex(node => node.type === title);
+     console.log("ID for title: ", pageId);
+
      paragraphs.forEach(entry => {
          // Check if the relation already exists
          const existingRel =
@@ -125,9 +129,8 @@
              console.log(`Relation between paragraph ${entry.id} and title ${title} already exists.`);
          } else {
              // Relation does not exist, so add it
-             const para = graph.addNode(entry.id, { text: entry.text });
-             //FIXME addNode returns the id. You have to save it.
-             graph.addRel('fromIdToTitle', para, para, entry.id, title, {});
+             const paraId = graph.addNode(entry.id, { text: entry.text });
+             graph.addRel('fromIdToTitle', paraId, pageId, entry.id, title, {});
              console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
          }
          serializeGraphAsJSONL(graph)
