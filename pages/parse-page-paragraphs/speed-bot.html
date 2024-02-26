@@ -70,7 +70,7 @@
          }
      }
 
-     console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     serializeGraphAsJSONL(graph)
 
      // Construct the DOT node string with the extracted color
      return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
@@ -130,7 +130,7 @@
              graph.addRel('fromIdToTitle', entry.id, title, {});
              console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
          }
-         console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+         serializeGraphAsJSONL(graph)
 
          // Create an option for the paragraph entry in the dropdown list
          let optgroup = document.createElement('optgroup');
@@ -144,6 +144,12 @@
          optgroup.appendChild(option);
          select.appendChild(optgroup);
      })
+ }
+
+ // Serialize the entire Graph object as one JSON line in a JSONL stream
+ function serializeGraphAsJSONL(graph) {
+     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     return JSON.stringify(graph) + '\n';
  }
 
 
