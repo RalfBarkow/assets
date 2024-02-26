@@ -60,24 +60,28 @@
          console.log(`Node with title '${title}' already exists in the graph.`);
      } else {
          // Add the node to the graph
-         const node = graph.addNode(title, nodeProperties);
+         const nodeId = graph.addNode(title, nodeProperties);
+         console.log("nodeId: ", nodeId)
+
+         //FIXME AddNode returns the id. You have to save it.
+         // Save nodeId
+         const start = graph.addRel('Start', nodeId, nodeId, title, {});
 
          // Check if the node was successfully added
-         if (node) {
-             console.log(`Node "${title}" added to the graph with ID ${node.id}`);
-         } else {
-             console.error(`Failed to add node "${title}" to the graph`);
+         if (nodeId) {
+             console.log(`Node "${title}" added to the graph with ID ${nodeId}`);
          }
+
+         // Serialize the updated graph
+         serializeGraphAsJSONL(graph)
+
+         // Construct the DOT node string with the extracted color
+         return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
+         /*
+            Ward introduced "dot" and "quote" nine years ago.
+            See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+          */
      }
-
-     serializeGraphAsJSONL(graph)
-
-     // Construct the DOT node string with the extracted color
-     return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
-     /*
-        Ward introduced "dot" and "quote" nine years ago.
-        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-      */
  }
 
  function joinTitlesDot(pick, next){
@@ -148,7 +152,7 @@
 
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
-     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
      broadcast(JSON.stringify(graph) + '\n');
  }
 
