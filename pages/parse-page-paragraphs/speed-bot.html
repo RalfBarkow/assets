@@ -49,12 +49,12 @@
      dot.push(addTitleDot(title, site, sites, color));
      /*
         Ward is introducing page titles to Graphviz.
-        This is where he associates a color to be used where ever he mentions that title.
+        This is where he associates a color
+        to be used where ever he mentions that title.
       */
  }
 
  function addTitleDot(title, site, sites, color) {
-     console.log("addTitleDot reached")
 
      const nodeProperties = {
          tooltip: `${site}\n\n${sites.join("\n")}`,
@@ -75,12 +75,15 @@
      console.log("addTitle reached")
 
      // Check if the node already exists in the graph
-     const existingNode = graph.nodes.findIndex(node => node.type === title);
+     const existingNode =
+         graph.nodes.findIndex(node => node.type === title);
      if (existingNode !== -1) {
          console.log(`Node with title '${title}' (${existingNode}) already exists in the graph.`);
      } else {
+
          // Add the node to the graph
-         const nodeId = graph.addNode(title, 0, 0, nodeProperties); // return this.nodes.length-1;
+         const nodeId =
+             graph.addNode(title, 0, 0, nodeProperties);
 
          // Check if the node was successfully added
          if (nodeId) {
@@ -94,16 +97,21 @@
 
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
-     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     console.log("serializeGraphAsJSONL reached")
+
      broadcast(JSON.stringify(graph) + '\n');
  }
 
+ //postMessage
  function broadcast(graph) {
+     console.log("broadcast reached")
+
      const targetOrigin = "*" // "*" indicates that the message can be received from any origin
 
      // Post a message to the parent window
      window.parent.postMessage(
-         // message See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+         // message
+         // See: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
          {
              action: "publishSourceData", // graphStream
              name: "graph",
@@ -117,22 +125,28 @@
      joinTitles(pick, next);
      return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
      /*
-        Here Ward is emitting the literal string, " -> ", with quoted titles on either side.
-        He prefers small words for variable names when the variable has been defined in close proximity.
+        Here Ward is emitting the literal string, " -> ",
+        with quoted titles on either side.
+        He prefers small words for variable names
+        when the variable has been defined in close proximity.
         The words "dot" and "quote" are an exception.
-        He has been using both words with specific meaning for many years.
-        He wrote about this here: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+        He has been using both words
+        with specific meaning for many years.
+        He wrote about this.
+        See: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
       */
  }
 
  function joinTitles(pick, next) {
      console.log("joinTitles reached")
 
-     const from = graph.nodes.findIndex(node => node.type === pick.page.title);
+     const from =
+         graph.nodes.findIndex(node => node.type === pick.page.title);
      console.log(`joinTitles from pick "${pick.page.title}" (${from})`);
 
      addTitle(next.page.title, {});
-     const to   = graph.nodes.findIndex(node => node.type === next.page.title);
+     const to   =
+         graph.nodes.findIndex(node => node.type === next.page.title);
      graph.addRel('fromPickToNext', from, to, {});
       console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
      serializeGraphAsJSONL(graph)
@@ -167,8 +181,8 @@
      select.innerHTML = '';
 
      // Get the id of a node named title
-     const pageId = graph.nodes.findIndex(node => node.type === title);
-     //console.log(`findIndex for "${title}": pageId is ${pageId}`);
+     const pageId =
+         graph.nodes.findIndex(node => node.type === title);
 
      paragraphs.forEach(entry => {
          // Check if the relation already exists
@@ -178,8 +192,10 @@
              // Relation already exists
              console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title ${title} (${pageId})already exists.`);
          } else {
+
              // Relation does not exist, so add it
-             const paraId = graph.addNode(entry.id, { text: entry.text });
+             const paraId =
+                 graph.addNode(entry.id, { text: entry.text });
              graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
               console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title ${title} (${pageId}) added to the graph.`);
              serializeGraphAsJSONL(graph)
@@ -294,7 +310,6 @@
      ]
 
      openSpeedBotJourney(story, event.shiftKey);
-
  }
 
  function openSpeedBotJourney(story, shiftKey) {
