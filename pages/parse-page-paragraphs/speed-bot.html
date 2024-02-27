@@ -140,18 +140,15 @@
  }
 
  function joinTitles(pick, next) {
-     console.log("joinTitles reached")
+     console.log("joinTitles reached");
 
-     const from =
-         graph.nodes.findIndex(node => node.type === pick.page.title);
-     console.log(`joinTitles from pick "${pick.page.title}" (${from})`);
-
-     addTitle(next.page.title, {});
-     const to   =
-         graph.nodes.findIndex(node => node.type === next.page.title);
-     graph.addRel('fromPickToNext', from, to, {});
-      console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
-     serializeGraphAsJSONL(graph)
+     const fromIndex = graph.nodes.findIndex(node => node.type === pick.page.title);
+     const toIndex = addTitle(next.page.title, {}); // Add next page title if it doesn't exist and get its index
+     if (toIndex !== -1) {
+         graph.addRel('fromPickToNext', fromIndex, toIndex, {});
+         console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${fromIndex}) -> to "${next.page.title}" (${toIndex})`);
+         serializeGraphAsJSONL(graph);
+     }
  }
 
  function populateIndexEntries(seen) {
