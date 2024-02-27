@@ -99,12 +99,18 @@
  }
 
  function broadcast(graph) {
+     const targetOrigin = "*" // "*" indicates that the message can be received from any origin
+
      // Post a message to the parent window
-     window.parent.postMessage({
-         action: "publishSourceData",
-         name: "graph",
-         sourceData: { graph }
-     }, "*"); // "*" indicates that the message can be received from any origin
+     window.parent.postMessage(
+         // message See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+         {
+             action: "publishSourceData", // graphStream
+             name: "graph",
+             sourceData: { graph }
+         },
+         targetOrigin // optional
+     );
  }
 
  function joinTitlesDot(pick, next){
