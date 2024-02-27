@@ -34,6 +34,13 @@
  populateIndexEntries(seen)
 
  function addPageTitleToGraphviz(pick) {
+     console.log("addPageTitleToGraphviz reached")
+     /* FIXME These functions are called twice at the beginning:
+        - addPageTitleToGraphviz
+        - addTitleDot
+        - addTitle
+      */
+
      let title = pick.page.title
      let site = pick.site
      let sites = pick.sites
@@ -116,11 +123,12 @@
      console.log("joinTitles reached")
 
      const from = graph.nodes.findIndex(node => node.type === pick.page.title);
-     console.log(`addNextPageRelation from pick "${pick.page.title}" (${from})`);
+     console.log(`joinTitles from pick "${pick.page.title}" (${from})`);
+
      addTitle(next.page.title, {});
      const to   = graph.nodes.findIndex(node => node.type === next.page.title);
      graph.addRel('fromPickToNext', from, to, {});
-     console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
+      console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
      serializeGraphAsJSONL(graph)
  }
 
