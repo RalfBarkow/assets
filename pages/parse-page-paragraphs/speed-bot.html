@@ -101,7 +101,7 @@
  }
 
  function joinTitlesDot(pick, next){
-     addNextPageRelation(pick, next);
+     joinTitles(pick, next);
      return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
      /*
         Here Ward is emitting the literal string, " -> ", with quoted titles on either side.
@@ -112,8 +112,8 @@
       */
  }
 
- function addNextPageRelation(pick, next) {
-     console.log("addNextPageRelation reached")
+ function joinTitles(pick, next) {
+     console.log("joinTitles reached")
 
      const from = graph.nodes.findIndex(node => node.type === pick.page.title);
      console.log(`addNextPageRelation from pick "${pick.page.title}" (${from})`);
