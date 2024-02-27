@@ -66,29 +66,35 @@
       */
  }
 
+ function nodeExists(title) {
+     console.log("nodeExists reached");
+
+     // Check if the node already exists in the graph
+     const existingNodeIndex = graph.nodes.findIndex(node => node.type === title);
+     return existingNodeIndex !== -1;
+ }
+
  function addTitle(title, nodeProperties) {
      console.log("addTitle reached")
 
-     // Check if the node already exists in the graph
-     const existingNode =
-         graph.nodes.findIndex(node => node.type === title);
-     if (existingNode !== -1) {
-         console.log(`Node with title '${title}' (${existingNode}) already exists in the graph.`);
-     } else {
+     // Check if the node already exists
+     if (nodeExists(title)) {
+         console.log(`Node with title '${title}' already exists in the graph.`);
+         return null; // Return null to indicate that the node wasn't added
+     }
 
-         // Add the node to the graph
-         const nodeId =
-             graph.addNode(title, 0, 0, nodeProperties);
+     // Add the node to the graph
+     const nodeId =
+         graph.addNode(title, 0, 0, nodeProperties);
 
-         // Check if the node was successfully added
-         if (nodeId) {
+     // Check if the node was successfully added
+     if (nodeId) {
              console.log(`Node "${title}" (${nodeId}) added`);
              serializeGraphAsJSONL(graph);
              console.log("addTitle returns nodeId ", nodeId);
              return nodeId;
          }
-     }
-   }
+ }
 
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
