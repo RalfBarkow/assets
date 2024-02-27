@@ -54,40 +54,53 @@
          fillcolor: color[site]
      };
 
+     addTitle(title, nodeProperties);
+
+     // Construct the DOT node string with the extracted color
+     return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
+     /*
+        Ward introduced "dot" and "quote" nine years ago.
+        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
+ }
+
+ function addTitle(title, nodeProperties) {
+     console.log("addTitle reached")
+
+     let nodeId = graph.nodes.length-1;
+     console.log("nodeId ", nodeId);
+
      // Check if the node already exists in the graph
      const existingNode = graph.nodes.find(node => node.type === title);
      if (existingNode) {
          console.log(`Node with title '${title}' already exists in the graph.`);
      } else {
          // Add the node to the graph
-         const nodeId = graph.addNode(title, nodeProperties);
+         nodeId = graph.addNode(title, 0, 0, nodeProperties); // return this.nodes.length-1;
 
          // Check if the node was successfully added
          if (nodeId) {
              console.log(`Node "${title}" added to the graph with ID ${nodeId}`);
          }
-
-         // Serialize the updated graph
-         serializeGraphAsJSONL(graph)
-
-         // Construct the DOT node string with the extracted color
-         return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
-         /*
-            Ward introduced "dot" and "quote" nine years ago.
-            See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-          */
      }
+     serializeGraphAsJSONL(graph);
+     console.log("return nodeId ", nodeId);
+     return nodeId;
  }
 
- function addNextPageRelation(currentPageId, nextPageId) {
-     // Add the relation to the graph's relations array
-     const relation = {
-         type: 'leadsTo', // or 'nextPage', or any descriptive type
-         from: currentPageId, // ID of the current page
-         to: nextPageId // ID of the next page
-     };
-     //graph.relations.push(relation); // Store the relation in the graph object
-     console.log(`Relation added: ${relation.from} -> ${relation.to}`);
+ // Serialize the entire Graph object as one JSON line in a JSONL stream
+ function serializeGraphAsJSONL(graph) {
+     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
+     broadcast(JSON.stringify(graph) + '\n');
+ }
+
+ function broadcast(graph) {
+     // Post a message to the parent window
+     window.parent.postMessage({
+         action: "publishSourceData",
+         name: "graph",
+         sourceData: { graph }
+     }, "*"); // "*" indicates that the message can be received from any origin
  }
 
  function joinTitlesDot(pick, next){
@@ -100,6 +113,18 @@
         He has been using both words with specific meaning for many years.
         He wrote about this here: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
       */
+ }
+
+ function addNextPageRelation(pick, next) {
+     console.log("addNextPageRelation reached")
+
+     const from = graph.nodes.findIndex(node => node.type === pick.page.title);
+     console.log(`addNextPageRelation from pick "${pick.page.title}" (${from})`);
+     addTitle(next.page.title,  {});
+     const to   = graph.nodes.findIndex(node => node.type === next.page.title);
+     graph.addRel('fromPickToNext', from, to, {});
+     console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
+     serializeGraphAsJSONL(graph)
  }
 
  function populateIndexEntries(seen) {
@@ -123,14 +148,16 @@
  }
 
  function populateParagraphEntries(paragraphs, title) {
-     let select = document.getElementById('paragraphEntries')
+     console.log("populateParagraphEntries reached");
+
+     let select = document.getElementById('paragraphEntries');
 
      // Clear existing options
      select.innerHTML = '';
 
      // Get the id of a node named title
      const pageId = graph.nodes.findIndex(node => node.type === title);
-     console.log("ID for title: ", pageId);
+     //console.log(`findIndex for "${title}": pageId is ${pageId}`);
 
      paragraphs.forEach(entry => {
          // Check if the relation already exists
@@ -138,14 +165,14 @@
              graph.rels.find(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
          if (existingRel !== undefined) {
              // Relation already exists
-             console.log(`Relation between paragraph ${entry.id} and title ${title} already exists.`);
+             console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title ${title} already exists.`);
          } else {
              // Relation does not exist, so add it
              const paraId = graph.addNode(entry.id, { text: entry.text });
              graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
-             console.log(`Relation between paragraph ${entry.id} and title ${title} added to the graph.`);
+              console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title ${title} (${existingRel}) added to the graph.`);
+             serializeGraphAsJSONL(graph)
          }
-         serializeGraphAsJSONL(graph)
 
          // Create an option for the paragraph entry in the dropdown list
          let optgroup = document.createElement('optgroup');
@@ -159,21 +186,6 @@
          optgroup.appendChild(option);
          select.appendChild(optgroup);
      })
- }
-
- // Serialize the entire Graph object as one JSON line in a JSONL stream
- function serializeGraphAsJSONL(graph) {
-     //console.log("Updated graph:", graph.stringify(null, 2)); // Output the updated graph
-     broadcast(JSON.stringify(graph) + '\n');
- }
-
- function broadcast(graph) {
-     // Post a message to the parent window
-     window.parent.postMessage({
-         action: "publishSourceData",
-         name: "graph",
-         sourceData: { graph }
-     }, "*"); // "*" indicates that the message can be received from any origin
  }
 
  function setStartEntry() {
