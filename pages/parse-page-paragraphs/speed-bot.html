@@ -67,26 +67,23 @@
  function addTitle(title, nodeProperties) {
      console.log("addTitle reached")
 
-     let nodeId = graph.nodes.length-1;
-     console.log("nodeId ", nodeId);
-
      // Check if the node already exists in the graph
-     const existingNode = graph.nodes.find(node => node.type === title);
-     if (existingNode) {
-         console.log(`Node with title '${title}' already exists in the graph.`);
+     const existingNode = graph.nodes.findIndex(node => node.type === title);
+     if (existingNode !== -1) {
+         console.log(`Node with title '${title}' (${existingNode}) already exists in the graph.`);
      } else {
          // Add the node to the graph
-         nodeId = graph.addNode(title, 0, 0, nodeProperties); // return this.nodes.length-1;
+         const nodeId = graph.addNode(title, 0, 0, nodeProperties); // return this.nodes.length-1;
 
          // Check if the node was successfully added
          if (nodeId) {
              console.log(`Node "${title}" added to the graph with ID ${nodeId}`);
+             serializeGraphAsJSONL(graph);
+             console.log("return nodeId ", nodeId);
+             return nodeId;
          }
      }
-     serializeGraphAsJSONL(graph);
-     console.log("return nodeId ", nodeId);
-     return nodeId;
- }
+   }
 
  // Serialize the entire Graph object as one JSON line in a JSONL stream
  function serializeGraphAsJSONL(graph) {
@@ -120,7 +117,7 @@
 
      const from = graph.nodes.findIndex(node => node.type === pick.page.title);
      console.log(`addNextPageRelation from pick "${pick.page.title}" (${from})`);
-     addTitle(next.page.title,  {});
+     addTitle(next.page.title, {});
      const to   = graph.nodes.findIndex(node => node.type === next.page.title);
      graph.addRel('fromPickToNext', from, to, {});
      console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
@@ -162,15 +159,15 @@
      paragraphs.forEach(entry => {
          // Check if the relation already exists
          const existingRel =
-             graph.rels.find(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
-         if (existingRel !== undefined) {
+             graph.rels.findIndex(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
+         if (existingRel !== -1) {
              // Relation already exists
-             console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title ${title} already exists.`);
+             console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title ${title} (${pageId})already exists.`);
          } else {
              // Relation does not exist, so add it
              const paraId = graph.addNode(entry.id, { text: entry.text });
              graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
-              console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title ${title} (${existingRel}) added to the graph.`);
+              console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title ${title} (${pageId}) added to the graph.`);
              serializeGraphAsJSONL(graph)
          }
 
