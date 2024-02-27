@@ -117,7 +117,8 @@
 
         const from = graph.nodes.findIndex(node => node.type === pick.page.title);
         console.log(`joinTitles from pick "${pick.page.title}" (${from})`);
-        const to = addTitle(next.page.title, {});
+        const to = graph.addNote(next.page.title, 0, 0, {});
+        // addTitle(next.page.title, {});
         //const to = graph.nodes.findIndex(node => node.type === next.page.title);
         graph.addRel('fromPickToNext', from, to, {});
         console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${from}) -> to "${next.page.title}" (${to})`);
