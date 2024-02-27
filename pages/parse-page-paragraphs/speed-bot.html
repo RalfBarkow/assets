@@ -30,16 +30,11 @@
  let dot = []
  let hue = 0.5001
  let color = {} // site => hsv
- addPageTitleToGraphviz(pick)
+
  populateIndexEntries(seen)
 
  function addPageTitleToGraphviz(pick) {
      console.log("addPageTitleToGraphviz reached")
-     /* FIXME These functions are called twice at the beginning:
-        - addPageTitleToGraphviz
-        - addTitleDot
-        - addTitle
-      */
 
      let title = pick.page.title
      let site = pick.site
