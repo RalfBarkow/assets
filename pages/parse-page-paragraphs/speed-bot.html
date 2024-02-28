@@ -277,7 +277,10 @@
                             window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`;
                         }
                     } else {
-                        handleNoLinks(pick);
+                        all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
+                        if (!all.length) break
+                        window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
+                        pick = any(all) // can't find new link on page
                     }
                 }
             }
@@ -304,16 +307,6 @@
 
                 displayResultSummary();
             };
-
-            function handleNoLinks(pick) {
-                all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title));
-                if (!all.length) {
-                    window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`;
-                    return true; // Indicates that the loop should break
-                }
-                pick = any(all); // can't find new link on page
-                return false; // Indicates that the loop should continue
-            }
 
             function displayResultSummary(event) {
                 window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n");
