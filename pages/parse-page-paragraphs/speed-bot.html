@@ -257,70 +257,72 @@
                 }, "*")
             }
 
+            async function handleParagraphs(paragraphs, pick, remain) {
+                for (let paragraph of paragraphs) {
+                    let links = visit(pick.page).filter(title => !seen.has(title));
+
+                    if (links.length) {
+                        let link = any(links);
+                        seen.add(link);
+                        populateIndexEntries(seen);
+                        let next = await getfrom(asSlug(link), pick.sites);
+
+                        if (next && next.page) {
+                            addPageTitleToGraphviz(next);
+                            dot.push(joinTitlesDot(pick, next));
+                            all.push(next);
+                            window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`;
+                            pick = next;
+                        } else {
+                            window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`;
+                        }
+                    } else {
+                        handleNoLinks(pick);
+                    }
+                }
+            }
+
             window.dostart = async function (event) {
                 done = Date.now() + 10000
                 window.result.innerText = ''
 
-                // Check if a start entry is selected
                 const selectedStartEntry = document.getElementById('indexEntries').value;
-                if (selectedStartEntry) {
-                    // Set the start entry based on the selected entry
-                    pick = all.find(entry => entry.page.title === selectedStartEntry);
-                } else {
-                    // Use the default start entry
-                    pick = all[0];
-                }
-
-                seen = new Set([pick.page.title])
-                addPageTitleToGraphviz(pick)
+                const pick = selectedStartEntry ? all.find(entry => entry.page.title === selectedStartEntry) : all[0];
+                seen = new Set([pick.page.title]);
+                addPageTitleToGraphviz(pick);
                 console.log('Start: pick.page', pick.page);
 
                 try {
                     while (Date.now() < done) {
                         let remain = Math.ceil((done - Date.now()) / 1000);
                         let paragraphs = filterParagraphs(pick.page);
-                        for (let paragraph of paragraphs) {
-                            let links = visit(pick.page).filter(title => !seen.has(title))
-                            if (links.length) {
-                                let link = any(links)
-                                seen.add(link)
-                                populateIndexEntries(seen)
-                                let next = await getfrom(asSlug(link), pick.sites)
-                                if (next && next.page) {
-                                    addPageTitleToGraphviz(next)
-
-                                    // Create relations, arrows, between titles already introduced
-                                    dot.push(joinTitlesDot(pick, next))
-
-                                    all.push(next)
-                                    window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
-                                    pick = next
-                                } else {
-                                    window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
-                                }
-                            } else {
-                                all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
-                                if (!all.length) break
-                                window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
-                                pick = any(all) // can't find new link on page
-                            }
-                        }
+                        await handleParagraphs(paragraphs, pick, remain); // await ?
                     }
-                }
-                catch (err) {
-                    window.result.innerHTML += `
-  ${err.message}
-  ${err.stack}`
+                } catch (err) {
+                    window.result.innerHTML += `${err.message}\n${err.stack}`;
                 }
 
-                window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n")
-                let dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
-                let story = [
+                displayResultSummary();
+            };
+
+            function handleNoLinks(pick) {
+                all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title));
+                if (!all.length) {
+                    window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`;
+                    return true; // Indicates that the loop should break
+                }
+                pick = any(all); // can't find new link on page
+                return false; // Indicates that the loop should continue
+            }
+
+            function displayResultSummary(event) {
+                window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n");
+                const dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`;
+                const story = [
                     { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },
                     { type: 'graphviz', text: dotText }
-                ]
-
-                openSpeedBotJourney(story, event.shiftKey);
+                ];
+                openSpeedBotJourney(story, event && event.shiftKey); // Check if event is defined before accessing shiftKey
             }
 
             function any(array) {
