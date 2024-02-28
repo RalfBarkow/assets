@@ -289,8 +289,16 @@
                 done = Date.now() + 10000
                 window.result.innerText = ''
 
+                // Check if a start entry is selected
                 const selectedStartEntry = document.getElementById('indexEntries').value;
-                const pick = selectedStartEntry ? all.find(entry => entry.page.title === selectedStartEntry) : all[0];
+                if (selectedStartEntry) {
+                    // Set the start entry based on the selected entry
+                    pick = all.find(entry => entry.page.title === selectedStartEntry);
+                } else {
+                    // Use the default start entry
+                    pick = all[0];
+                }
+
                 seen = new Set([pick.page.title]);
                 addPageTitleToGraphviz(pick);
                 console.log('Start: pick.page', pick.page);
