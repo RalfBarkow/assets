@@ -7,313 +7,314 @@
 <pre id="result"></pre>
 <script type="module">
 
-    import { visit, getfrom, sitemaps } from './telling.js'
-    import { open, context } from 'http://code.fed.wiki/assets/v1/frame.js'
-    import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';
+ // Import necessary modules and classes
+ import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';
+ import { visit, getfrom, sitemaps } from './telling.js'
+ import { open, context } from 'http://code.fed.wiki/assets/v1/frame.js'
 
-    const graph = new Graph();
-    const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
-    const any = list => list[Math.floor(Math.random() * list.length)]
-    const hsv = hue => `"${(hue % 1).toFixed(3)} 0.2 1.0"`
-    const quote = title => `"${title.replace(/ +/g, '\\n')}"`
+ const graph = new Graph();
+ const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
+ const any = list => list[Math.floor(Math.random() * list.length)]
+ const hsv = hue => `"${(hue % 1).toFixed(3)} 0.2 1.0"`
+ const quote = title => `"${title.replace(/ +/g, '\\n')}"`
 
-    let done = Date.now() + 10000
+ let done = Date.now() + 10000
 
-    let all = [await getfrom('a', ['wiki.ralfbarkow.ch'])]
-    let reference = (await context()).page.story.find(item => item.type == 'reference')
-    if (reference) {
-        all = [await getfrom(reference.slug, [reference.site])]
-    }
-    window.startat.innerText = all[0].page.title
-    let pick = all[0]
-    let seen = new Set([pick.page.title])
-    let dot = []
-    let hue = 0.5001
-    let color = {} // site => hsv
+ let all = [await getfrom('a', ['wiki.ralfbarkow.ch'])]
+ let reference = (await context()).page.story.find(item => item.type == 'reference')
+ if (reference) {
+     all = [await getfrom(reference.slug, [reference.site])]
+ }
+ window.startat.innerText = all[0].page.title
+ let pick = all[0]
+ let seen = new Set([pick.page.title])
+ let dot = []
+ let hue = 0.5001
+ let color = {} // site => hsv
 
-    populateIndexEntries(seen)
+ populateIndexEntries(seen)
 
-    function addPageTitleToGraphviz(pick) {
-        console.log("addPageTitleToGraphviz reached")
+ function addPageTitleToGraphviz(pick) {
+     console.log("addPageTitleToGraphviz reached")
 
-        let title = pick.page.title
-        let site = pick.site
-        let sites = pick.sites
-        color[site] ||= hsv(hue += 0.111)
+     let title = pick.page.title
+     let site = pick.site
+     let sites = pick.sites
+     color[site] ||= hsv(hue += 0.111)
 
-        dot.push(addTitleDot(title, site, sites, color));
-        /*
-           Ward is introducing page titles to Graphviz.
-           This is where he associates a color
-           to be used where ever he mentions that title.
-         */
-    }
+     dot.push(addTitleDot(title, site, sites, color));
+     /*
+        Ward is introducing page titles to Graphviz.
+        This is where he associates a color
+        to be used where ever he mentions that title.
+      */
+ }
 
-    function addTitleDot(title, site, sites, color) {
+ function addTitleDot(title, site, sites, color) {
 
-        const nodeProperties = {
-            tooltip: `${site}\n\n${sites.join("\n")}`,
-            fillcolor: color[site]
-        };
+     const nodeProperties = {
+         tooltip: `${site}\n\n${sites.join("\n")}`,
+         fillcolor: color[site]
+     };
 
-        addTitle(title, nodeProperties);
+     addTitle(title, nodeProperties);
 
-        // Construct the DOT node string with the extracted color
-        return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
-        /*
-           Ward introduced "dot" and "quote" nine years ago.
-           See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-         */
-    }
+     // Construct the DOT node string with the extracted color
+     return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
+     /*
+        Ward introduced "dot" and "quote" nine years ago.
+        See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
+ }
 
-    function nodeIndex(title) {
-        console.log("nodeIndex reached");
+ function nodeIndex(title) {
+     console.log("nodeIndex reached");
 
-        // Check if the node already exists in the graph
-        const nodeId = graph.nodes.findIndex(node => node.type === title);
-        return nodeId;
-    }
+     // Check if the node already exists in the graph
+     const nodeId = graph.nodes.findIndex(node => node.type === title);
+     return nodeId;
+ }
 
-    function addTitle(title, nodeProperties) {
-        console.log("addTitle reached");
+ function addTitle(title, nodeProperties) {
+     console.log("addTitle reached");
 
-        // Check if the node already exists
-        const foundNodeId = nodeIndex(title);
+     // Check if the node already exists
+     const foundNodeId = nodeIndex(title);
 
-        if (foundNodeId !== -1) {
-            console.log(`Node with title '${title}' (${foundNodeId}) already exists in the graph.`);
-            return foundNodeId;
-        }
+     if (foundNodeId !== -1) {
+         console.log(`Node with title '${title}' (${foundNodeId}) already exists in the graph.`);
+         return foundNodeId;
+     }
 
-        // Add the node to the graph
-        const newNodeId = graph.addNode(title, 0, 0, nodeProperties);
+     // Add the node to the graph
+     const newNodeId = graph.addNode(title, 0, 0, nodeProperties);
 
-        // Check if the node was successfully added
-        if (!newNodeId) return null;
+     // Check if the node was successfully added
+     if (!newNodeId) return null;
 
-        console.log(`Node "${title}" (${newNodeId}) added`);
-        serializeGraphAsJSONL(graph);
-        console.log("addTitle returns new nodeId ", newNodeId);
-        return newNodeId;
-    }
+     console.log(`Node "${title}" (${newNodeId}) added`);
+     serializeGraphAsJSONL(graph);
+     console.log("addTitle returns new nodeId ", newNodeId);
+     return newNodeId;
+ }
 
-    // Serialize the entire Graph object as one JSON line in a JSONL stream
-    function serializeGraphAsJSONL(graph) {
-        console.log("serializeGraphAsJSONL reached")
+ // Serialize the entire Graph object as one JSON line in a JSONL stream
+ function serializeGraphAsJSONL(graph) {
+     console.log("serializeGraphAsJSONL reached")
 
-        broadcast(JSON.stringify(graph) + '\n');
-    }
+     broadcast(JSON.stringify(graph) + '\n');
+ }
 
-    //postMessage
-    function broadcast(graph) {
-        console.log("broadcast reached")
+ //postMessage
+ function broadcast(graph) {
+     console.log("broadcast reached")
 
-        const targetOrigin = "*" // "*" indicates that the message can be received from any origin
+     const targetOrigin = "*" // "*" indicates that the message can be received from any origin
 
-        // Post a message to the parent window
-        window.parent.postMessage(
-            // message
-            // See: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
-            {
-                action: "publishSourceData", // graphStream
-                name: "graph",
-                sourceData: { graph }
-            },
-            targetOrigin // optional
-        );
-    }
+     // Post a message to the parent window
+     window.parent.postMessage(
+         // message
+         // See: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+         {
+             action: "publishSourceData", // graphStream
+             name: "graph",
+             sourceData: { graph }
+         },
+         targetOrigin // optional
+     );
+ }
 
-    function joinTitlesDot(pick, next) {
-        joinTitles(pick, next);
-        return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
-        /*
-           Here Ward is emitting the literal string, " -> ",
-           with quoted titles on either side.
-           He prefers small words for variable names
-           when the variable has been defined in close proximity.
-           The words "dot" and "quote" are an exception.
-           He has been using both words
-           with specific meaning for many years.
-           He wrote about this.
-           See: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-         */
-    }
+ function joinTitlesDot(pick, next) {
+     joinTitles(pick, next);
+     return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
+     /*
+        Here Ward is emitting the literal string, " -> ",
+        with quoted titles on either side.
+        He prefers small words for variable names
+        when the variable has been defined in close proximity.
+        The words "dot" and "quote" are an exception.
+        He has been using both words
+        with specific meaning for many years.
+        He wrote about this.
+        See: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+      */
+ }
 
-    function joinTitles(pick, next) {
-        console.log("joinTitles reached");
+ function joinTitles(pick, next) {
+     console.log("joinTitles reached");
 
-        const fromIndex = graph.nodes.findIndex(node => node.type === pick.page.title);
-        const toIndex = addTitle(next.page.title, {}); // Add next page title if it doesn't exist and get its index
-        if (toIndex !== -1) {
-            graph.addRel('fromPickToNext', fromIndex, toIndex, {});
-            console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${fromIndex}) -> to "${next.page.title}" (${toIndex})`);
-            serializeGraphAsJSONL(graph);
-        }
-    }
+     const fromIndex = graph.nodes.findIndex(node => node.type === pick.page.title);
+     const toIndex = addTitle(next.page.title, {}); // Add next page title if it doesn't exist and get its index
+     if (toIndex !== -1) {
+         graph.addRel('fromPickToNext', fromIndex, toIndex, {});
+         console.log(`fromPickToNext: Relation added from "${pick.page.title}" (${fromIndex}) -> to "${next.page.title}" (${toIndex})`);
+         serializeGraphAsJSONL(graph);
+     }
+ }
 
-    function populateIndexEntries(seen) {
-        let indexEntries = seen
-        let select = document.getElementById('indexEntries')
+ function populateIndexEntries(seen) {
+     let indexEntries = seen
+     let select = document.getElementById('indexEntries')
 
-        // Clear existing options
-        select.innerHTML = '';
+     // Clear existing options
+     select.innerHTML = '';
 
-        indexEntries.forEach(entry => {
-            let option = document.createElement('option')
-            option.text = entry
-            select.add(option)
-        })
-    }
+     indexEntries.forEach(entry => {
+         let option = document.createElement('option')
+         option.text = entry
+         select.add(option)
+     })
+ }
 
-    function filterParagraphs(page) {
-        let _paragraphs = page.story.filter(item => item.type === 'paragraph');
-        populateParagraphEntries(_paragraphs, page.title)
-        return _paragraphs;
-    }
+ function filterParagraphs(page) {
+     let _paragraphs = page.story.filter(item => item.type === 'paragraph');
+     populateParagraphEntries(_paragraphs, page.title)
+     return _paragraphs;
+ }
 
-    function populateParagraphEntries(paragraphs, title) {
-        console.log("populateParagraphEntries reached");
+ function populateParagraphEntries(paragraphs, title) {
+     console.log("populateParagraphEntries reached");
 
-        let select = document.getElementById('paragraphEntries');
+     let select = document.getElementById('paragraphEntries');
 
-        // Clear existing options
-        select.innerHTML = '';
+     // Clear existing options
+     select.innerHTML = '';
 
-        // Get the id of a node named title
-        const pageId =
-            graph.nodes.findIndex(node => node.type === title);
+     // Get the id of a node named title
+     const pageId =
+         graph.nodes.findIndex(node => node.type === title);
 
-        paragraphs.forEach(entry => {
-            // Check if the relation already exists
-            const existingRel =
-                graph.rels.findIndex(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
-            if (existingRel !== -1) {
-                // Relation already exists
-                console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title "${title}" (${pageId}) already exists.`);
-            } else {
+     paragraphs.forEach(entry => {
+         // Check if the relation already exists
+         const existingRel =
+             graph.rels.findIndex(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
+         if (existingRel !== -1) {
+             // Relation already exists
+             console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title "${title}" (${pageId}) already exists.`);
+         } else {
 
-                // Relation does not exist, so add it
-                const paraId =
-                    graph.addNode(entry.id, { text: entry.text });
-                graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
-                console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title "${title}" (${pageId}) added to the graph.`);
-                serializeGraphAsJSONL(graph)
-            }
+             // Relation does not exist, so add it
+             const paraId =
+                 graph.addNode(entry.id, { text: entry.text });
+             graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
+             console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title "${title}" (${pageId}) added to the graph.`);
+             serializeGraphAsJSONL(graph)
+         }
 
-            // Create an option for the paragraph entry in the dropdown list
-            let optgroup = document.createElement('optgroup');
-            optgroup.label = entry.id;
+         // Create an option for the paragraph entry in the dropdown list
+         let optgroup = document.createElement('optgroup');
+         optgroup.label = entry.id;
 
-            let option = document.createElement('option')
-            option.value = entry.id;
-            option.text = entry.text
+         let option = document.createElement('option')
+         option.value = entry.id;
+         option.text = entry.text
 
-            //select.add(option)
-            optgroup.appendChild(option);
-            select.appendChild(optgroup);
-        })
-    }
+         //select.add(option)
+         optgroup.appendChild(option);
+         select.appendChild(optgroup);
+     })
+ }
 
-    function setStartEntry() {
-        const select = document.getElementById('indexEntries');
-        const selectedEntry = select.value;
-        console.log('Selected Entry:', selectedEntry);
+ function setStartEntry() {
+     const select = document.getElementById('indexEntries');
+     const selectedEntry = select.value;
+     console.log('Selected Entry:', selectedEntry);
 
-        // Find the selected entry in the `seen` Set
-        for (let entry of seen) {
-            if (entry === selectedEntry) {
-                // Update the start entry and display it
-                window.startat.innerText = entry;
-                console.log('Start Entry:', entry);
-                break;
-            }
-        }
-    }
+     // Find the selected entry in the `seen` Set
+     for (let entry of seen) {
+         if (entry === selectedEntry) {
+             // Update the start entry and display it
+             window.startat.innerText = entry;
+             console.log('Start Entry:', entry);
+             break;
+         }
+     }
+ }
 
-    // Attach the setStartEntry function to the change event of the select element
-    document.getElementById('indexEntries').addEventListener('change', setStartEntry);
-    document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
+ // Attach the setStartEntry function to the change event of the select element
+ document.getElementById('indexEntries').addEventListener('change', setStartEntry);
+ document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
 
 
-    window.doview = function (event) {
-        let [site, title] = event.target.innerText.split(' — ')
-        window.parent.postMessage({
-            action: "doInternalLink",
-            title,
-            site,
-            keepLineup: event.shiftKey
-        }, "*")
-    }
+ window.doview = function (event) {
+     let [site, title] = event.target.innerText.split(' — ')
+     window.parent.postMessage({
+         action: "doInternalLink",
+         title,
+         site,
+         keepLineup: event.shiftKey
+     }, "*")
+ }
 
-    window.dostart = async function (event) {
-        done = Date.now() + 10000
-        window.result.innerText = ''
+ window.dostart = async function (event) {
+     done = Date.now() + 10000
+     window.result.innerText = ''
 
-        // Check if a start entry is selected
-        const selectedStartEntry = document.getElementById('indexEntries').value;
-        if (selectedStartEntry) {
-            // Set the start entry based on the selected entry
-            pick = all.find(entry => entry.page.title === selectedStartEntry);
-        } else {
-            // Use the default start entry
-            pick = all[0];
-        }
+     // Check if a start entry is selected
+     const selectedStartEntry = document.getElementById('indexEntries').value;
+     if (selectedStartEntry) {
+         // Set the start entry based on the selected entry
+         pick = all.find(entry => entry.page.title === selectedStartEntry);
+     } else {
+         // Use the default start entry
+         pick = all[0];
+     }
 
-        seen = new Set([pick.page.title])
-        addPageTitleToGraphviz(pick)
-        console.log('Start: pick.page', pick.page);
+     seen = new Set([pick.page.title])
+     addPageTitleToGraphviz(pick)
+     console.log('Start: pick.page', pick.page);
 
-        try {
-            while (Date.now() < done) {
-                let remain = Math.ceil((done - Date.now()) / 1000);
-                let paragraphs = filterParagraphs(pick.page);
-                for (let paragraph of paragraphs) {
-                    let links = visit(pick.page).filter(title => !seen.has(title))
-                    if (links.length) {
-                        let link = any(links)
-                        seen.add(link)
-                        populateIndexEntries(seen)
-                        let next = await getfrom(asSlug(link), pick.sites)
-                        if (next && next.page) {
-                            addPageTitleToGraphviz(next)
+     try {
+         while (Date.now() < done) {
+             let remain = Math.ceil((done - Date.now()) / 1000);
+             let paragraphs = filterParagraphs(pick.page);
+             for (let paragraph of paragraphs) {
+                 let links = visit(pick.page).filter(title => !seen.has(title))
+                 if (links.length) {
+                     let link = any(links)
+                     seen.add(link)
+                     populateIndexEntries(seen)
+                     let next = await getfrom(asSlug(link), pick.sites)
+                     if (next && next.page) {
+                         addPageTitleToGraphviz(next)
 
-                            // Create relations, arrows, between titles already introduced
-                            dot.push(joinTitlesDot(pick, next))
+                         // Create relations, arrows, between titles already introduced
+                         dot.push(joinTitlesDot(pick, next))
 
-                            all.push(next)
-                            window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
-                            pick = next
-                        } else {
-                            window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
-                        }
-                    } else {
-                        all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
-                        if (!all.length) break
-                        window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
-                        pick = any(all) // can't find new link on page
-                    }
-                }
-            }
-        }
-        catch (err) {
-            window.result.innerHTML += `
+                         all.push(next)
+                         window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\n`
+                         pick = next
+                     } else {
+                         window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`
+                     }
+                 } else {
+                     all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
+                     if (!all.length) break
+                     window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
+                     pick = any(all) // can't find new link on page
+                 }
+             }
+         }
+     }
+     catch (err) {
+         window.result.innerHTML += `
   ${err.message}
   ${err.stack}`
-        }
+     }
 
-        window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n")
-        let dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
-        let story = [
-            { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },
-            { type: 'graphviz', text: dotText }
-        ]
+     window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n")
+     let dotText = `digraph {\nnode [shape=box style=filled fillcolor=white]\n${dot.join("\n")}\n}`
+     let story = [
+         { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },
+         { type: 'graphviz', text: dotText }
+     ]
 
-        openSpeedBotJourney(story, event.shiftKey);
-    }
+     openSpeedBotJourney(story, event.shiftKey);
+ }
 
-    function openSpeedBotJourney(story, shiftKey) {
-        open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
-    }
+ function openSpeedBotJourney(story, shiftKey) {
+     open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
+ }
 
 </script>
 </body>
