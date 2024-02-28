@@ -9,9 +9,9 @@
 
 <body>
     <p>
-        <select id="indexEntries"></select>
-        <select id="paragraphEntries"></select>
-        <button onclick=dostart(event)>start</button>
+        <label for="indexEntries">Page:</label><select id="indexEntries"></select>
+        <label for="paragraphEntries">Paragraph:</label><select id="paragraphEntries"></select>
+        <button onclick=dostart(event) type="submit">start</button>
         <span id=startat></span>
     </p>
     <pre id="result"></pre>
@@ -50,7 +50,6 @@
                 }
 
                 window.startat.innerText = all[0].page.title;
-
             }
 
             // Private function to add page title to graphviz
@@ -87,6 +86,11 @@
                 }
             }
 
+            function quote(title) {
+                // const quote = title => `"${title.replace(/ +/g,'\\n')}"`
+                return `"${title.replace(/ +/g, '\\n')}"`;
+            }
+
             function addTitleDot(title, site, sites, color) {
 
                 const nodeProperties = {
@@ -96,12 +100,9 @@
 
                 addTitle(title, nodeProperties);
 
-                //const quote = title => `"${title.replace(/ +/g, '\\n')}"`
-
                 // Construct the DOT node string with the extracted color
                 return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
                 /*
-                   Ward introduced "dot" and "quote" nine years ago.
                    See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
                  */
             }
@@ -144,7 +145,7 @@
                 broadcast(JSON.stringify(graph) + '\n');
             }
 
-            //postMessage
+            // postMessage
             function broadcast(graph) {
                 console.log("broadcast reached")
 
@@ -153,7 +154,7 @@
                 // Post a message to the parent window
                 window.parent.postMessage(
                     // message
-                    // See: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+                    // See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
                     {
                         action: "publishSourceData", // graphStream
                         name: "graph",
@@ -167,15 +168,7 @@
                 joinTitles(pick, next);
                 return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
                 /*
-                   Here Ward is emitting the literal string, " -> ",
-                   with quoted titles on either side.
-                   He prefers small words for variable names
-                   when the variable has been defined in close proximity.
-                   The words "dot" and "quote" are an exception.
-                   He has been using both words
-                   with specific meaning for many years.
-                   He wrote about this.
-                   See: http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+                   See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
                  */
             }
 
@@ -340,11 +333,6 @@
                 return title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase();
             }
 
-            function quote(title) {
-                // const quote = title => `"${title.replace(/ +/g,'\\n')}"`
-                return `"${title.replace(/ +/g, '\\n')}"`;
-            }
-
             function openSpeedBotJourney(story, shiftKey) {
                 open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
             }
@@ -355,8 +343,6 @@
                 // Attach setStartEntry function to the change event of the select element
                 document.getElementById('indexEntries').addEventListener('change', setStartEntry);
                 document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
-                // Start the application logic
-                // ...
             }
 
             // Public API
