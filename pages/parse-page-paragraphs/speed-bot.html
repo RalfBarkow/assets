@@ -307,7 +307,7 @@
                     while (Date.now() < done) {
                         let remain = Math.ceil((done - Date.now()) / 1000);
                         let paragraphs = filterParagraphs(pick.page);
-                        await handleParagraphs(paragraphs, pick, remain); // await ?
+                        await handleParagraphs(paragraphs, pick, remain);
                     }
                 } catch (err) {
                     window.result.innerHTML += `${err.message}\n${err.stack}`;
