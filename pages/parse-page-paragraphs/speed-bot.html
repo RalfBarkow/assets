@@ -181,7 +181,7 @@
 
                 // Add the node to the graph
                 const newNodeId = addNode(title, nodeProperties);
-                
+
                 return newNodeId;
             }
 
@@ -338,6 +338,8 @@
             }
 
             function openSpeedBotJourney(story, shiftKey) {
+                console.log("openSpeedBotJourney reached")
+                
                 open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
             }
 
