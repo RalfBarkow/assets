@@ -107,63 +107,6 @@
                  */
             }
 
-            function nodeIndex(title) {
-                console.log("nodeIndex reached");
-
-                // Check if the node already exists in the graph
-                const nodeId = graph.nodes.findIndex(node => node.type === title);
-                return nodeId;
-            }
-
-            function addTitle(title, nodeProperties) {
-                console.log("addTitle reached");
-
-                // Check if the node already exists
-                const foundNodeId = nodeIndex(title);
-
-                if (foundNodeId !== -1) {
-                    console.log(`Node with title '${title}' (${foundNodeId}) already exists`);
-                    return foundNodeId;
-                }
-
-                // Add the node to the graph
-                const newNodeId = graph.addNode(title, 0, 0, nodeProperties);
-
-                // Check if the node was successfully added
-                if (!newNodeId) return null;
-
-                console.log(`Node "${title}" (${newNodeId}) added`);
-                serializeGraphAsJSONL(graph);
-                console.log("addTitle returns new nodeId ", newNodeId);
-                return newNodeId;
-            }
-
-            // Serialize the entire Graph object as one JSON line in a JSONL stream
-            function serializeGraphAsJSONL(graph) {
-                console.log("serializeGraphAsJSONL reached")
-
-                broadcast(JSON.stringify(graph) + '\n');
-            }
-
-            // postMessage
-            function broadcast(graph) {
-                console.log("broadcast reached")
-
-                const targetOrigin = "*" // "*" indicates that the message can be received from any origin
-
-                // Post a message to the parent window
-                window.parent.postMessage(
-                    // message
-                    // See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
-                    {
-                        action: "publishSourceData", // graphStream
-                        name: "graph",
-                        sourceData: { graph }
-                    },
-                    targetOrigin // optional
-                );
-            }
-
             function joinTitlesDot(pick, next) {
                 joinTitles(pick, next);
                 return `${quote(pick.page.title)} -> ${quote(next.page.title)}`
@@ -199,9 +142,59 @@
             }
 
             function filterParagraphs(page) {
+                console.log("filterParagraphs reached")
+
                 let _paragraphs = page.story.filter(item => item.type === 'paragraph');
                 populateParagraphEntries(_paragraphs, page.title)
                 return _paragraphs;
+            }
+
+            function nodeTitleIndex(title) {
+                console.log("nodeIndex reached");
+
+                // Check if the node already exists in the graph
+                const nodeId = graph.nodes.findIndex(node => node.type === title);
+                console.log(`nodeTitleIndex: nodeId ${nodeId}`);
+                return nodeId;
+            }
+
+            function addTitle(title, nodeProperties) {
+                console.log("addTitle reached");
+
+                // Check if the node already exists
+                const foundNodeTitleId = nodeTitleIndex(title);
+
+                if (foundNodeTitleId !== -1) {
+                    console.log(`Node with title '${title}' (${foundNodeTitleId}) already exists`);
+                    return foundNodeTitleId;
+                }
+
+                // Add the node to the graph
+                const newNodeId = graph.addNode(title, 0, 0, nodeProperties);
+
+                // Check if the node was successfully added
+                if (!newNodeId) return null;
+
+                console.log(`Node "${title}" (${newNodeId}) added`);
+                serializeGraphAsJSONL(graph);
+                console.log("addTitle returns new nodeId ", newNodeId);
+                return newNodeId;
+            }
+
+            function relIndex(id, pageId) {
+                console.log("relIndex reached");
+
+                // Check if the rel already exists in the graph
+                const relId = graph.rels.findIndex(rel => rel.type === 'fromParaToPage' && rel.from === id && rel.to === pageId);
+                return relId;
+            }
+
+            function nodeParaIndex(id){
+                console.log("nodeParaIndex reached");
+
+                const nodeId = graph.nodes.findIndex(node => node.type === id);
+                console.log(`nodeParaIndex: nodeId ${nodeId}`);
+                return nodeId;
             }
 
             function populateParagraphEntries(paragraphs, title) {
@@ -213,16 +206,20 @@
                 select.innerHTML = '';
 
                 // Get the id of a node named title
-                const pageId =
-                    graph.nodes.findIndex(node => node.type === title);
+                const pageId = nodeTitleIndex(title);
+                
 
                 paragraphs.forEach(entry => {
-                    // Check if the relation already exists
-                    const existingRel =
-                        graph.rels.findIndex(rel => rel.type === 'fromParaToPage' && rel.from === entry.id && rel.to === title);
-                    if (existingRel !== -1) {
+
+                    // Check the id of the paragraph node 
+                    const foundParaNodeId = nodeParaIndex(entry.id);
+
+                    // Check if the relation exists
+                    const foundRelId = relIndex(foundParaNodeId, pageId);
+                    console.log(`foundRelId: ${foundRelId} (for paragraph ${entry.id})`);
+                    if (foundRelId !== -1) {
                         // Relation already exists
-                        console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${existingRel}) and title "${title}" (${pageId}) already exists.`);
+                        console.log(`fromParaToPage: Relation (${foundRelId}) between paragraph ${entry.id} and title "${title}" (${pageId}) already exists.`);
                     } else {
 
                         // Relation does not exist, so add it
@@ -338,6 +335,32 @@
 
             function openSpeedBotJourney(story, shiftKey) {
                 open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
+            }
+
+            // Serialize the entire Graph object as one JSON line in a JSONL stream
+            function serializeGraphAsJSONL(graph) {
+                console.log("serializeGraphAsJSONL reached")
+
+                broadcast(JSON.stringify(graph) + '\n');
+            }
+
+            // postMessage
+            function broadcast(graph) {
+                console.log("broadcast reached")
+
+                const targetOrigin = "*" // "*" indicates that the message can be received from any origin
+
+                // Post a message to the parent window
+                window.parent.postMessage(
+                    // message
+                    // See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+                    {
+                        action: "publishSourceData", // graphStream
+                        name: "graph",
+                        sourceData: { graph }
+                    },
+                    targetOrigin // optional
+                );
             }
 
             // Public method to start the application
