@@ -33,11 +33,13 @@
             let dot;
             let hue;
             let color;
-            let done; // Initialize done here
+            let nodeShape; 
+            let done;
 
             // Initialize the application
             async function init() {
                 graph = new Graph();
+                nodeShape = "ellipse"; // Use ellipse for the first title node, box for others
                 color = {};
                 dot = [];
                 hue = 0.5001;
@@ -92,7 +94,7 @@
                 const hsv = hue => `"${(hue % 1).toFixed(3)} 0.2 1.0"`
                 color[site] ||= hsv(hue += 0.111)
 
-                dot.push(addTitleDot(title, site, sites, color));
+                dot.push(addTitleDot(title, site, sites, color, nodeShape));
                 /*
                    Ward is introducing page titles to Graphviz.
                    This is where he associates a color
@@ -100,25 +102,39 @@
                  */
             }
 
+            function nodeTitleIndex(title) {
+                console.log("nodeIndex reached");
+
+                // Check if the node already exists in the graph
+                const nodeId = graph.nodes.findIndex(node => node.type === title);
+                console.log(`nodeTitleIndex: title id is ${nodeId}`);
+                return nodeId;
+            }
+
             function quote(title) {
                 // const quote = title => `"${title.replace(/ +/g,'\\n')}"`
                 return `"${title.replace(/ +/g, '\\n')}"`;
+                /*
+                   See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
+                 */
             }
 
             function addTitleDot(title, site, sites, color) {
 
-                const nodeProperties = {
-                    tooltip: `${site}\n\n${sites.join("\n")}`,
-                    fillcolor: color[site]
-                };
+              let nodeShape_ = nodeShape;
 
-                addTitle(title, nodeProperties);
+              const nodeProperties = {
+                tooltip: `${site}\n\n${sites.join("\n")}`,
+                fillcolor: color[site],
+                shape: `${nodeShape_}`
+              };
+              addTitle(title, nodeProperties);
 
-                // Construct the DOT node string with the extracted color
-                return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]}]`;
-                /*
-                   See http://gd.fed.wiki/view/dump-a-structure-into-graphviz
-                 */
+              // Modify nodeShape for subsequent nodes
+              nodeShape = "box";
+
+              // Construct the DOT node string with the extracted color
+              return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]} shape=${nodeShape_}]`;
             }
 
             function joinTitlesDot(pick, next) {
@@ -144,18 +160,9 @@
             function filterParagraphs(page) {
                 console.log("filterParagraphs reached")
 
-                let _paragraphs = page.story.filter(item => item.type === 'paragraph');
-                populateParagraphEntries(_paragraphs, page.title)
-                return _paragraphs;
-            }
-
-            function nodeTitleIndex(title) {
-                console.log("nodeIndex reached");
-
-                // Check if the node already exists in the graph
-                const nodeId = graph.nodes.findIndex(node => node.type === title);
-                console.log(`nodeTitleIndex: nodeId ${nodeId}`);
-                return nodeId;
+                let paragraphs = page.story.filter(item => item.type === 'paragraph');
+                populateParagraphEntries(paragraphs, page.title)
+                return paragraphs;
             }
 
             function addNode(node, nodeProperties){
@@ -289,6 +296,7 @@
             window.dostart = async function (event) {
                 done = Date.now() + 10000
                 window.result.innerText = ''
+                nodeShape = "ellipse"; // Use ellipse for the first title node, box for others
 
                 // Check if a start entry is selected
                 const selectedStartEntry = document.getElementById('indexEntries').value;
@@ -339,7 +347,7 @@
 
             function openSpeedBotJourney(story, shiftKey) {
                 console.log("openSpeedBotJourney reached")
-                
+
                 open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
             }
 
