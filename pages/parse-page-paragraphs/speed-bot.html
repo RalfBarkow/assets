@@ -94,7 +94,7 @@
                 const hsv = hue => `"${(hue % 1).toFixed(3)} 0.2 1.0"`
                 color[site] ||= hsv(hue += 0.111)
 
-                dot.push(addTitleDot(title, site, sites, color, nodeShape));
+                dot.push(addTitleDot(title, site, sites, color));
                 /*
                    Ward is introducing page titles to Graphviz.
                    This is where he associates a color
@@ -120,22 +120,21 @@
             }
 
             function addTitleDot(title, site, sites, color) {
+                let nodeShape_ = nodeShape;
 
-              let nodeShape_ = nodeShape;
-
-              const nodeProperties = {
-                tooltip: `${site}\n\n${sites.join("\n")}`,
-                fillcolor: color[site],
-                shape: `${nodeShape_}`
-              };
+                const nodeProperties = {
+                    tooltip: `${site}\n\n${sites.join("\n")}`,
+                    fillcolor: color[site],
+                    shape: `${nodeShape_}`
+                };
               
-              addTitle(title, nodeProperties);
+                addTitle(title, nodeProperties);
 
-              // Modify nodeShape for subsequent nodes
-              nodeShape = "box";
+                // Modify nodeShape for subsequent nodes
+                nodeShape = "box";
 
-              // Construct the DOT node string with the extracted color
-              return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]} shape=${nodeShape_}]`;
+                // Construct the DOT node string with the extracted color
+                return `${quote(title)} [ tooltip="${site}\n\n${sites.join("\n")}" fillcolor=${color[site]} shape=${nodeShape_}]`;
             }
 
             function joinTitlesDot(pick, next) {
