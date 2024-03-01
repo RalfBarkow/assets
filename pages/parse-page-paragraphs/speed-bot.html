@@ -52,6 +52,36 @@
                 window.startat.innerText = all[0].page.title;
             }
 
+            function setStartEntry() {
+                const select = document.getElementById('indexEntries');
+                const selectedEntry = select.value;
+                console.log('Selected Entry:', selectedEntry);
+
+                // Find the selected entry in the `seen` Set
+                for (let entry of seen) {
+                    if (entry === selectedEntry) {
+                        // Update the start entry and display it
+                        window.startat.innerText = entry;
+                        console.log('Start Entry:', entry);
+                        break;
+                    }
+                }
+            }
+
+            function populateIndexEntries(seen) {
+                let indexEntries = seen
+                let select = document.getElementById('indexEntries')
+
+                // Clear existing options
+                select.innerHTML = '';
+
+                indexEntries.forEach(entry => {
+                    let option = document.createElement('option')
+                    option.text = entry
+                    select.add(option)
+                })
+            }
+
             // Private function to add page title to graphviz
             function addPageTitleToGraphviz(pick) {
                 console.log("addPageTitleToGraphviz reached")
@@ -68,22 +98,6 @@
                    This is where he associates a color
                    to be used where ever he mentions that title.
                  */
-            }
-
-            function setStartEntry() {
-                const select = document.getElementById('indexEntries');
-                const selectedEntry = select.value;
-                console.log('Selected Entry:', selectedEntry);
-
-                // Find the selected entry in the `seen` Set
-                for (let entry of seen) {
-                    if (entry === selectedEntry) {
-                        // Update the start entry and display it
-                        window.startat.innerText = entry;
-                        console.log('Start Entry:', entry);
-                        break;
-                    }
-                }
             }
 
             function quote(title) {
@@ -127,20 +141,6 @@
                 }
             }
 
-            function populateIndexEntries(seen) {
-                let indexEntries = seen
-                let select = document.getElementById('indexEntries')
-
-                // Clear existing options
-                select.innerHTML = '';
-
-                indexEntries.forEach(entry => {
-                    let option = document.createElement('option')
-                    option.text = entry
-                    select.add(option)
-                })
-            }
-
             function filterParagraphs(page) {
                 console.log("filterParagraphs reached")
 
@@ -158,6 +158,16 @@
                 return nodeId;
             }
 
+            function addNode(node, nodeProperties){
+              console.log("addNode reached");
+
+              // Add the node to the graph
+                const newNodeId = graph.addNode(node, 0, 0, nodeProperties);
+                console.log(`Node "${node}" (${newNodeId}) added`);
+                serializeGraphAsJSONL(graph);
+                return newNodeId;
+            }
+
             function addTitle(title, nodeProperties) {
                 console.log("addTitle reached");
 
@@ -170,14 +180,8 @@
                 }
 
                 // Add the node to the graph
-                const newNodeId = graph.addNode(title, 0, 0, nodeProperties);
-
-                // Check if the node was successfully added
-                if (!newNodeId) return null;
-
-                console.log(`Node "${title}" (${newNodeId}) added`);
-                serializeGraphAsJSONL(graph);
-                console.log("addTitle returns new nodeId ", newNodeId);
+                const newNodeId = addNode(title, nodeProperties);
+                
                 return newNodeId;
             }
 
