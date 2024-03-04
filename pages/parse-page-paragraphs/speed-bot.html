@@ -33,7 +33,7 @@
             let dot;
             let hue;
             let color;
-            let nodeShape; 
+            let nodeShape;
             let done;
 
             // Initialize the application
@@ -127,7 +127,7 @@
                     fillcolor: color[site],
                     shape: `${nodeShape_}`
                 };
-              
+
                 addTitle(title, nodeProperties);
 
                 // Modify nodeShape for subsequent nodes
@@ -218,11 +218,10 @@
 
                 // Get the id of a node named title
                 const pageId = nodeTitleIndex(title);
-                
 
                 paragraphs.forEach(entry => {
 
-                    // Check the id of the paragraph node 
+                    // Check the id of the paragraph node
                     const foundParaNodeId = nodeParaIndex(entry.id);
 
                     // Check if the relation exists
