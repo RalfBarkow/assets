@@ -219,34 +219,36 @@
                 // Get the id of a node named title
                 const pageId = nodeTitleIndex(title);
 
-                paragraphs.forEach(entry => {
+                paragraphs.forEach(paragraph => {
 
                     // Check the id of the paragraph node
-                    const foundParaNodeId = nodeParaIndex(entry.id);
+                    const foundParaNodeId = nodeParaIndex(paragraph.id);
 
                     // Check if the relation exists
                     const foundRelId = relIndex(foundParaNodeId, pageId);
-                    console.log(`foundRelId: ${foundRelId} (for paragraph ${entry.id})`);
+                    console.log(`foundRelId: ${foundRelId} (for paragraph ${paragraph.id})`);
                     if (foundRelId !== -1) {
                         // Relation already exists
-                        console.log(`fromParaToPage: Relation (${foundRelId}) between paragraph ${entry.id} and title "${title}" (${pageId}) already exists.`);
+                        console.log(`fromParaToPage: Relation (${foundRelId}) between paragraph ${paragraph.id} and title "${title}" (${pageId}) already exists.`);
                     } else {
 
                         // Relation does not exist, so add it
                         const paraId =
-                            graph.addNode(entry.id, { text: entry.text });
-                        graph.addRel('fromParaToPage', paraId, pageId, entry.id, title, {});
-                        console.log(`fromParaToPage: Relation between paragraph ${entry.id} (${paraId}) and title "${title}" (${pageId}) added to the graph.`);
+                            graph.addNode(paragraph.id, { text: paragraph.text });
+                        graph.addRel('fromParaToPage', paraId, pageId, paragraph.id, title, {});
+                        console.log(`fromParaToPage: Relation between paragraph ${paragraph.id} (${paraId}) and title "${title}" (${pageId}) added to the graph.`);
+
+                        broadcastParagraph(paragraph)
                         serializeGraphAsJSONL(graph)
                     }
 
                     // Create an option for the paragraph entry in the dropdown list
                     let optgroup = document.createElement('optgroup');
-                    optgroup.label = entry.id;
+                    optgroup.label = paragraph.id;
 
                     let option = document.createElement('option')
-                    option.value = entry.id;
-                    option.text = entry.text
+                    option.value = paragraph.id;
+                    option.text = paragraph.text
 
                     //select.add(option)
                     optgroup.appendChild(option);
@@ -354,12 +356,12 @@
             function serializeGraphAsJSONL(graph) {
                 console.log("serializeGraphAsJSONL reached")
 
-                broadcast(JSON.stringify(graph) + '\n');
+                broadcastGraph(JSON.stringify(graph) + '\n');
             }
 
             // postMessage
-            function broadcast(graph) {
-                console.log("broadcast reached")
+            function broadcastGraph(graph) {
+                console.log("broadcastGraph reached")
 
                 const targetOrigin = "*" // "*" indicates that the message can be received from any origin
 
@@ -376,9 +378,27 @@
                 );
             }
 
-            // Public method to start the application
-            function start() {
-                init();
+            function broadcastParagraph(paragraph) {
+                console.log("broadcastParagraph reached")
+
+                const targetOrigin = "*" // "*" indicates that the message can be received from any origin
+
+                // Post a message to the parent window
+                window.parent.postMessage(
+                    // message
+                    // See https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+                    {
+                        action: "publishSourceData",
+                        name: "paragraph", // paragraphStream
+                        sourceData: { paragraph }
+                    },
+                    targetOrigin // optional
+                );
+            }
+
+                // Public method to start the application
+                function start() {
+                    init();
                 // Attach setStartEntry function to the change event of the select element
                 document.getElementById('indexEntries').addEventListener('change', setStartEntry);
                 document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
