@@ -396,11 +396,29 @@
                 );
             }
 
+            function loadGraph(jsonString){
+                console.log("loadGraph received:", jsonString);
+
+                // Parse the JSON string into a JavaScript object
+                const json = JSON.parse(jsonString);
+
+                const incoming = new Graph(json.nodes, json.rels);
+                console.log("incoming: ", incoming);
+
+                // broadcastGraph(graph);
+            }
+
             // Add event listener for message
             window.addEventListener('message', function (event) {
                 console.log('Message event received:', event);
+
                 const message = event.data;
+
                 // Handle message event here
+                if (message.action === 'graphStream') {
+                    loadGraph(message.graph);
+                }
+ 
             });
 
             // Public method to start the application
