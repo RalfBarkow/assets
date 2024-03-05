@@ -396,12 +396,21 @@
                 );
             }
 
-                // Public method to start the application
-                function start() {
-                    init();
-                // Attach setStartEntry function to the change event of the select element
-                document.getElementById('indexEntries').addEventListener('change', setStartEntry);
-                document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
+            // Add event listener for message
+            window.addEventListener('message', function (event) {
+                console.log('Message event received:', event);
+                const message = event.data;
+                // Handle message event here
+            });
+
+            // Public method to start the application
+            function start() {
+                init();
+
+            // Attach setStartEntry function to the change event of the select element
+            document.getElementById('indexEntries').addEventListener('change', setStartEntry);
+            document.getElementById('paragraphEntries').addEventListener('change', setStartEntry);
+
             }
 
             // Public API
