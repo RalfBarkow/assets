@@ -333,7 +333,7 @@
                     { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },
                     { type: 'graphviz', text: dotText }
                 ];
-                openSpeedBotJourney(story, event && event.shiftKey); // Check if event is defined before accessing shiftKey
+                openSpeedBotJourneyGhostPage(story, event && event.shiftKey); // Check if event is defined before accessing shiftKey
             }
 
             function any(array) {
@@ -346,8 +346,8 @@
                 return title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase();
             }
 
-            function openSpeedBotJourney(story, shiftKey) {
-                console.log("openSpeedBotJourney reached")
+            function openSpeedBotJourneyGhostPage(story, shiftKey) {
+                console.log("openSpeedBotJourneyGhostPage reached")
 
                 open({ title: "Speed Bot Journey", story }, shiftKey, Object.keys(color));
             }
@@ -397,16 +397,15 @@
                 );
             }
 
-            function graphStreamIncoming(message){
+            function graphStreamIncoming(message){ // message.graph
                 console.log("graphStreamIncoming reached");
-                // Is the function called twice in every case?
+                // Is the function called twice in every case? See graphStream
 
                 // Parse the JSON string into a JavaScript object
                 const json = JSON.parse(message);
 
                 const incomingGraph = new Graph(json.nodes, json.rels); // incoming broadcast
-                return incomingGraph;
-                //return message;
+                return incomingGraph; // return message as Graph;
             }
 
             // Compare the incoming broadcast of a graph with the outgoing broadcast
@@ -420,6 +419,16 @@
                 // Wait for the next incoming graph
                 const incomingGraph = await graphStreamIncoming(graph);
                 console.log("incomingGraph: ", incomingGraph);
+
+                /*
+                 * The graphStream function calls graphStreamIncoming twice:
+                 *
+                 *  - when awaiting the promise 
+                 *    returned by graphStreamIncoming(graph)
+                 *
+                 *  - and in the event listener for the 'message' event, 
+                 *    when the action is 'graphStream'
+                 */
 
             }
 
