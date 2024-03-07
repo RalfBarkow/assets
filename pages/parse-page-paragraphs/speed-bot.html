@@ -399,25 +399,20 @@
 
             function graphStreamIncoming(message){ // message.graph
                 console.log("graphStreamIncoming reached");
-                // Is the function called twice in every case? See graphStream
 
-                // Parse the JSON string into a JavaScript object
-                const json = JSON.parse(message);
-
-                const incomingGraph = new Graph(json.nodes, json.rels); // incoming broadcast
-                return incomingGraph; // return message as Graph;
+                return Graph.load(message);
             }
 
             // Compare the incoming broadcast of a graph with the outgoing broadcast
-            async function graphStream(graph) {
+            async function graphStream(jsonl) {
                 console.log("graphStream reached");
 
-                const json = JSON.parse(graph);
-                const outgoingGraph = new Graph(json.nodes, json.rels); // outgoing broadcast;
+                const json = JSON.parse(jsonl);
+                
+                const outgoingGraph = new Graph(json.nodes, json.rels); 
                 console.log("outgoingGraph: ", outgoingGraph);
 
-                // Wait for the next incoming graph
-                const incomingGraph = await graphStreamIncoming(graph);
+                const incomingGraph = await graphStreamIncoming(outgoingGraph);
                 console.log("incomingGraph: ", incomingGraph);
 
                 /*
