@@ -408,7 +408,7 @@
 
                 const json = JSON.parse(jsonl);
 
-                const outgoingGraph = new Graph(json.nodes, json.rels); 
+                const outgoingGraph = new Graph(json.nodes, json.rels);
                 console.log("outgoingGraph: ", outgoingGraph);
 
                 const incomingGraph = await graphStreamIncoming(outgoingGraph);
