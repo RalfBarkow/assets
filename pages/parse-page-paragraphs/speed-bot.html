@@ -359,7 +359,7 @@
                 broadcastGraph(JSON.stringify(graph) + '\n'); // outgoing broadcast
             }
 
-            function broadcastGraph(graph) {
+            function broadcastGraph(jsonl) {
                 console.log("broadcastGraph reached");
 
                 const targetOrigin = "*" // "*" indicates that the message can be received from any origin
@@ -371,12 +371,12 @@
                     {
                         action: "publishSourceData",
                         name: "graph", // graphStream
-                        sourceData: { graph }
+                        sourceData: { jsonl }
                     },
                     targetOrigin // optional
                 );
 
-                graphStream(graph); // outgoing broadcast 
+                graphStream(jsonl); // outgoing broadcast
             }
 
             function broadcastParagraph(paragraph) {
@@ -423,11 +423,14 @@
                 /*
                  * The graphStream function calls graphStreamIncoming twice:
                  *
-                 *  - when awaiting the promise 
+                 *  - when awaiting the promise
                  *    returned by graphStreamIncoming(graph)
                  *
-                 *  - and in the event listener for the 'message' event, 
+                 *  - and in the event listener for the 'message' event,
                  *    when the action is 'graphStream'
+                 *
+                 * The graphStream function is called by broadcastGraph
+                 * and the message event listener.
                  */
 
             }
