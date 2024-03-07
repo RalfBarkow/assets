@@ -375,7 +375,6 @@
                     },
                     targetOrigin // optional
                 );
-
                 graphStream(jsonl); // outgoing broadcast
             }
 
@@ -408,26 +407,12 @@
                 console.log("graphStream reached");
 
                 const json = JSON.parse(jsonl);
-                
+
                 const outgoingGraph = new Graph(json.nodes, json.rels); 
                 console.log("outgoingGraph: ", outgoingGraph);
 
                 const incomingGraph = await graphStreamIncoming(outgoingGraph);
                 console.log("incomingGraph: ", incomingGraph);
-
-                /*
-                 * The graphStream function calls graphStreamIncoming twice:
-                 *
-                 *  - when awaiting the promise
-                 *    returned by graphStreamIncoming(graph)
-                 *
-                 *  - and in the event listener for the 'message' event,
-                 *    when the action is 'graphStream'
-                 *
-                 * The graphStream function is called by broadcastGraph
-                 * and the message event listener.
-                 */
-
             }
 
             // Add event listener for message
