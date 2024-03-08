@@ -11,7 +11,7 @@
     <p>
         <label for="indexEntries">Page:</label><select id="indexEntries"></select>
         <label for="paragraphEntries">Paragraph:</label><select id="paragraphEntries"></select>
-        <button onclick=dostart(event) type="submit">start</button>
+        <button id="startButton" onclick=dostart(event) type="submit">start</button>
         <span id=startat></span>
     </p>
     <pre id="result"></pre>
@@ -65,6 +65,7 @@
                         // Update the start entry and display it
                         window.startat.innerText = entry;
                         console.log('Start Entry:', entry);
+                        enableStartButton();
                         break;
                     }
                 }
@@ -107,7 +108,7 @@
 
                 // Check if the node already exists in the graph
                 const nodeId = graph.nodes.findIndex(node => node.type === title);
-                console.log(`nodeTitleIndex: title id is ${nodeId}`);
+                console.log(`nodeTitleIndex: "${title}" (${nodeId})`);
                 return nodeId;
             }
 
@@ -182,7 +183,7 @@
                 const foundNodeTitleId = nodeTitleIndex(title);
 
                 if (foundNodeTitleId !== -1) {
-                    console.log(`Node with title '${title}' (${foundNodeTitleId}) already exists`);
+                    console.log(`Node with title "${title}" (${foundNodeTitleId}) already exists`);
                     return foundNodeTitleId;
                 }
 
@@ -294,9 +295,9 @@
                 }
             }
 
-            window.dostart = async function (event) {
-                done = Date.now() + 10000
-                window.result.innerText = ''
+            window.dostart = async function(event) {
+                done = Date.now() + 10000;
+                window.result.innerText = '';
                 nodeShape = "ellipse"; // Use ellipse for the first title node, box for others
 
                 // Check if a start entry is selected
@@ -309,22 +310,40 @@
                     pick = all[0];
                 }
 
-                seen = new Set([pick.page.title]);
-                addPageTitleToGraphviz(pick);
-                console.log('Start: pick.page', pick.page);
+                if (pick) {
+                    seen = new Set([pick.page.title]);
+                    addPageTitleToGraphviz(pick);
+                    console.log('Start: pick.page', pick.page);
 
-                try {
-                    while (Date.now() < done) {
-                        let remain = Math.ceil((done - Date.now()) / 1000);
-                        let paragraphs = filterParagraphs(pick.page);
-                        await handleParagraphs(paragraphs, pick, remain);
+                    try {
+                        while (Date.now() < done) {
+                            let remain = Math.ceil((done - Date.now()) / 1000);
+                            let paragraphs = filterParagraphs(pick.page);
+                            await handleParagraphs(paragraphs, pick, remain);
+                        }
+                    } catch (err) {
+                        window.result.innerHTML += `${err.message}\n${err.stack}`;
                     }
-                } catch (err) {
-                    window.result.innerHTML += `${err.message}\n${err.stack}`;
-                }
+                    displayResultSummary();
+                } else {
+                    console.log("End of the journey reached");
 
-                displayResultSummary();
+                    // Deactivate the Start Button
+                    document.getElementById('startButton').disabled = true;
+
+                    // Display an error message in the UI
+                    const errorMessage = 'The end of the journey has been reached.';
+                    window.result.innerHTML += `${errorMessage}\n`;
+                }
             };
+
+            function enableStartButton() {
+                const startButton = document.getElementById('startButton');
+                if (startButton) {
+                    startButton.removeAttribute('disabled');
+                }
+            }
+
 
             function displayResultSummary(event) {
                 window.result.innerHTML += "\n\n" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join("\n");
@@ -406,7 +425,7 @@
             async function graphStream(jsonl) {
                 console.log("graphStream reached");
 
-                const json = JSON.parse(jsonl);
+                const json = JSON.parse(jsonl.trim());
 
                 const outgoingGraph = new Graph(json.nodes, json.rels);
                 console.log("outgoingGraph: ", outgoingGraph);
@@ -423,7 +442,7 @@
 
                 // Handle message event here
                 if (message.action === 'graphStream') {
-                    graphStream(message);
+                    graphStream(message.jsonl);
                 }
             });
 
