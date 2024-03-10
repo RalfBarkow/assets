@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sodium Cell</title>
+</head>
+
+<body>
+    <p>
+        <button id="startButton" onclick=dostart(event) type="submit">start</button>
+        <span id=startat></span>
+    </p>
+    <pre id="result"></pre>
+    <script src="https://cdn.jsdelivr.net/npm/sodiumjs/dist/sodium.umd.min.js"></script>
+    <script type="module">
+
+        window.dostart = async function(event) {
+            //const c = new Cell(12);
+            var cell = new Sodium.Cell(12);
+            console.log("Cell: ", cell);
+        }
+
+    </script>
+</body>
+
+</html>
