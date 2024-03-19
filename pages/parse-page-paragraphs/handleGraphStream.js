@@ -7,7 +7,7 @@ function handleGraphStream(message, graphPromise) {
     console.log("handleGraphStream: ", graph);
 
     // Process the graph data as needed
-    const result = graph.search('match (n)');
+    const result = graph.search('match ()-[r]->()');
     console.log("(handleGraphStream) match: ", result);
 
     // Resolve the promise with the graph instance
