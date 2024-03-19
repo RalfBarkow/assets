@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Bot</title>
+    <title>Sodium FRP</title>
 </head>
 
 <body>
@@ -15,19 +15,18 @@
         <span id=startat></span>
     </p>
     <pre id="result"></pre>
+    <script src="https://cdn.jsdelivr.net/npm/sodiumjs/dist/sodium.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typescript-collections@1.3.3/dist/lib/index.min.js"></script>
     <script type="module">
 
         // Import necessary modules and classes
         import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';
         import { visit, getfrom, sitemaps } from './telling.js';
         import { open, context } from 'http://code.fed.wiki/assets/v1/frame.js';
-        import { recommend } from './recommend.js'; // Import the recommend function
-        import { tokenizeParagraph } from './tokenization.js';
-        import { computeProfile } from './profile.js';
-        import { compareProfiles } from './comparison.js';
+        import Button from './SButton.js';
 
         // Define a module for the application
-        const SpeedBotApp = (() => {
+        const SodiumApp = (() => {
             // Private variables and functions
             let graph;
             let all;
@@ -39,9 +38,33 @@
             let color;
             let nodeShape;
             let done;
+            let cell;
 
             // Initialize the application
             async function init() {
+                cell = new Sodium.Cell(12);
+                console.log("Cell: ", cell);
+
+                const startButton = new Button('Start');
+                console.log("Button: ", startButton);
+
+                Sodium.Transaction.run(() => {
+                    const value = new Sodium.CellLoop();
+                    //const label = new SLabel(value.map(i => i.toString()));
+
+                    const btnPlus = new Button("+");
+                    const btnMinus = new Button("-");
+
+                    const sDelta = btnPlus.sClicked.map(u => 1)
+                        .orElse(btnMinus.sClicked.map(u => -1));
+
+                    const sUpdate = sDelta.snapshot(value, (delta, _value) => {
+                        return delta + _value;
+                    }).filter(n => n >= 0);
+
+                    value.loop(sUpdate.hold(0));
+                });
+
                 graph = new Graph();
                 nodeShape = "ellipse"; // Use ellipse for the first title node, box for others
                 color = {};
@@ -466,7 +489,7 @@
         })();
 
         // Initialize and start the application
-        SpeedBotApp.start();
+        SodiumApp.start();
 
     </script>
 </body>
