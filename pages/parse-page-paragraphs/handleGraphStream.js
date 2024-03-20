@@ -12,5 +12,11 @@ function handleGraphStream(message, graphPromise) {
 
     // Resolve the promise with the graph instance
     graphPromise.resolve(graph);
+
+    // Create a new promise for the next graph update
+    graphPromise.promise = new Promise((resolve, reject) => {
+        graphPromise.resolve = resolve;
+        graphPromise.reject = reject;
+    });
 }
 export { handleGraphStream };
