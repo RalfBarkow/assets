@@ -72,7 +72,7 @@
                         window.startat.innerText = entry;
                         console.log('Start Entry:', entry);
                         enableStartButton();
-                        break;
+                        return entry;
                     }
                 }
             }
@@ -275,7 +275,11 @@
 
             async function handleParagraphs(paragraphs, pick, remain) {
                 for (let paragraph of paragraphs) {
-                    let links = visit(pick.page).filter(title => !seen.has(title));
+                    let links = new Set(visit(pick.page).filter(title => !seen.has(title))); // Convert to Set to eliminate duplicates
+
+                    if (!all.length) break; // Check if there are remaining pages to explore
+
+                    links = Array.from(links); // Convert back to array if needed
 
                     if (links.length) {
                         let link = any(links);
@@ -293,10 +297,9 @@
                             window.result.innerHTML += `  <span style="color:gray;">fail ${link}</span>\n`;
                         }
                     } else {
-                        all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title))
-                        if (!all.length) break
-                        window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`
-                        pick = any(all) // can't find new link on page
+                        all = all.filter(place => !(place.site == pick.site && place.page.title == pick.page.title));
+                        window.result.innerHTML += `  <span style="color:gray;">done ${pick.page.title}</span>\n`;
+                        pick = any(all); // Randomly select a page from the remaining pages
                     }
                 }
             }
