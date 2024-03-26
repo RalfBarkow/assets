@@ -35,7 +35,7 @@
             let all;
             let reference;
             let pick;
-            let seen;
+            let seen = new Set(); // Initialize seen as an empty set
             let dot;
             let hue;
             let color;
@@ -312,12 +312,11 @@
                     // Set the start entry based on the selected entry
                     pick = all.find(entry => entry.page.title === selectedStartEntry);
                 } else {
-                    // Use the default start entry
-                    pick = all[0];
+                    // Find the default start entry based on the seen set
+                    pick = all.find(entry => seen.has(entry.page.title)) || all[0];
                 }
 
                 if (pick) {
-                    seen = new Set([pick.page.title]);
                     addPageTitleToGraphviz(pick);
                     console.log('Start: pick.page', pick.page);
 
