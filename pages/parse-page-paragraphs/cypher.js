@@ -96,6 +96,12 @@ export function parse(text, log=()=>{}) {
 }
 
 export function gen(level, tree, code, log=()=>{}) {
+   // Check if tree is undefined or empty
+  if (!tree || tree.length === 0) {
+    console.log("Empty tree or undefined tree received.");
+    return code; // Return the unchanged code object
+  }
+
   const tab = () => ' |'.repeat(level)
   switch (tree[0]) {
     case 'sp':
@@ -141,21 +147,32 @@ export function gen(level, tree, code, log=()=>{}) {
 }
 
 export function check(tally, code, errors) {
-  if(code?.node?.type && errors) {
-    if(!tally.nodes[code.node.type]) {
-      errors.push(`No node of type "${code.node.type}" in the graph.`)
-    }
-  }
-  if(code?.rel?.type && errors) {
-    if(!tally.rels[code.rel.type]) {
-      errors.push(`No relation of type "${code.rel.type}" in the graph.`)
-    }
-  }
-  if(Object.keys(code.chain).length) {
-    check(tally,code.chain, errors)
+  // Check if code object is undefined
+  if (!code) {
+    errors.push("Code object is undefined.");
+    return;
   }
 
+  if (code.node?.type && errors) {
+    // Check if tally.nodes is undefined before accessing code.node.type
+    if (!tally.nodes || !tally.nodes[code.node.type]) {
+      errors.push(`No node of type "${code.node.type}" in the graph.`);
+    }
+  }
+
+  if (code.rel?.type && errors) {
+    // Check if tally.rels is undefined before accessing code.rel.type
+    if (!tally.rels || !tally.rels[code.rel.type]) {
+      errors.push(`No relation of type "${code.rel.type}" in the graph.`);
+    }
+  }
+
+  // Check if code.chain is defined and is an object before accessing its properties
+  if (code.chain && typeof code.chain === 'object' && Object.keys(code.chain).length) {
+    check(tally, code.chain, errors);
+  }
 }
+
 
 export function apply(graph, code) {
   const nodes = graph.nodes
@@ -167,17 +184,18 @@ export function apply(graph, code) {
   return results
 
   function chain(node, code, maybe) {
-    if ((!code.node.type || node.type == code.node.type) &&
-        (!code.node.prop || node.props[code.node.prop[0]] == code.node.prop[1])) {
+    // Check if code.node is defined before accessing its properties
+    if (code.node && ((!code.node.type || node.type == code.node.type) &&
+        (!code.node.prop || node.props[code.node.prop[0]] == code.node.prop[1]))) {
       if (code.node.bind)
-        maybe[code.node.bind] = node
+        maybe[code.node.bind] = node;
       if (code.chain.rel) {
         if (['in','both'].includes(code.chain.rel.dir))
-          links(node.in, 'from')
+          links(node.in, 'from');
         if (['out','both'].includes(code.chain.rel.dir))
-          links(node.out, 'to')
+          links(node.out, 'to');
       } else {
-        results.push(maybe)
+        results.push(maybe);
       }
     }
 
