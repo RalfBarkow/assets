@@ -306,7 +306,9 @@
 
             window.dostart = async function(event) {
                 done = Date.now() + 10000;
-                window.result.innerText = '';
+                // Clear the result area
+                window.result.innerHTML = '';
+                
                 nodeShape = "ellipse"; // Use ellipse for the first title node, box for others
 
                 // Check if a start entry is selected
