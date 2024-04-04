@@ -8,10 +8,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/jasmine-html.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/boot0.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/5.1.2/boot1.js"></script>
-  <!-- Include your JavaScript file with the functions to test -->
-  <script type="module" src="http://localhost:3000/assets/pages/parse-page-paragraphs/graph.js"></script>
-    <!-- Include your test file -->
-  <script type="module" src="http://localhost:3000/assets/pages/parse-page-paragraphs/tests/cypher.spec.js"></script>
+  <!-- Include your JavaScript files with the functions to test and the graphData fixture -->
+  <script src="./graphData.js"></script>
+  <script type="module" src="../graph.js"></script>
+  <!-- Include your test file -->
+  <script type="module" src="./graph.spec.js"></script>
+  <script type="module" src="./cypher.spec.js"></script>
 </head>
 <body>
   <!-- Empty body -->

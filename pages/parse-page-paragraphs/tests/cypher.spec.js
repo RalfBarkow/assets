@@ -3,9 +3,9 @@ import { parse, gen, check, apply } from '../cypher.js';
 describe('Cypher Parser Tests', () => {
   describe('parse function', () => {
     it('should parse simple text', () => {
-      const text = 'MATCH (a)';
+      const text = 'MATCH (n)';
       const tree = parse(text);
-      expect(tree).toEqual([['match', ['node', ['term', 'MATCH'], ['elem', ['word', 'a']], ['eot']]]]);
+      expect(tree).toEqual([['match', ['node', ['term', 'MATCH'], ['elem', ['word', 'n']], ['eot']]]]);
     });
 
     // Add more test cases to cover different scenarios
@@ -16,7 +16,7 @@ describe('Cypher Parser Tests', () => {
       const tree = [['match', ['node', ['term', 'MATCH'], ['elem', ['word', 'a']], ['eot']]]];
       const code = {};
       const generatedCode = gen(0, tree, code);
-      expect(generatedCode).toEqual({ match: { node: { type: 'MATCH', bind: undefined, props: {} }, chain: {} } });
+      expect(generatedCode).toEqual({ match: { node: { type: 'MATCH', props: {} }, chain: {} } });
     });
 
     // Add more test cases to cover different scenarios
