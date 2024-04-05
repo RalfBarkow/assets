@@ -22,7 +22,7 @@ export function parse(text, log=()=>{}) {
 
   // Terminal Symbols
 
-  r.word = () => match(/^[A-Za-z][A-Za-z0-9_]*/) && x.sp()
+  r.word = () => match(/^[A-Za-z0-9][A-Za-z0-9_]*/) && x.sp()
   r.term = want => right.startsWith(want) && accept(want.length) && keep(want) && x.sp()
   r.strn = () => x.ch('"') && match(/^[^"]{0,20}/) && x.ch('"') && x.sp()
   r.ch = char => right.startsWith(char) && accept(1) && keep(char) && x.sp()
