@@ -1,4 +1,4 @@
-import { Graph } from '../graph.js'; 
+import { Graph } from '../graph/graph.js'; 
 
 describe('Graph Tests', () => {
   // Use the graphData fixture in your tests

@@ -1,4 +1,5 @@
-import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';
+//import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';
+import { Graph } from '../graph/graph.js';
 
 // Function to handle messages received from "SOURCE graph" frame
 function handleGraphStream(message, graphPromise) {

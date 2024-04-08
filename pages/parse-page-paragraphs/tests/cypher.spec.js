@@ -1,4 +1,4 @@
-import { parse, gen, check, apply } from '../cypher.js';
+import { parse, gen, check, apply } from '../graph/cypher.js';
 
 describe('Cypher Parser Tests', () => {
   describe('parse function', () => {
