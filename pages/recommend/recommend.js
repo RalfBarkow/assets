@@ -9,18 +9,18 @@ function recommend(chosen) {
         }
     }
 
-    // Step 2: Check for similarity
+    // Step 2: Check for similarity and set "recommended" property for recommended nodes
     const similar = (graph) => {
         for (const node of graph.nodes) {
-            if (vocabulary.has(hash(node))) return true;
+            if (vocabulary.has(hash(node))) { 
+                node.props["recommended"] = true;
+                return true;
+            }
+        }
+        // If no similar node found, set "recommended" property to false
+        for (const node of graph.nodes) {
+            node.props["recommended"] = false;
         }
         return false;
     }
-
-    // Step 3: Update checkbox colors
-    // Assuming recommended items are stored in a global variable `recommendedItems`
-    window.recommendedItems.forEach(item => {
-        const color = !item.checked && similar(item.graph) ? 'darkorange' : 'black';
-        item.nextElementSibling.style.color = color;
-    });
 }
