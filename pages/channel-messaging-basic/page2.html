@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <title>wiki javascript snippet runner – page2 </title>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>➡</text></svg>">
+
+  <body>
+    <pre id=showPage2>waiting</pre>
+    <div id=outputPage2><div>
+      <script type=module>
+
+       async function render (text) {
+         try {
+           let module = await import(`data:text/javascript;base64,${btoa(text)}`)
+           console.log({text, module})
+           showPage2.innerHTML = ''
+           if (!module) return
+           let result = Object.assign({default:""}, module).default
+           if (typeof result == typeof "" && result.match(/\s*</)) {
+             outputPage2.insertAdjacentHTML("beforeend", result)
+           } else {
+             let maybe = JSON.stringify(result)
+             if (maybe.length > 50) maybe = JSON.stringify(result,null,2)
+             outputPage2.insertAdjacentHTML("beforeend", `<pre>${maybe}</pre>`)
+           }
+         } catch (e) {
+           showPage2.innerHTML = `<pre>${e.message}</pre>`
+         }
+       }
+
+      </script>
+  </body>
+</html>

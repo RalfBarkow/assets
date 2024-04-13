@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>My Page 2 title</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Lobster+Two' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="style.css">
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+      <button onclick="onClick()">Send Message</button>
+    <ul></ul>
+  </body>
+  <script>
+  var list = document.querySelector('ul');
+  var port_to_main; // will be populated once 'main' give it to us
+
+  var pendingResponseCollection = new Array();
+
+  window.onload = () => {
+    console.log("iframe loaded")
+  }
+
+  async function onClick(){
+    console.log("iframe making request")
+    makeAjaxCall("functionName", "Outbound message body").then(response => console.log("iframe got response: " + response))
+
+    // -or-
+    //console.log("Got response: " + await makeAjaxCall("functionName", "Outbound message body"))
+  }
+
+  //message channel child-side function established on startup 
+  window.onmessage = (e) => {
+    //todo - important - need to make sure the origin is the wire browser
+    // if (event.origin !== "http://")
+    //   return;
+
+    console.log("iframe port established");
+    
+    port_to_main = e.ports[0]; // we got it
+    // we add the message listener on this MessagePort
+    port_to_main.onmessage = responseFromMobileClient;
+  }
+ 
+  //dispatched incomming message from mobile client by routing responses to the correct callback
+  function responseFromMobileClient(e){
+  
+    let response = e.data;
+
+    //find the request we should respond to
+    let responseItem = pendingResponseCollection.find(element => element.guid == response.guid)
+
+    //respond
+    responseItem.resolver(response.message)
+
+    var listItem = document.getElementById(response.guid);
+    listItem.parentNode.removeChild(listItem);
+    
+    //remove the pending call
+    let index = pendingResponseCollection.indexOf(responseItem);
+    if (index > -1) pendingResponseCollection.splice(index, 1);   
+
+    console.log("Remaining queued promises: " + pendingResponseCollection.length);
+  }
+
+  //client to wire web calling function
+  function makeAjaxCall(command, message){
+    let guid = uuidv4();
+
+    let listItem = document.createElement('li');
+    listItem.setAttribute("id", guid);
+    listItem.textContent = guid;
+    list.appendChild(listItem);
+
+    let resolver;
+    let promise = new Promise((resolve, reject)=>{
+      resolver = (message) => resolve(message);
+    });
+    
+    pendingResponseCollection.push({guid, resolver});
+    // we talk to main from our own port
+    port_to_main.postMessage({command, guid, message});
+
+    return promise;
+  }
+
+  //todo - stack overflow guid implementation
+  function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    )
+  }
+
+  </script>
+</html>

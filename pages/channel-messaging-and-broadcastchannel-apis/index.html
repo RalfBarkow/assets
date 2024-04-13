@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>
+	    window.addEventListener('DOMContentLoaded', () => {
+	    	const channel = new MessageChannel();
+	    	const display = document.querySelector('p');
+
+			const iframe = document.querySelector('iframe');
+
+			iframe.addEventListener('load', () => {
+				iframe.contentWindow.postMessage('Hey', '*', [channel.port2]);
+			});
+
+			channel.port1.onmessage = event => {
+				display.innerHTML = `Message back from the iframe: ${event.data}`;
+			};
+
+		});
+	</script>
+</head>
+<body>
+	<iframe src="iframe.html" width="500" height="100"></iframe>
+	<p></p>
+</body>
+</html>

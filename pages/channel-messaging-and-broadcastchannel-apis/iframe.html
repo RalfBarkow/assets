@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			window.addEventListener('message', event =>  {
+			// send a message back
+				document.querySelector('p').innerHTML = `Message from index.html: ${event.data}`;
+				event.ports[0].postMessage('Ho!');
+			});
+		});
+	</script>
+</head>
+<body>
+	<p>I am the p within iframe.html.</p>
+</body>
+</html>
