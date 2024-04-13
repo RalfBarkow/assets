@@ -13,3 +13,6 @@
 [submodule "Dynaverse/microverse"]
 	path = Dynaverse/microverse
 	url = https://github.com/neolay/microverse.git
+[submodule "pages/elix-plain-example"]
+	path = pages/elix-plain-example
+	url = https://github.com/elix/plain-example.git

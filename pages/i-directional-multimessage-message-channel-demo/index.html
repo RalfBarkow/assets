@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>Bi-directional multimessage message channel demo</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Lobster+Two' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="style.css">
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <h1>Bi-directional multimessage message channel demo</h1>
+
+    <h2>This is the iframe element's message queue</h2>
+    <iframe src="page2.html" width='480' height='320'>
+      
+    </iframe>
+
+    <h2>This is the parent page's message queue</h2>
+    <ul></ul>
+
+  </body>
+  <script>
+    
+    var ifr = document.querySelector('iframe');
+    var otherWindow = ifr.contentWindow;
+    var list = document.querySelector('ul');
+    var port_to_frame; // will be populated in the negotiation part
+
+    ifr.addEventListener("load", iframeLoaded, false);
+    
+    function iframeLoaded() {  
+      var channel = new MessageChannel();   
+      port_to_frame = channel.port1; // we keep the first port for ourselve
+      port_to_frame.onmessage = requestFromIFrame; // we listen for messages from 'ifr'
+      // we give the other port to 'ifr'
+      ifr.contentWindow.postMessage("establish message channel", '*', [channel.port2]);      
+    }
+
+    function requestFromIFrame(e){
+      console.log("Parent got data: ");
+      console.log(e.data)
+      
+      let guid = e.data.guid;
+      let message = e.data.message;
+
+      let listItem = document.createElement('li');
+      listItem.setAttribute("id", guid);
+      listItem.textContent = guid;
+      list.appendChild(listItem);
+
+      //fake an async response
+      setTimeout(()=>{ 
+        respondToIFrame({guid, message}) 
+        var listItem = document.getElementById(guid);
+        listItem.parentNode.removeChild(listItem);
+        }, Math.random() * 3000)     
+    }
+
+    function respondToIFrame(response){
+      console.log("Parent responding to iframe");
+      port_to_frame.postMessage(response); // we talk inside our own port
+    }
+
+  </script>
+</html>

@@ -1,0 +1,38 @@
+<div id=result>working</div>
+<style>
+  span {color:blue; cursor:pointer}
+</style>
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  const data = ["17|register", "15|slide", "14|plugins", "13|line",
+    "11|importer", "11|chess", "10|bikeshare", "9|signature", "9|shell",
+    "9|recycler", "8|rollup", "8|reduce", "8|bytebeat", "7|turtle",
+    "7|solo", "7|pushpin", "7|cytodemo", "6|rostermatic", "6|report",
+    "6|metamodel", "5|scatter", "5|force", "5|cypher", "4|wikish",
+    "4|microtalk", "4|crazy", "4|bars", "3|tab", "3|process-step",
+    "3|print", "3|point", "3|outline", "2|tally", "2|soundcloud",
+    "2|math", "2|future", "1|wsjt", "1|txtzyme", "1|turtle-wander",
+    "1|stats", "1|popup", "1|parse", "1|logwatch", "1|dotviz",
+    "1|detect", "1|dailynote", "1|alert"]
+
+  window.dosearch = event => {
+    const target = event.target
+    const plugin = target.innerText
+    const title = `Search for wiki-plugin-${plugin}`
+    const npm = `https://www.npmjs.com/package/wiki-plugin-${plugin}`
+    const story = [
+      {type:'paragraph',text:`Find this plugin. [${npm} npm]`},
+      {type:'search',text:`PLUGINS ${plugin}`}
+    ]
+    frame.open({title,story},event.shiftKey)
+  }
+  window.result.innerHTML = data
+    .map(s => s.split(/\|/))
+    .map(([count,plugin]) => `
+      ${count} ×
+      <span onclick=dosearch(event)>
+      ${plugin}
+      </span>`)
+    .join("<br>")
+
+</script>
