@@ -16,24 +16,34 @@
      }
    }
 
-   async function render (text) {
-     console.log({text})
-     try {
-       let module = await import(`data:text/javascript;base64,${btoa(text)}`)
-       if (!module) return
-       let emit = module.emit
-       if (emit) {
-         await emit(document.body)
-       }
-       let bind = module.bind
-       if (bind) {
-         await bind(document.body)
-       }
-     } catch (e) {
-       const {name, message} = e
-       document.body.innerHTML = `<pre>${JSON.stringify({name, message}, null, 2)}</pre>`
-     }
-   }
+async function render(text) {
+    const logPre = document.createElement('pre'); // Create a new <pre> element
+    document.body.appendChild(logPre); // Append it to the document body
+    const oldLog = console.log; // Store the original console.log function
+
+    // Override console.log with a function that appends messages to the <pre> element
+    console.log = function (message) {
+        logPre.textContent += `> ${message}\n`; // Append message to the <pre> element
+        oldLog.apply(console, arguments); // Call the original console.log function
+    };
+
+    try {
+        let module = await import(`data:text/javascript;base64,${btoa(text)}`);
+        if (!module) return;
+        let emit = module.emit;
+        if (emit) {
+            await emit(document.body);
+        }
+        let bind = module.bind;
+        if (bind) {
+            await bind(document.body);
+        }
+    } catch (e) {
+        const { name, message } = e;
+        // Display error information in the <pre> element
+        logPre.textContent = JSON.stringify({ name, message }, null, 2);
+    }
+}
 
   </script>
   <body></body>
