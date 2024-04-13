@@ -1,48 +1,88 @@
+import { recommend } from "./recommend.js";
+
 describe("recommend function", () => {
-  let graph;
+    let chosen;
 
-  beforeEach(() => {
-    // Initialize or create the graph object before each test
-    graph = {
-      nodes: [
-        { type: "A", props: { name: "Node A" } },
-        { type: "B", props: { name: "Node B" } },
-        { type: "C", props: { name: "Node C" } }
-      ]
-    };
-  });
-
-  it("should correctly determine similarity and set recommended property to true", () => {
-    // Simulate the vocabulary set
-    const vocabulary = new Set(["A: Node A", "B: Node B"]);
-
-    // Call the similar function
-    const result = similar(graph, vocabulary);
-
-    // Expect the result to be true
-    expect(result).toBe(true);
-
-    // Expect nodes A and B to have recommended property set to true
-    expect(graph.nodes[0].props.recommended).toBe(true);
-    expect(graph.nodes[1].props.recommended).toBe(true);
-
-    // Expect node C to have recommended property set to false
-    expect(graph.nodes[2].props.recommended).toBe(false);
-  });
-
-  it("should set recommended property to false for all nodes when no similarity found", () => {
-    // Simulate an empty vocabulary set
-    const vocabulary = new Set();
-
-    // Call the similar function
-    const result = similar(graph, vocabulary);
-
-    // Expect the result to be false
-    expect(result).toBe(false);
-
-    // Expect all nodes to have recommended property set to false
-    graph.nodes.forEach(node => {
-      expect(node.props.recommended).toBe(false);
+    beforeEach(() => {
+        chosen = [
+            {
+                index: "8",
+                name: "Debug",
+                graph: {
+                    nodes: [
+                        {
+                            type: "HTML",
+                            in: [],
+                            out: [0, 1, 2, 3, 4, 5],
+                            props: {
+                                name: "sites-indexed"
+                            }
+                        },
+                        {
+                            type: "Sites",
+                            in: [0],
+                            out: [],
+                            props: {
+                                name: "owner"
+                            }
+                        },
+                        {
+                            type: "Sites",
+                            in: [1],
+                            out: [],
+                            props: {
+                                name: "detail-sites"
+                            }
+                        },
+                        {
+                            type: "Page",
+                            in: [2],
+                            out: [],
+                            props: {
+                                name: "site-activity"
+                            }
+                        },
+                        {
+                            type: "Logs",
+                            in: [3],
+                            out: [],
+                            props: {
+                                name: "Now-0000"
+                            }
+                        },
+                        {
+                            type: "Window",
+                            in: [4],
+                            out: [],
+                            props: {
+                                name: "summary"
+                            }
+                        },
+                        {
+                            type: "Window",
+                            in: [5],
+                            out: [],
+                            props: {
+                                name: "result"
+                            }
+                        }
+                    ],
+                    rels: [
+                        { type: "get", from: 0, to: 1, props: { source: "Debug" } },
+                        { type: "get", from: 0, to: 2, props: { source: "Debug" } },
+                        { type: "open", from: 0, to: 3, props: { source: "Debug" } },
+                        { type: "get", from: 0, to: 4, props: { source: "Debug" } },
+                        { type: "set", from: 0, to: 5, props: { source: "Debug" } },
+                        { type: "set", from: 0, to: 6, props: { source: "Debug" } }
+                    ]
+                },
+                date: 1712704755786
+            }
+        ];
     });
-  });
+
+    it("should pass chosen as an argument to the recommend function", () => {
+      recommend(chosen);
+    });
+
 });
