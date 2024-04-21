@@ -6,35 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Bot</title>
     <style>
-        /* Define grid layout */
-        body {
-            display: grid;
-            grid-template-columns: 1fr; /* Initially, one column taking up all available space */
-            grid-template-rows: auto; /* Auto-sized rows */
-            grid-gap: 10px; /* Gap between grid cells */
-        }
-
-        /* Style individual elements */
+        /* Additional styling for other elements as needed */
         .paragraph-select-wrapper {
             margin-bottom: 10px;
         }
-
-        /* Additional styling for other elements as needed */
     </style>
 </head>
 
 <body>
-    <p>
-        <label for="indexEntries">Page:</label><select id="indexEntries"></select> 
-        <button id="startButton" onclick=dostart(event) type="submit">start</button>
-        <span id=startat></span>
-        <br>
-        <div class="paragraph-select-wrapper">
-            <label for="paragraphEntries">Paragraph:</label>
-            <select id="paragraphEntries"></select>
-        </div>
-    </p>
-    <pre id="result"></pre>
+    <div class="container">
+        <p>
+            <label for="indexEntries">Page:</label><select id="indexEntries"></select>
+            <button id="startButton" onclick=dostart(event) type="submit">start</button>
+            <span id=startat></span>
+            <br>
+            <div class="paragraph-select-wrapper">
+                <label for="paragraphEntries">Paragraph:</label>
+                <select id="paragraphEntries"></select>
+            </div>
+        </p>
+        <pre id="result"></pre>
+    </div>
     <script type="module">
 
         // Import necessary modules and classes
