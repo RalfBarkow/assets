@@ -5,7 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Bot</title>
-    <style>
+     <style>
+        /* Define grid layout */
+        .container {
+            display: flex; /* Make it a Flex container */
+            flex-direction: column; /* Arrange items vertically */
+            gap: 10px; /* Gap between Flex items */
+        }
+
         /* Additional styling for other elements as needed */
         .paragraph-select-wrapper {
             margin-bottom: 10px;
@@ -19,7 +26,6 @@
             <label for="indexEntries">Page:</label><select id="indexEntries"></select>
             <button id="startButton" onclick=dostart(event) type="submit">start</button>
             <span id=startat></span>
-            <br>
             <div class="paragraph-select-wrapper">
                 <label for="paragraphEntries">Paragraph:</label>
                 <select id="paragraphEntries"></select>
