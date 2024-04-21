@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframe2</title>
+    <style>
+        /* Add any custom styles for iframe2 */
+        body {
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .iframe-container {
+            border: 2px dashed #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="iframe-container" id="iframe2" 
+         ondrop="dropHandler(event)" 
+         ondragover="dragOverHandler(event)"
+         ondragend="dragEndHandler(event)">
+        <h2>Drop here</h2>
+        <p>I am iframe2</p>
+    </div>
+
+    <script>
+        function dropHandler(event) {
+          console.log("dropHandler reached.");
+          event.preventDefault();
+
+          // Retrieve data when the drop event occurs
+          const iframeId = event.dataTransfer.getData("text/plain");
+          if (iframeId) {
+              console.log("Data transferred:", iframeId);
+              const iframe1 = window.parent.document.getElementById(iframeId);
+              console.log("Iframe element:", iframe1);
+
+              const iframe2 = document.getElementById("iframe2");
+              console.log("Container iframe:", iframe2);
+
+              if (iframe1 && iframe1 !== event.target) {
+                  const target = event.target;
+                  if (target) {
+                      target.appendChild(iframe1);
+                  } else {
+                      console.error("target is not available.");
+                  }
+              }
+          } else {
+              console.log("No data transferred.");
+          }
+        }
+
+        function dragOverHandler(event) {
+            event.preventDefault();
+        }
+
+        function dragEndHandler(event) {
+            console.log('Drag ended');
+        }
+    </script>
+</body>
+</html>

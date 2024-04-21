@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframe1</title>
+    <style>
+        /* Add any custom styles for iframe1 */
+        body {
+            background-color: lightblue;
+            padding: 20px;
+        }
+        .iframe-container {
+            border: 2px dashed #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="iframe-container" id="iframe1" draggable="true" ondragstart="dragStartHandler(event)">
+        <h2>Drag me</h2>
+        <p>I am iframe1</p>
+    </div>
+
+    <script>
+        function dragStartHandler(event) {
+            console.log('Drag started from iframe1');
+            event.dataTransfer.setData('text/plain', event.target.id);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Iframes</title>
+    <style>
+        #container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+        }
+        iframe {
+            border: 2px dashed gray;
+            width: 300px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <iframe id="iframe1" src="iframe1.html" draggable="true"></iframe>
+        <iframe id="iframe2" src="iframe2.html" draggable="true"></iframe>
+    </div>
+  
+    <script>
+        window.addEventListener('load', () => {
+            const iframe1 = document.getElementById('iframe1');
+            const iframe2 = document.getElementById('iframe2');
+
+            iframe1.addEventListener('dragstart', dragStart);
+            iframe2.addEventListener('dragover', dragOver);
+            iframe2.addEventListener('drop', drop);
+
+            function dragStart(event) {
+                event.dataTransfer.setData('text/plain', event.target.id);
+            }
+
+            function dragOver(event) {
+                event.preventDefault();
+            }
+
+            function drop(event) {
+                event.preventDefault();
+                const iframeId = event.dataTransfer.getData('text/plain');
+                const iframe = document.getElementById(iframeId);
+                if (iframe && iframe !== event.target) {
+                    // Append iframe1 to the body of iframe2's document
+                    event.target.contentDocument.body.appendChild(iframe);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

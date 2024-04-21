@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drag and Drop Iframes</title>
+  <style>
+    /* Style for iframes */
+    .iframe-container {
+      width: 400px;
+      height: 200px;
+      border: 1px solid #ccc;
+      margin: 10px;
+      display: inline-block;
+      position: relative;
+    }
+    .iframe-content {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    /* Style for dragged iframe */
+    .dragged {
+      opacity: 0.5; /* Reduce opacity when dragging */
+    }
+  </style>
+</head>
+<body>
+  <!-- Parent document -->
+  <div class="iframe-container" id="iframe1">
+    <iframe class="iframe-content" src="iframe1.html"></iframe>
+  </div>
+  <div class="iframe-container" id="iframe2">
+    <iframe class="iframe-content" src="iframe2.html"></iframe>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const iframes = document.querySelectorAll(".iframe-content");
+
+      let draggedIframe = null;
+
+      // Add event listeners for drag events
+      iframes.forEach(iframe => {
+        iframe.addEventListener("dragstart", () => {
+          draggedIframe = iframe;
+          iframe.classList.add("dragged");
+        });
+
+        iframe.addEventListener("dragend", () => {
+          draggedIframe = null;
+          iframe.classList.remove("dragged");
+        });
+      });
+
+      // Add event listener for drop event on iframes
+      iframes.forEach(iframe => {
+        iframe.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        iframe.addEventListener("drop", (event) => {
+          event.preventDefault();
+          if (draggedIframe) {
+            iframe.contentWindow.document.body.appendChild(draggedIframe);
+            draggedIframe.classList.remove("dragged");
+            draggedIframe = null;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
