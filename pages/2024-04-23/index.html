@@ -46,7 +46,8 @@
                 const iframe = document.getElementById(iframeId);
                 if (iframe && iframe !== event.target) {
                     // Append iframe1 to the body of iframe2's document
-                    event.target.contentDocument.body.appendChild(iframe);
+                    const iframeDocument = event.target.contentWindow.document;
+                    iframeDocument.body.appendChild(iframe);
                 }
             }
         });
