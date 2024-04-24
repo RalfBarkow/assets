@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Movement Visualization</title>
+<style>
+    canvas {
+        border: 1px solid black;
+    }
+</style>
+</head>
+<body>
+<canvas id="particleCanvas" width="500" height="500"></canvas>
+<script>
+    // Get canvas element and context
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Function to draw a particle
+    function drawParticle(x, y, color) {
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // Function to draw the grid
+    function drawGrid() {
+        const numRows = 10;
+        const numCols = 10;
+        const cellWidth = canvas.width / numCols;
+        const cellHeight = canvas.height / numRows;
+
+        ctx.strokeStyle = 'black';
+        for (let i = 0; i < numRows; i++) {
+            for (let j = 0; j < numCols; j++) {
+                const x = j * cellWidth;
+                const y = i * cellHeight;
+                ctx.strokeRect(x, y, cellWidth, cellHeight);
+            }
+        }
+    }
+
+    // Function to clear canvas
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Function to update particle positions and redraw canvas
+    function update() {
+        clearCanvas();
+        drawGrid();
+
+        // Iterate over particles and draw them
+        particles.forEach((particle) => {
+            drawParticle(particle.position.x, particle.position.y, 'blue');
+        });
+    }
+
+    // Sample particle data (replace this with your actual particle data)
+    const particles = [
+        { id: 1, position: { x: 50, y: 50 } },
+        { id: 2, position: { x: 150, y: 150 } },
+        { id: 3, position: { x: 250, y: 250 } }
+    ];
+
+    // Call update function to initially draw particles
+    update();
+
+    // Call update function periodically to update particle positions
+    setInterval(update, 1000); // Adjust interval as needed
+</script>
+</body>
+</html>
