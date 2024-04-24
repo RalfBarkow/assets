@@ -20,27 +20,39 @@
     // Function to draw a particle
     function drawParticle(x, y, color) {
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.moveTo(x, y - 5);
+        ctx.lineTo(x + 5, y + 5);
+        ctx.lineTo(x - 5, y + 5);
+        ctx.closePath();
         ctx.fillStyle = color;
         ctx.fill();
-        ctx.closePath();
     }
 
-    // Function to draw the grid
+    // Function to draw the triangular grid
     function drawGrid() {
         const numRows = 10;
         const numCols = 10;
         const cellWidth = canvas.width / numCols;
-        const cellHeight = canvas.height / numRows;
+        const cellHeight = (Math.sqrt(3) / 2) * cellWidth;
 
         ctx.strokeStyle = 'black';
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < numCols; j++) {
-                const x = j * cellWidth;
+                const x = j * cellWidth + (i % 2 === 1 ? cellWidth / 2 : 0);
                 const y = i * cellHeight;
-                ctx.strokeRect(x, y, cellWidth, cellHeight);
+                drawTriangle(x, y, cellWidth);
             }
         }
+    }
+
+    // Function to draw a triangle at given coordinates
+    function drawTriangle(x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + size / 2, y + (Math.sqrt(3) / 2) * size);
+        ctx.lineTo(x - size / 2, y + (Math.sqrt(3) / 2) * size);
+        ctx.closePath();
+        ctx.stroke();
     }
 
     // Function to clear canvas
