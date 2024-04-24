@@ -1,0 +1,89 @@
+<div id=result>working</div>
+<script type=module>
+  import * as frame from 'http://code.fed.wiki/assets/v1/frame.js'
+  import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'
+
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const context = await frame.context()
+  const code = context.page.story.find(item => item.type=='code')
+  const query = encodeURIComponent(code.text)
+  const url = `https://query.wikidata.org/sparql?format=json&query=${query}`
+  const t0 = Date.now()
+  const json = await fetch(url).then(res => res.json())
+  const dt = Date.now() - t0
+  console.log({json})
+
+  // console.log(json.results.bindings
+  //   .filter(b => b.educatedatLabel.value == 'University of Amsterdam')
+  //   .map(b => `${b.humanLabel.value} ${b.educatedat.value} => ${b.coords.value}`)
+  //   .filter(uniq))
+
+  const wholang = json.results.bindings
+    .map(b => `${b.langLabel.value} ⇒ ${b.humanLabel.value}`)
+    .filter(uniq)
+    .sort()
+  const wherewho = json.results.bindings
+    .map(b => `${b.humanLabel.value} ⇒ ${b.educatedatLabel.value}`)
+    .filter(uniq)
+    .sort()
+
+
+  const aspects = json.results.bindings
+    .map(b => b.langLabel.value)
+    .filter(uniq)
+    .sort()
+    .map(name => {
+      const graph = new Graph()
+      const node = where => {
+        let nid = graph.nodes.findIndex(node => node.props.name == where.name)
+        if (nid < 0) nid = graph.addNode(where.type,{name:where.name, url:where.url})
+        return nid
+      }
+      const rel = (here, there) => {
+        const hid = node(here)
+        const tid = node(there)
+        const rid = graph.rels.findIndex(rel => rel.from == hid && rel.to == there)
+        if (rid < 0) graph.addRel("",hid,tid,{})
+      }
+      for (const b of json.results.bindings) {
+        if(b.langLabel.value != name) continue
+        const language = {type:'Language', name:b.langLabel.value, url:b.lang.value}
+        const influence = {type:'Language', name:b.influenceLabel.value, url:b.influence.value}
+        const human = {type:'Human', name:b.humanLabel.value, url:b.human.value}
+        const school = {type:'School', name:b.educatedatLabel.value, url:b.educatedat.value}
+        rel(school,human)
+        rel(human,language)
+        rel(influence,language)
+      }
+      return {name,graph}
+    })
+  console.log({aspects})
+  window.parent.postMessage({action: "publishSourceData", name:'aspect', sourceData:aspects},'*')
+
+  window.domap = event => {
+    const latlon = value => value
+      .match(/Point\((.*?) (.*?)\)/)
+      .slice(1,3)
+      .reverse()
+      .join(", ")
+    const locations = json.results.bindings
+      .map(b => `${latlon(b.coords.value)} ${b.educatedatLabel.value}`)
+      .filter(uniq)
+    const title = `Map of ${context.page.title}`
+    const text = locations
+      .concat(['Where Language Creators Learn'])
+      .join("\n")
+    const story = [
+      {type:'paragraph',text:`Result from [[${context.page.title}]]`},
+      code,
+      {type:'map',text},
+      {type:'paragraph',text:'See [[Aerial Map]]'}]
+    frame.open({title,story},event.shiftKey)
+  }
+
+  window.result.innerHTML = `
+    <p>${json.results.bindings.length} results in ${dt} ms</p>
+    <button onclick=domap(event)>Show Map</button>
+    <p>${wholang.join("<br>")}</p>
+    <p>${wherewho.join("<br>")}</p>`
+</script>
