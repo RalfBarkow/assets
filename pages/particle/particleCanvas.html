@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Movement Visualization</title>
+<style>
+    canvas {
+        border: 1px solid black;
+    }
+</style>
+</head>
+<body>
+<canvas id="particleCanvas" width="500" height="500"></canvas>
+<script>
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Define Particle class
+    class Particle {
+        constructor(id, x, y) {
+            this.id = id;
+            this.position = { x, y };
+            this.size = 10; // Adjust particle size as needed
+        }
+
+        move() {
+            // Simulate particle movement
+            this.position.x += Math.random() * 10 - 5;
+            this.position.y += Math.random() * 10 - 5;
+        }
+
+        draw() {
+            // Draw particle on canvas
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.size / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+        }
+    }
+
+    // Create initial particles
+    const particles = [
+        new Particle(1, 50, 50),
+        new Particle(2, 150, 150),
+        new Particle(3, 250, 250)
+    ];
+
+    // Function to clear canvas
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Function to draw particles
+    function drawParticles() {
+        clearCanvas();
+        particles.forEach((particle) => {
+            particle.draw();
+        });
+    }
+
+    // Simulate particle movement and update visualization
+    setInterval(() => {
+        particles.forEach((particle) => {
+            particle.move();
+        });
+        drawParticles();
+    }, 1000); // Adjust simulation speed as needed
+</script>
+</body>
+</html>
