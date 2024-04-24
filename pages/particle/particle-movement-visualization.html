@@ -18,11 +18,11 @@
     const ctx = canvas.getContext('2d');
 
     // Function to draw a particle
-    function drawParticle(x, y, color) {
+    function drawParticle(x, y, color, size) {
         ctx.beginPath();
-        ctx.moveTo(x, y - 5);
-        ctx.lineTo(x + 5, y + 5);
-        ctx.lineTo(x - 5, y + 5);
+        ctx.moveTo(x - size / 2, y - (Math.sqrt(3) / 6) * size);
+        ctx.lineTo(x + size / 2, y - (Math.sqrt(3) / 6) * size);
+        ctx.lineTo(x, y + (Math.sqrt(3) / 3) * size);
         ctx.closePath();
         ctx.fillStyle = color;
         ctx.fill();
@@ -32,7 +32,7 @@
     function drawGrid() {
         const numRows = 10;
         const numCols = 10;
-        const cellWidth = canvas.width / numCols;
+        const cellWidth = canvas.width / (numCols + 0.5);
         const cellHeight = (Math.sqrt(3) / 2) * cellWidth;
 
         ctx.strokeStyle = 'black';
@@ -67,7 +67,7 @@
 
         // Iterate over particles and draw them
         particles.forEach((particle) => {
-            drawParticle(particle.position.x, particle.position.y, 'blue');
+            drawParticle(particle.position.x, particle.position.y, 'blue', 10); // Adjust particle size as needed
         });
     }
 
