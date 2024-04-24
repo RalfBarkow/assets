@@ -17,41 +17,30 @@
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Function to draw a particle
-    function drawParticle(x, y, color, size) {
+    // Function to draw a single node
+    function drawNode(x, y, size) {
         ctx.beginPath();
-        ctx.moveTo(x - size / 2, y - (Math.sqrt(3) / 6) * size);
-        ctx.lineTo(x + size / 2, y - (Math.sqrt(3) / 6) * size);
-        ctx.lineTo(x, y + (Math.sqrt(3) / 3) * size);
-        ctx.closePath();
-        ctx.fillStyle = color;
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'lightgray';
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    // Function to draw a particle occupying a single node (contracted particle)
+    function drawContractedParticle(x, y, size) {
+        ctx.beginPath();
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
         ctx.fill();
     }
 
-    // Function to draw the triangular grid
-    function drawGrid() {
-        const numRows = 10;
-        const numCols = 10;
-        const cellWidth = canvas.width / (numCols + 0.5);
-        const cellHeight = (Math.sqrt(3) / 2) * cellWidth;
-
-        ctx.strokeStyle = 'black';
-        for (let i = 0; i < numRows; i++) {
-            for (let j = 0; j < numCols; j++) {
-                const x = j * cellWidth + (i % 2 === 1 ? cellWidth / 2 : 0);
-                const y = i * cellHeight;
-                drawTriangle(x, y, cellWidth);
-            }
-        }
-    }
-
-    // Function to draw a triangle at given coordinates
-    function drawTriangle(x, y, size) {
+    // Function to draw an edge between two particles
+    function drawEdge(particle1, particle2, size) {
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + size / 2, y + (Math.sqrt(3) / 2) * size);
-        ctx.lineTo(x - size / 2, y + (Math.sqrt(3) / 2) * size);
-        ctx.closePath();
+        ctx.moveTo(particle1.x, particle1.y);
+        ctx.lineTo(particle2.x, particle2.y);
+        ctx.lineWidth = size / 10; // Adjust edge width as needed
+        ctx.strokeStyle = 'black';
         ctx.stroke();
     }
 
@@ -63,26 +52,54 @@
     // Function to update particle positions and redraw canvas
     function update() {
         clearCanvas();
+
+        // Draw the underlying graph Geqt (triangular grid)
         drawGrid();
 
-        // Iterate over particles and draw them
+        // Draw particles
         particles.forEach((particle) => {
-            drawParticle(particle.position.x, particle.position.y, 'blue', 10); // Adjust particle size as needed
+            if (particle.state === 'contracted') {
+                drawContractedParticle(particle.x, particle.y, particleSize);
+            } else if (particle.state === 'expanded') {
+                drawContractedParticle(particle.x, particle.y, particleSize);
+                drawContractedParticle(particle.head.x, particle.head.y, particleSize);
+                drawEdge(particle, particle.head, particleSize);
+            }
         });
+    }
+
+    // Function to draw the triangular grid (Geqt)
+    function drawGrid() {
+        const numRows = 10;
+        const numCols = 10;
+        const cellWidth = canvas.width / numCols;
+        const cellHeight = (Math.sqrt(3) / 2) * cellWidth;
+
+        ctx.strokeStyle = 'gray';
+        for (let i = 0; i < numRows; i++) {
+            for (let j = 0; j < numCols; j++) {
+                const x = j * cellWidth + (i % 2 === 1 ? cellWidth / 2 : 0);
+                const y = i * cellHeight;
+                drawNode(x, y, nodeSize);
+            }
+        }
     }
 
     // Sample particle data (replace this with your actual particle data)
     const particles = [
-        { id: 1, position: { x: 50, y: 50 } },
-        { id: 2, position: { x: 150, y: 150 } },
-        { id: 3, position: { x: 250, y: 250 } }
+        { id: 1, x: 50, y: 50, state: 'contracted' },
+        { id: 2, x: 150, y: 150, state: 'expanded', head: { x: 180, y: 150 } },
+        // Add more particles as needed
     ];
+
+    const particleSize = 10; // Adjust particle size as needed
+    const nodeSize = 20; // Adjust node size as needed
 
     // Call update function to initially draw particles
     update();
 
     // Call update function periodically to update particle positions
-    setInterval(update, 1000); // Adjust interval as needed
+    // setInterval(update, 1000); // Adjust interval as needed
 </script>
 </body>
 </html>
