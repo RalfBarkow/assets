@@ -1,4 +1,7 @@
-<p><button id=toc onclick=dotoc(event) disabled>table of contents</button></p>
+<p>
+  <button id=toc onclick=dotoc(event) disabled>table of contents</button>
+  <button id=tor onclick=dotor(event) disabled>table of references</button>
+</p>
 <div id=result>working</div>
 <style>span.index{cursor:pointer;}</style>
 <script type=module>
@@ -10,15 +13,16 @@
     .map(item => item.text.split(/\n\n/))
     .flat()
     .map(block => block.split(/\n/)))
-  const sub = title => subs[title] || title
-  console.log({subs})
+  const sub = (title,index) => subs[title] || subs[index] || title
   const div = document.createElement('div')
   div.innerHTML = html
   const children = Array.from(div.children)
   const first = children.findIndex(elem => elem.innerText == 'CHAPTER I: INTRODUCTION')
   const last = children.findIndex(elem => elem.innerText == 'References')
+  const limit = last
   console.log({first,last})
   children.forEach((elem,i) => elem.setAttribute('data-index',i))
+  const refs = {}
   window.result.innerHTML = children
     .slice(first,last)
     .filter(elem => elem.tagName.match(/h\d/i))
@@ -30,7 +34,7 @@
       return `
         <span class=index data-index=${index} data-next=${next}>${index}
         &nbsp; ${"| &nbsp; &nbsp;".repeat(+elem.tagName[1]-1)}
-        <span style="color:${need}">${sub(elem.innerText)}</span></span>`})
+        <span style="color:${need}">${sub(elem.innerText,index)}</span></span>`})
     .join("<br>")
   window.result.querySelectorAll('span.index')
     .forEach(item => item.addEventListener('click',event => {
@@ -38,8 +42,8 @@
       const first = dataset['index']
       const last = dataset['next']
       console.log({first,last})
-      const title = sub(children[first].innerText)
-      const story = convert(children.slice(first,last))
+      const title = sub(children[first].innerText,first)
+      const story = convert(first,last,event.shiftKey)
       frame.open({title,story},event.shiftKey)
     }))
   window.toc.disabled = false
@@ -54,9 +58,31 @@
     const story = [{type:'markdown',text}]
     frame.open({title:sub(title),story},event.shiftKey)
   }
+  window.tor.disabled = false
+  window.dotor = event => {
+    const title = "Table of References"
+    const text = Object.entries(refs)
+      .map(([sect,cites]) => `[[${sub(sect)}]]\n${
+        cites.map(cite => `- ([[${cite.replaceAll(/[()]/g,'')}]])  `).join("\n")
+      }`).join("\n\n")
+    const story = [{type:'markdown',text}]
+    frame.open({title:sub(title),story},event.shiftKey)
+  }
+
 
   function analyze(first,last) {
     const elems = children.slice(first,last)
+    const cites= /\(\w+, \d{4}.*?\)/g
+
+    for (const elem of elems.slice(1)) {
+      const text = elem.innerText
+      const hits = [...text.matchAll(cites)]
+      const sect = elems[0].innerText
+      if(hits.length) {
+        if (!(sect in refs)) refs[sect] = []
+        refs[sect].push(...hits.map(hit => hit[0]))
+      }
+    }
     for(const elem of elems.slice(1)) {
       if (elem.outerHTML.match(/<img/i)) return 'green'
     }
@@ -69,18 +95,50 @@
     return 'black'
   }
 
-  function convert(elems) {
+  function convert(first,last,debug) {
+    const elems = children.slice(first,last)
     console.log(elems.map(e => e.tagName).join(" "))
-    const paragraph = elem => ({type:'paragraph',text:elem.innerText})
-    const html = elem => ({type:'html',text:elem.outerHTML})
+    const cites = /\((\w+, \d{4}.*?)\)/g
+    const cite = text => text.replaceAll(cites,(_,c) => `([[${c}]])`)
 
-    return elems.slice(1)
-      .map(elem => elem.tagName == 'P'
-        ? paragraph(elem)
-        : html(elem))
+    const code = elem => ({type:'code',text:debug?elem.outerHTML:''})
+    const paragraph = elem => ({type:'paragraph',text:cite(elem.innerText)})
+    const html = elem => ({type:'html',text:cite(elem.innerHTML)})
+    const image = elem => {
+      const m = elem.innerHTML.match(/src="(.*?)".*?width: (\d+).*?height: (\d+).*$/)
+      return {type: 'image',text:'caption',size:'wide',width:m[2],url:`${assets}/${m[1]}`
+      }
+    }
+    const table = elem => {
+      const data = [...elem.rows].map(t => [...t.children].map(u => u.innerText))
+      const text = `<table border=1 style="border-collapse: collapse;">${
+        data.map(row=>`<tr><td>${
+          row.join("<td>")}`).join("\n")}</table>`
+      return {type:'html',text}
+    }
+
+    const story = elems.slice(1)
+      .map(elem => [
+        code(elem),
+        elem.tagName == 'TABLE'
+        ? table(elem)
+        : elem.tagName == 'P'
+          ? elem.innerHTML.match(/<img/)
+            ? image(elem)
+            : paragraph(elem)
+          : html(elem)])
+      .flat()
+      .filter(item => item.text.length)
+
+    if(last < limit)
+      story.push({
+        type:'paragraph',
+        text:`Next [[${sub(children[last].innerText,last)}]]`
+      })
+
+    return story
 
       // .map(html => html.replace(/(&nbsp;){4,9}/,''))
-      // .map(html => html.replace(/src="images\//,`src="${assets}/images/`))
       // .map(html => html.replaceAll(/<span class="c36">(.*?)<\/span>/g,'<b>$1</b>'))
 
   }
